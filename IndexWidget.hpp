@@ -12,6 +12,9 @@ public:
 
 signals:
     void openFile(const QString& path);
+
+private slots:
+    void chooseFile();
 };
 
 #endif
