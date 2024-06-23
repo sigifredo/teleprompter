@@ -1,19 +1,24 @@
 #include "IndexWidget.hpp"
 
 // Qt
-#include <QBoxLayout>
 #include <QFileDialog>
+#include <QGridLayout>
 #include <QPushButton>
+#include <QSpacerItem>
 
 IndexWidget::IndexWidget(QWidget *parent)
     : QWidget(parent)
 {
-    QBoxLayout* pLayout = new QBoxLayout(QBoxLayout::TopToBottom, this);
+    QGridLayout* pLayout = new QGridLayout(this);
     QPushButton* pOpenButton = new QPushButton("&Abrir archivo...", this);
 
     connect(pOpenButton, SIGNAL(clicked()), this, SLOT(chooseFile()));
 
-    pLayout->addWidget(pOpenButton);
+    pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding), 0, 1);
+    pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum), 1, 0);
+    pLayout->addWidget(pOpenButton, 1, 1);
+    pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum), 1, 2);
+    pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Minimum, QSizePolicy::Expanding), 2, 1);
 }
 
 void IndexWidget::chooseFile()
