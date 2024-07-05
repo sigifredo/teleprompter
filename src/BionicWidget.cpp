@@ -1,8 +1,9 @@
+
+
 // Own
-#include "BionicWidget.hpp"
+#include <BionicWidget.hpp>
 
-
-BionicWidget::BionicWidget(QWidget* pParent)
+BionicWidget::BionicWidget(QWidget *pParent)
     : QTextEdit(pParent)
 {
     setReadOnly(true);
@@ -35,7 +36,7 @@ void BionicWidget::incrementFontSize()
     emit fontSizeChanged(fontSize);
 }
 
-void BionicWidget::setBionicText(const QString& sText)
+void BionicWidget::setBionicText(const QString &sText)
 {
     QString sResult;
     QStringList words = QString(sText)

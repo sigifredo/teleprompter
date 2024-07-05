@@ -1,3 +1,5 @@
+
+
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
@@ -8,7 +10,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget* Parent = nullptr);
+    MainWindow(QWidget *Parent = nullptr);
 };
 
 #endif

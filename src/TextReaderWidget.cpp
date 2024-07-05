@@ -1,5 +1,8 @@
-#include "TextReaderWidget.hpp"
-#include "BionicWidget.hpp"
+
+
+// Own
+#include <TextReaderWidget.hpp>
+#include <BionicWidget.hpp>
 
 // Qt
 #include <QBoxLayout>
@@ -8,18 +11,18 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QSpacerItem>
-
+#include <QTextStream>
 
 TextReaderWidget::TextReaderWidget(QWidget *parent)
     : QWidget(parent)
 {
-    QBoxLayout* pLayout = new QBoxLayout(QBoxLayout::TopToBottom, this);
+    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, this);
 
-    QWidget* pFileWidget = new QWidget(this);
+    QWidget *pFileWidget = new QWidget(this);
     {
-        QLayout* pLayout = new QBoxLayout(QBoxLayout::LeftToRight, pFileWidget);
+        QLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, pFileWidget);
 
-        QPushButton* pOpenFileButton = new QPushButton("&Abrir archivo...", pFileWidget);
+        QPushButton *pOpenFileButton = new QPushButton("&Abrir archivo...", pFileWidget);
 
         connect(pOpenFileButton, SIGNAL(clicked()), this, SLOT(chooseFile()));
 
@@ -29,13 +32,13 @@ TextReaderWidget::TextReaderWidget(QWidget *parent)
 
     _pBionicWidget = new BionicWidget(this);
 
-    QWidget* pFontBarWidget = new QWidget(this);
+    QWidget *pFontBarWidget = new QWidget(this);
     {
-        QLayout* pLayout = new QBoxLayout(QBoxLayout::LeftToRight, pFontBarWidget);
+        QLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, pFontBarWidget);
 
-        QPushButton* pPlusButton = new QPushButton("+", pFontBarWidget);
+        QPushButton *pPlusButton = new QPushButton("+", pFontBarWidget);
         _pFontSizeLabel = new QLabel("0", pFontBarWidget);
-        QPushButton* pMinusButton = new QPushButton("-", pFontBarWidget);
+        QPushButton *pMinusButton = new QPushButton("-", pFontBarWidget);
 
         _pFontSizeLabel->setAlignment(Qt::AlignCenter);
         _pFontSizeLabel->setText(QString::number(_pBionicWidget->font().pointSize()));
@@ -75,12 +78,12 @@ void TextReaderWidget::chooseFile()
     }
 }
 
-void TextReaderWidget::fontSizeChanged(const int& iSize)
+void TextReaderWidget::fontSizeChanged(const int &iSize)
 {
     _pFontSizeLabel->setText(QString::number(iSize));
 }
 
-void TextReaderWidget::openFile(const QString& sPath)
+void TextReaderWidget::openFile(const QString &sPath)
 {
     if (!sPath.isEmpty())
     {

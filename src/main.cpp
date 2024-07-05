@@ -1,5 +1,7 @@
+
+
 // Own
-#include "MainWindow.hpp"
+#include <MainWindow.hpp>
 
 // Qt
 #include <QApplication>
