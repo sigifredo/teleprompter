@@ -55,6 +55,7 @@ void BionicWidget::setBionicText(const QString &sText)
     {
         if (!paragraph.isEmpty())
         {
+            QString sNewParagraph;
             QStringList words = paragraph.split(" ");
 
             for (const QString &sWord : words)
@@ -66,13 +67,13 @@ void BionicWidget::setBionicText(const QString &sText)
                     int iLen = sFixedWord.length();
                     int iBoldPart = iLen / 2;
 
-                    sResult.append("<strong>" + sFixedWord.left(iBoldPart) + "</strong>" + sFixedWord.mid(iBoldPart) + " ");
+                    sNewParagraph.append("<strong>" + sFixedWord.left(iBoldPart) + "</strong>" + sFixedWord.mid(iBoldPart) + " ");
                 }
             }
 
-            sResult.append("<br><br>");
+            sResult.append(sNewParagraph.trimmed().append("<br><br>"));
         }
     }
 
-    setHtml(sResult.trimmed());
+    setHtml(sResult);
 }
