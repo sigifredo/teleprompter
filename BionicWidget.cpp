@@ -19,5 +19,8 @@ void BionicWidget::setBionicText(const QString& sText)
         sResult.append("<b>" + sWord.left(iBoldPart) + "</b>" + sWord.mid(iBoldPart) + " ");
     }
 
+    sResult.replace("\r\n", "<br>");
+    sResult.replace("\n", "<br>");
+
     setHtml(sResult.trimmed());
 }
