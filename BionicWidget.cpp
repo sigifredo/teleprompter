@@ -38,7 +38,10 @@ void BionicWidget::incrementFontSize()
 void BionicWidget::setBionicText(const QString& sText)
 {
     QString sResult;
-    QStringList words = sText.split(" ");
+    QStringList words = QString(sText)
+                            .replace("<", "&lt;")
+                            .replace(">", "&gt;")
+                            .split(" ");
 
     for (const QString &sWord : words)
     {
