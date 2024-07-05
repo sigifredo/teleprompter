@@ -39,21 +39,40 @@ void BionicWidget::incrementFontSize()
 void BionicWidget::setBionicText(const QString &sText)
 {
     QString sResult;
-    QStringList words = QString(sText)
-                            .replace("<", "&lt;")
-                            .replace(">", "&gt;")
-                            .split(" ");
+    QString sFixedText(sText);
 
-    for (const QString &sWord : words)
+    sFixedText
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\r", "\n")
+        .replace("\f", "\n")
+        .replace("\v", "\n")
+        .replace("\t", " ");
+
+    QStringList paragraphs = sFixedText.split("\n");
+
+    for (const QString &paragraph : paragraphs)
     {
-        int iLen = sWord.length();
-        int iBoldPart = iLen / 2;
+        if (!paragraph.isEmpty())
+        {
+            QStringList words = paragraph.split(" ");
 
-        sResult.append("<strong>" + sWord.left(iBoldPart) + "</strong>" + sWord.mid(iBoldPart) + " ");
+            for (const QString &sWord : words)
+            {
+                QString sFixedWord = sWord.trimmed();
+
+                if (!sFixedWord.isEmpty())
+                {
+                    int iLen = sFixedWord.length();
+                    int iBoldPart = iLen / 2;
+
+                    sResult.append("<strong>" + sFixedWord.left(iBoldPart) + "</strong>" + sFixedWord.mid(iBoldPart) + " ");
+                }
+            }
+
+            sResult.append("<br><br>");
+        }
     }
-
-    sResult.replace("\r\n", "<br>");
-    sResult.replace("\n", "<br>");
 
     setHtml(sResult.trimmed());
 }
