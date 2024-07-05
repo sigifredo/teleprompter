@@ -3,12 +3,21 @@
 
 #include <QWidget>
 
+class BionicWidget;
+
 class TextReaderWidget: public QWidget
 {
     Q_OBJECT
 
 public:
-    TextReaderWidget(QWidget *parent = nullptr);
+    TextReaderWidget(QWidget* pParent = nullptr);
+
+public slots:
+    void chooseFile();
+    void openFile(const QString& sPath);
+
+private:
+    BionicWidget* _pBionicWidget;
 };
 
 #endif

@@ -16,8 +16,8 @@ set(TS_FILES teleprompter_es_CO.ts)
 
 set(PROJECT_SOURCES
         main.cpp
-        IndexWidget.cpp
-        IndexWidget.hpp
+        BionicWidget.cpp
+        BionicWidget.hpp
         MainWindow.cpp
         MainWindow.hpp
         TextReaderWidget.cpp

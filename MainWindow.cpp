@@ -1,12 +1,12 @@
 #include "MainWindow.hpp"
-#include "IndexWidget.hpp"
+#include "TextReaderWidget.hpp"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowFlag(Qt::WindowStaysOnTopHint);
 
-    IndexWidget* pIndexWidget = new IndexWidget(this);
+    TextReaderWidget* pTextReaderWidget = new TextReaderWidget(this);
 
-    setCentralWidget(pIndexWidget);
+    setCentralWidget(pTextReaderWidget);
 }
