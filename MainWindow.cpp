@@ -6,7 +6,5 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setWindowFlag(Qt::WindowStaysOnTopHint);
 
-    TextReaderWidget* pTextReaderWidget = new TextReaderWidget(this);
-
-    setCentralWidget(pTextReaderWidget);
+    setCentralWidget(new TextReaderWidget(this));
 }

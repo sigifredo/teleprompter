@@ -1,8 +1,6 @@
 // Own
 #include "BionicWidget.hpp"
 
-// Qt
-#include <QDebug>
 
 BionicWidget::BionicWidget(QWidget* pParent)
     : QTextEdit(pParent)

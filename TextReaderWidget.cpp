@@ -9,6 +9,7 @@
 #include <QPushButton>
 #include <QSpacerItem>
 
+
 TextReaderWidget::TextReaderWidget(QWidget *parent)
     : QWidget(parent)
 {
