@@ -8,37 +8,37 @@ BionicWidget::BionicWidget(QWidget* pParent)
     : QTextEdit(pParent)
 {
     setReadOnly(true);
+
+    QFont defaultFont = font();
+    defaultFont.setPointSize(DEFAULT_FONT_SIZE);
+
+    setFont(defaultFont);
 }
 
 void BionicWidget::decrementFontSize()
 {
+    QFont defaultFont = font();
+    int fontSize = defaultFont.pointSize() - 2;
+
+    defaultFont.setPointSize(fontSize);
+
+    setFont(defaultFont);
+    emit fontSizeChanged(fontSize);
 }
 
 void BionicWidget::incrementFontSize()
 {
-    // Obtener el cursor de texto y seleccionar todo el texto
-    QTextCursor cursor = textCursor();
-    cursor.select(QTextCursor::Document);
+    QFont defaultFont = font();
+    int fontSize = defaultFont.pointSize() + 2;
 
-    // Obtener el formato del texto
-    QTextCharFormat format = cursor.charFormat();
-    QFont font = format.font();
+    defaultFont.setPointSize(fontSize);
 
-    // Aumentar el tamaño de la fuente
-    font.setPointSize(font.pointSize() + 2);
-    font.setBold(false);
-    format.setFont(font);
-
-    // Aplicar el nuevo formato al texto seleccionado
-    cursor.setCharFormat(format);
-
-    // setBionicText(_sRawText);
+    setFont(defaultFont);
+    emit fontSizeChanged(fontSize);
 }
 
 void BionicWidget::setBionicText(const QString& sText)
 {
-    _sRawText = sText;
-
     QString sResult;
     QStringList words = sText.split(" ");
 

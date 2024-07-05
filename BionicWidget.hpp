@@ -1,6 +1,10 @@
 #ifndef BIONICWIDGET_HPP
 #define BIONICWIDGET_HPP
 
+// Own
+#define DEFAULT_FONT_SIZE       31
+
+// Qt
 #include <QTextEdit>
 
 class BionicWidget: public QTextEdit
@@ -14,6 +18,9 @@ public slots:
     void decrementFontSize();
     void incrementFontSize();
     void setBionicText(const QString& sText);
+
+signals:
+    void fontSizeChanged(const int& iSize);
 
 private:
     QString _sRawText;

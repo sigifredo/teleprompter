@@ -4,6 +4,7 @@
 #include <QWidget>
 
 class BionicWidget;
+class QLabel;
 
 class TextReaderWidget: public QWidget
 {
@@ -14,10 +15,12 @@ public:
 
 public slots:
     void chooseFile();
+    void fontSizeChanged(const int& iSize);
     void openFile(const QString& sPath);
 
 private:
     BionicWidget* _pBionicWidget;
+    QLabel* _pFontSizeLabel;
 };
 
 #endif
