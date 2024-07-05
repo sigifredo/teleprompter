@@ -27,8 +27,23 @@ TextReaderWidget::TextReaderWidget(QWidget *parent)
 
     _pBionicWidget = new BionicWidget(this);
 
+    QWidget* pToolBarWidget = new QWidget(this);
+    {
+        QLayout* pLayout = new QBoxLayout(QBoxLayout::LeftToRight, pToolBarWidget);
+
+        QPushButton* pPlusButton = new QPushButton("+", pToolBarWidget);
+        QPushButton* pMinusButton = new QPushButton("-", pToolBarWidget);
+
+        connect(pPlusButton, SIGNAL(clicked()), _pBionicWidget, SLOT(incrementFontSize()));
+        connect(pMinusButton, SIGNAL(clicked()), _pBionicWidget, SLOT(decrementFontSize()));
+
+        pLayout->addWidget(pPlusButton);
+        pLayout->addWidget(pMinusButton);
+    }
+
     pLayout->addWidget(pFileWidget);
     pLayout->addWidget(_pBionicWidget);
+    pLayout->addWidget(pToolBarWidget);
 }
 
 void TextReaderWidget::chooseFile()

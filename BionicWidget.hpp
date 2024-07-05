@@ -11,7 +11,12 @@ public:
     BionicWidget(QWidget* pParent = nullptr);
 
 public slots:
+    void decrementFontSize();
+    void incrementFontSize();
     void setBionicText(const QString& sText);
+
+private:
+    QString _sRawText;
 };
 
 #endif
