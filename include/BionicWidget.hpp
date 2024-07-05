@@ -23,9 +23,6 @@ public slots:
 
 signals:
     void fontSizeChanged(const int &iSize);
-
-private:
-    QString _sRawText;
 };
 
 #endif
