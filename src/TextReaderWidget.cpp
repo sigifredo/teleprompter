@@ -35,16 +35,13 @@ TextReaderWidget::TextReaderWidget(QWidget *pParent)
     }
 
     _pBionicWidget = new BionicWidget(this);
-    _pBionicWidget->setBionicText("Autor:\nSigifredo Escobar Gómez <sigifredo89@gmail.com>\nhttps://s9art.com/links/");
-
     ChronometerWidget *pChronometerWidget = new ChronometerWidget(this);
-
     FontBarWidget *pFontBarWidget = new FontBarWidget(this);
-    {
-        connect(pFontBarWidget, SIGNAL(changeFontSize(int)), _pBionicWidget, SLOT(setFontSize(int)));
-    }
 
+    _pBionicWidget->setBionicText("Autor:\nSigifredo Escobar Gómez <sigifredo89@gmail.com>\nhttps://s9art.com/links/");
     _pBionicWidget->setFontSize(pFontBarWidget->fontSize());
+
+    connect(pFontBarWidget, SIGNAL(changeFontSize(int)), _pBionicWidget, SLOT(setFontSize(int)));
 
     pLayout->addWidget(pFileWidget);
     pLayout->addWidget(_pBionicWidget);

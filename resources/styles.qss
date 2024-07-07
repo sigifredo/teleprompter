@@ -9,7 +9,7 @@ MainWindow {
 }
 
 MainWindow QLabel {
-    color: #212121;
+    color: #6b717f;
 }
 
 MainWindow QLabel#fontSizeLabel {
@@ -22,7 +22,7 @@ MainWindow QLabel#timer {
 }
 
 MainWindow QLabel#timer[active="true"] {
-    color: #900;
+    color: #803c3c;
 }
 
 MainWindow QPushButton {
