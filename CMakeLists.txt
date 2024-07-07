@@ -15,12 +15,14 @@ set(PROJECT_SOURCES
     include/BionicWidget.hpp
     include/ChronometerWidget.hpp
     include/CreditsDialog.hpp
+    include/FileWidget.hpp
     include/FontBarWidget.hpp
     include/MainWindow.hpp
     include/VersionWidget.hpp
     src/BionicWidget.cpp
     src/ChronometerWidget.cpp
     src/CreditsDialog.cpp
+    src/FileWidget.cpp
     src/FontBarWidget.cpp
     src/main.cpp
     src/MainWindow.cpp

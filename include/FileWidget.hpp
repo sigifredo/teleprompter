@@ -16,30 +16,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef MAINWINDOW_HPP
-#define MAINWINDOW_HPP
+#ifndef FILEWIDGET_HPP
+#define FILEWIDGET_HPP
 
-#include <QMainWindow>
+// Qt
+#include <QWidget>
 
-class BionicWidget;
-class FileWidget;
 class QLabel;
 
-class MainWindow : public QMainWindow
+class FileWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *pParent = nullptr);
+    FileWidget(QWidget *pParent = nullptr);
+
+    void setFileName(const QString &sFileName);
+
+signals:
+    void fileSelected(const QString &sFilePath);
 
 public slots:
-    void fontSizeChanged(const int &iSize);
-    void openFile(const QString &sFilePath);
+    void chooseFile();
 
 private:
-    BionicWidget *_pBionicWidget;
-    QLabel *_pFontSizeLabel;
-    FileWidget *_pFileWidget;
+    QLabel *_pFileNameLabel;
 };
 
 #endif
