@@ -22,6 +22,7 @@ public slots:
 
 private:
     BionicWidget *_pBionicWidget;
+    QLabel *_pFileNameLabel;
     QLabel *_pFontSizeLabel;
 };
 

@@ -18,11 +18,15 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+add_definitions( -Wall -Wextra -O3 )
+
 set(PROJECT_SOURCES
     include/BionicWidget.hpp
+    include/ChronometerWidget.hpp
     include/MainWindow.hpp
     include/TextReaderWidget.hpp
     src/BionicWidget.cpp
+    src/ChronometerWidget.cpp
     src/main.cpp
     src/MainWindow.cpp
     src/TextReaderWidget.cpp
