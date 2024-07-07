@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *pParent)
     FontBarWidget *pFontBarWidget = new FontBarWidget(pCentralWidget);
     VersionWidget *pVersionWidget = new VersionWidget(pCentralWidget);
 
+    pLayout->setSpacing(0);
     _pBionicWidget->setBionicText("Hello world!");
     _pBionicWidget->setFontSize(pFontBarWidget->fontSize());
 
