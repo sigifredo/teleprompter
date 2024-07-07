@@ -12,7 +12,6 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QSpacerItem>
 #include <QTextStream>
 
 TextReaderWidget::TextReaderWidget(QWidget *pParent)
