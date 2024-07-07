@@ -34,6 +34,7 @@ TextReaderWidget::TextReaderWidget(QWidget *pParent)
     }
 
     _pBionicWidget = new BionicWidget(this);
+    _pBionicWidget->setBionicText("Autor:\nSigifredo Escobar Gómez <sigifredo89@gmail.com>\nhttps://s9art.com/links/");
 
     ChronometerWidget *pChronometerWidget = new ChronometerWidget(this);
 
