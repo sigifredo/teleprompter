@@ -27,13 +27,13 @@ set(PROJECT_SOURCES
     include/ChronometerWidget.hpp
     include/FontBarWidget.hpp
     include/MainWindow.hpp
-    include/TextReaderWidget.hpp
+    include/VersionWidget.hpp
     src/BionicWidget.cpp
     src/ChronometerWidget.cpp
     src/FontBarWidget.cpp
     src/main.cpp
     src/MainWindow.cpp
-    src/TextReaderWidget.cpp
+    src/VersionWidget.cpp
     ${RESOURCES}
 )
 
