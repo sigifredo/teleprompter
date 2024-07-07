@@ -1,6 +1,7 @@
 
 // Own
 #include <CreditsDialog.hpp>
+#include <Version.hpp>
 
 // Qt
 #include <QGridLayout>
@@ -9,110 +10,76 @@
 #include <QTabWidget>
 #include <QDialogButtonBox>
 
-CreditsDialog::CreditsDialog(QWidget *pParent) : QDialog(pParent)
+CreditsDialog::CreditsDialog(QWidget *pParent)
+    : QDialog(pParent)
 {
-    init();
+    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, this);
 
-    QStringList idiomas;
-    QString sDescription = QString::fromUtf8("SwitchRL es una utilidad creada para todas aquellas personas que\njuegan en mas de un servidor de WoW. El programa administra de\nforma automática el archivo \"realmlist.wtf\" para que el jugador no se\ntenga que preocupar por editar archivos para cambiar de servidor.\n\nEste programa es distribuido bajo licencia GPLv3, no hace parte de\nBlizzard, no modifica ninguna funcionalidad del juego.\n\nIdiomas soportados:\n") + idiomas.join(",");
-
-    _sAppName = "SwitchRL";
-    // _pAppInfoLabel->setText("<font size=\"5\">" + _sAppName + "</font><br><i>" + QString::fromUtf8("Versión ") + SWRL_VERSION "</i><br>Usando la biblioteca de desarrollo Qt " + qVersion());
-    _pDescriptionLabel->setText(sDescription);
-    setWindowTitle("Acerca de " + _sAppName);
-}
-
-void CreditsDialog::addAuthor(const QString &sName, const QString &sTask, const QString &sEmail, const QString &sWebAddress)
-{
-    QString sAuthor = "<br><b>" + sName + "</b><br><i>" + sTask + "</i><br><font color=\"#0000ff\"><u>" + sEmail;
-    if (sWebAddress.trimmed() != "")
-        sAuthor += "<br>" + sWebAddress + "</u></font><br>";
-    else
-        sAuthor += "</u></font><br>";
-    _pAuthorsLabel->setText(_pAuthorsLabel->text() + sAuthor);
-}
-
-void CreditsDialog::setImage(const QString &sImagePath)
-{
-    _pIconLabel->setPixmap(QPixmap(sImagePath));
-}
-
-void CreditsDialog::init()
-{
-    QGridLayout *pLayout = new QGridLayout(this);
-
-    // Label donde estará el icono.
-    _pIconLabel = new QLabel(this);
-    _pIconLabel->setPixmap(QPixmap(QString::fromUtf8(":/GfifDev/logo90.png")));
-    pLayout->addWidget(_pIconLabel, 0, 0, 1, 1);
-
-    // Donde estará la información de la aplicación.
-    _pAppInfoLabel = new QLabel(this);
-    pLayout->addWidget(_pAppInfoLabel, 0, 1, 1, 1);
-
-    // QTabWidget que tendrá la aplicación.
-    _pTabWidget = new QTabWidget(this);
-
-    // Pestaña de "Acerca de...". Aquí va la descripción.
+    QWidget *pInfoWidget = new QWidget(this);
     {
-        QWidget *pAboutTab = new QWidget(_pTabWidget);
-        QVBoxLayout *pAboutLayout = new QVBoxLayout(pAboutTab);
-        _pDescriptionLabel = new QLabel(pAboutTab);
-        pAboutLayout->addWidget(_pDescriptionLabel);
-        QSpacerItem *pSpacer = new QSpacerItem(10, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
-        pAboutLayout->addItem(pSpacer);
-        _pTabWidget->addTab(pAboutTab, "Acerca de...");
+        QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, pInfoWidget);
+        QLabel *pIconLabel = new QLabel(pInfoWidget);
+        QLabel *pAppInfoLabel = new QLabel(pInfoWidget);
+
+        pLayout->setSpacing(10);
+        pIconLabel->setPixmap(QPixmap(QString::fromUtf8(":/s9art.png")));
+        pIconLabel->setAlignment(Qt::AlignCenter);
+        pAppInfoLabel->setText("<h2>" PROJECT_NAME "</h2>" + QString::fromUtf8("Project version: ") + PROJECT_VERSION "<br>Qt version: " + qVersion());
+
+        pLayout->addWidget(pIconLabel);
+        pLayout->addWidget(pAppInfoLabel);
+        pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+    }
+
+    QTabWidget *pTabWidget = new QTabWidget(this);
+    {
+        QWidget *pAboutTabWidget = new QWidget(pTabWidget);
+        {
+            QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, pAboutTabWidget);
+            QLabel *pDescriptionLabel = new QLabel(pAboutTabWidget);
+
+            QString sDescription = QString::fromUtf8(PROJECT_NAME " es una utilidad creada para todas aquellas personas que\njuegan en mas de un servidor de WoW. El programa administra de\nforma automática el archivo \"realmlist.wtf\" para que el jugador no se\ntenga que preocupar por editar archivos para cambiar de servidor.\n\nEste programa es distribuido bajo licencia GPLv3, no hace parte de\nBlizzard, no modifica ninguna funcionalidad del juego.\n\nIdiomas soportados:\n");
+            pDescriptionLabel->setText(sDescription);
+
+            pLayout->addWidget(pDescriptionLabel);
+        }
+
+        QWidget *pAuthorTabWidget = new QWidget(pTabWidget);
+        {
+            QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, pAuthorTabWidget);
+            QLabel *pAuthorLabel = new QLabel(pAuthorTabWidget);
+
+            pAuthorLabel->setText("<strong>Sigifredo Escobar Gómez</strong><br><em>Developer</em><br><a href=\"https://s9art.com/links/\">https://s9art.com/links/</a>");
+
+            pLayout->addWidget(pAuthorLabel);
+        }
+
+        QWidget *pLicenceTabWidget = new QWidget(pTabWidget);
+        {
+            QVBoxLayout *pLayout = new QVBoxLayout(pLicenceTabWidget);
+            QTextEdit *pLicenceTextEdit = new QTextEdit(pLicenceTabWidget);
+
+            pLicenceTextEdit->setReadOnly(true);
+            pLicenceTextEdit->setHtml(QString::fromUtf8(
+                "<strong>" PROJECT_NAME ":</strong> A bionic reading and time control application.<br>Copyright (C) 2024 Sigifredo Escobar Gómez<br><br>This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.<br><br>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.<br><br>You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>."));
+
+            pLayout->addWidget(pLicenceTextEdit);
+        }
+
+        pTabWidget->addTab(pAboutTabWidget, "About");
+        pTabWidget->addTab(pAuthorTabWidget, "Author");
+        pTabWidget->addTab(pLicenceTabWidget, "Licence");
     }
 
     QDialogButtonBox *pButtonBox = new QDialogButtonBox(this);
     pButtonBox->setOrientation(Qt::Horizontal);
     pButtonBox->setStandardButtons(QDialogButtonBox::Close);
 
-    pLayout->addWidget(pButtonBox, 2, 1, 1, 1);
-
-    // Pestaña de autores
-    {
-        QWidget *pAuthorTab = new QWidget(_pTabWidget);
-        QVBoxLayout *pAuthorsLayout = new QVBoxLayout(pAuthorTab);
-        _pAuthorsLabel = new QLabel(pAuthorTab);
-        addAuthor("Sigifredo Escobar Gómez", "Desarrollador", "sigifredo89@gmail.com", "sigifredo-eg.blogspot.com");
-        pAuthorsLayout->addWidget(_pAuthorsLabel);
-        QSpacerItem *pSpacer = new QSpacerItem(10, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
-        pAuthorsLayout->addItem(pSpacer);
-        _pTabWidget->addTab(pAuthorTab, "Autores");
-    }
-
-    // Pestaña de licencia
-    {
-        QWidget *pLicenceTab = new QWidget(_pTabWidget);
-        QVBoxLayout *pLicenceLayout = new QVBoxLayout(pLicenceTab);
-        _pLicenceTextEdit = new QTextEdit(pLicenceTab);
-        _pLicenceTextEdit->setReadOnly(true);
-        QString str1 = QString::fromUtf8("\
-Este programa es una utilidad libre para la administración sencilla de servidores para WoW.\n\
-Copyright (C) 2012 Sigifredo Escobar Gómez.\n\
-\n\
-Este programa es software libre: usted puede redistribuirlo y/o modificarlo\n\
-bajo los términos de la Licencia Pública General GNU publicada\n\
-por la Fundación para el Software Libre, ya sea la versión 3\n\
-de la Licencia, o (a su elección) cualquier versión posterior.\n\
-\n\
-Este programa se distribuye con la esperanza de que sea útil, pero\n\
-SIN GARANTÍA ALGUNA; ni siquiera la garantía implícita\n\
-MERCANTIL o de APTITUD PARA UN PROPÓSITO DETERMINADO.\n\
-Consulte los detalles de la Licencia Pública General GNU para obtener\n\
-una información más detallada.\n\
-\n\
-Debería haber recibido una copia de la Licencia Pública General GNU\n\
-junto a este programa.\n\
-En caso contrario, consulte <http://www.gnu.org/licenses/>.\n\
-");
-        _pLicenceTextEdit->setText(str1);
-        pLicenceLayout->addWidget(_pLicenceTextEdit);
-        _pTabWidget->addTab(pLicenceTab, "Licencia");
-    }
-
-    pLayout->addWidget(_pTabWidget, 1, 0, 1, 2);
-
     connect(pButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
+
+    pLayout->addWidget(pInfoWidget);
+    pLayout->addWidget(pTabWidget);
+    pLayout->addWidget(pButtonBox);
+
+    setWindowTitle("About " PROJECT_NAME);
 }

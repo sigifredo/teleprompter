@@ -4,6 +4,11 @@ BionicWidget {
     color: #212121;
 }
 
+h1 {
+    margin: 0;
+    border: 1px solid red;
+}
+
 MainWindow {
     background-color: #f8f8f8;
 }

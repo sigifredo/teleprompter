@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(teleprompter VERSION 0.1.1 LANGUAGES CXX)
+project(Teleprompter VERSION 0.1.1 LANGUAGES CXX)
 
 include(config/build.cmake)
 

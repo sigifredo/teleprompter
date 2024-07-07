@@ -1,4 +1,20 @@
-
+/**
+ * Teleprompter: A bionic reading and time control application.
+ * Copyright (C) 2024 Sigifredo Escobar Gómez
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 #ifndef CREDITSDIALOG_HPP
 #define CREDITSDIALOG_HPP
@@ -6,39 +22,12 @@
 // Qt
 #include <QDialog>
 
-class QLabel;
-class QTabWidget;
-class QTextEdit;
-
 class CreditsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    CreditsDialog(QWidget *pParent = 0);
-
-    void addAuthor(const QString &sName, const QString &sTask, const QString &sEmail, const QString &sWebAddress = QString(""));
-
-    QString appName() const;
-
-    void setImage(const QString &sImagePath);
-
-protected:
-    QLabel *_pIconLabel;
-    QLabel *_pAppInfoLabel;
-    QLabel *_pDescriptionLabel;
-    QLabel *_pAuthorsLabel;
-    QTextEdit *_pLicenceTextEdit;
-    QString _sAppName;
-    QTabWidget *_pTabWidget;
-
-private:
-    void init();
+    CreditsDialog(QWidget *pParent = nullptr);
 };
-
-inline QString CreditsDialog::appName() const
-{
-    return _sAppName;
-}
 
 #endif
