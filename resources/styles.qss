@@ -1,74 +1,92 @@
 BionicWidget {
     background-color: white;
-    border: 1px solid #dee2e6;
-    border-radius: 0.5em;
+    border: 1px solid #dadbdf;
     color: #212121;
 }
 
 MainWindow {
-    background-color: #f7f7f7;
+    background-color: #f8f8f8;
 }
 
-QLabel {
+MainWindow QLabel {
     color: #212121;
 }
 
-QLabel.red {
-    color: red;
+MainWindow QLabel#timer {
+    font: 24pt;
 }
 
-QPushButton {
-    background-color: #607D8B;
-    color: white;
-    border: 2px solid #607D8B;
-    border-radius: 5px;
+MainWindow QLabel#timer[active="true"] {
+    color: #900;
+}
+
+QLabel[class~="active"] {
+    color: #900;
+}
+
+MainWindow QPushButton {
+    background-color: #dadbdf;
+    color: #6b717f;
+    border: 2px solid #dadbdf;
     padding: 5px 10px;
     font-size: 14px;
-    font-weight: bold;
     text-align: center;
     text-decoration: none;
 }
 
-QPushButton:hover {
-    background-color: #45a049;
-    border-color: #45a049;
+MainWindow QPushButton:hover {
+    background-color: #ccced3;
+    border-color: #ccced3;
 }
 
-QPushButton:pressed {
-    background-color: #3e8e41;
-    border-color: #3e8e41;
+MainWindow QPushButton:pressed {
+    background-color: #bfc0c7;
+    border-color: #bfc0c7;
 }
 
-QPushButton:disabled {
+MainWindow QPushButton:disabled {
     background-color: #cccccc;
     border-color: #cccccc;
     color: #999999;
 }
 
-QPushButton:focus {
+MainWindow QPushButton:focus {
     outline: none;
 }
 
-QScrollBar:vertical {
-    background: #f0f0f0; /* Color de fondo */
-    width: 15px; /* Ancho de la barra de desplazamiento */
-}
-QScrollBar::handle:vertical {
-    background: #c0c0c0; /* Color del "handle" (la parte deslizable de la barra) */
-    min-height: 20px; /* Altura mínima del "handle" */
-    border-radius: 10px; /* Redondear los bordes del handle */
-}
+MainWindow QScrollBar:vertical {
+     border: 2px solid grey;
+     background: #32CC99;
+     width: 15px;
+     margin: 22px 0 22px 0;
+ }
 
-QScrollBar::add-line:vertical {
-    background: #e0e0e0; /* Color de fondo del botón de desplazamiento hacia abajo */
-    height: 15px; /* Altura del botón de desplazamiento */
-}
+MainWindow QScrollBar::handle:vertical {
+     background: white;
+     min-height: 20px;
+ }
+MainWindow QScrollBar::add-line:vertical {
+     border: 2px solid grey;
+     background: #32CC99;
+     height: 20px;
+     subcontrol-position: bottom;
+     subcontrol-origin: margin;
+ }
 
-QScrollBar::sub-line:vertical {
-    background: #e0e0e0; /* Color de fondo del botón de desplazamiento hacia arriba */
-    height: 15px; /* Altura del botón de desplazamiento */
-}
+MainWindow QScrollBar::sub-line:vertical {
+     border: 2px solid grey;
+     background: #32CC99;
+     height: 20px;
+     subcontrol-position: top;
+     subcontrol-origin: margin;
+ }
+MainWindow QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+     border: 2px solid grey;
+     width: 3px;
+     height: 3px;
+     background: white;
+ }
 
-QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-    background: none; /* Fondo de la página (el área entre el handle y los botones) */
-}
+MainWindow QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+     background: none;
+ }

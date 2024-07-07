@@ -7,8 +7,10 @@
 #include <QBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QStyle>
 #include <QTime>
 #include <QTimer>
+#include <QVariant>
 
 ChronometerWidget::ChronometerWidget(QWidget *pParent)
     : QWidget(pParent), _iTimeElapsed(0)
@@ -19,8 +21,8 @@ ChronometerWidget::ChronometerWidget(QWidget *pParent)
     _pStartButton = new QPushButton("St&art", this);
     _pTimeLabel = new QLabel("00:00", this);
     {
+        _pTimeLabel->setObjectName("timer");
         _pTimeLabel->setAlignment(Qt::AlignCenter);
-        _pTimeLabel->setStyleSheet("font: 24pt;");
     }
     QPushButton *pStopButton = new QPushButton("Sto&p", this);
 
@@ -41,13 +43,13 @@ void ChronometerWidget::start()
     {
         _pTimer->stop();
         _pStartButton->setText("St&art");
-        _pTimeLabel->setStyleSheet("font: 24pt;");
+        setTimerActiveStyle(false);
     }
     else
     {
         _pTimer->start(1000);
         _pStartButton->setText("P&ause");
-        _pTimeLabel->setStyleSheet("font: 24pt; color: #a61d1d;");
+        setTimerActiveStyle(true);
     }
 }
 
@@ -57,11 +59,25 @@ void ChronometerWidget::stop()
     {
         _pTimer->stop();
         _pStartButton->setText("St&art");
-        _pTimeLabel->setStyleSheet("font: 24pt;");
+        setTimerActiveStyle(false);
     }
 
     _iTimeElapsed = 0;
     _pTimeLabel->setText("00:00");
+}
+
+void ChronometerWidget::setTimerActiveStyle(const bool &active)
+{
+    QString value("false");
+
+    if (active)
+    {
+        value = "true";
+    }
+
+    _pTimeLabel->setProperty("active", value);
+    style()->unpolish(_pTimeLabel);
+    style()->polish(_pTimeLabel);
 }
 
 void ChronometerWidget::updateTime()

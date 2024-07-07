@@ -27,6 +27,8 @@ private:
     QTimer *_pTimer;
     int _iTimeElapsed;
 
+    void setTimerActiveStyle(const bool &active);
+
 private slots:
     void updateTime();
 };
