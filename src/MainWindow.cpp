@@ -10,10 +10,9 @@
 
 // Qt
 #include <QBoxLayout>
-#include <QFileDialog>
+#include <QFileInfo>
 #include <QLabel>
 #include <QMessageBox>
-#include <QPushButton>
 #include <QTextStream>
 
 MainWindow::MainWindow(QWidget *pParent)
