@@ -11,7 +11,7 @@
 #include <QTimer>
 
 ChronometerWidget::ChronometerWidget(QWidget *pParent)
-    : QWidget(pParent), _iTimeElapsed(3558)
+    : QWidget(pParent), _iTimeElapsed(0)
 {
     QLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
     _pTimer = new QTimer(this);
@@ -41,11 +41,13 @@ void ChronometerWidget::start()
     {
         _pTimer->stop();
         _pStartButton->setText("St&art");
+        _pTimeLabel->setStyleSheet("font: 24pt;");
     }
     else
     {
         _pTimer->start(1000);
         _pStartButton->setText("P&ause");
+        _pTimeLabel->setStyleSheet("font: 24pt; color: #a61d1d;");
     }
 }
 
@@ -54,6 +56,7 @@ void ChronometerWidget::stop()
     if (_pTimer->isActive())
     {
         _pTimer->stop();
+        _pTimeLabel->setStyleSheet("font: 24pt;");
     }
 
     _iTimeElapsed = 0;
