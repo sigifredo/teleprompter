@@ -4,11 +4,6 @@ BionicWidget {
     color: #212121;
 }
 
-h1 {
-    margin: 0;
-    border: 1px solid red;
-}
-
 MainWindow {
     background-color: #f8f8f8;
 }
@@ -87,4 +82,17 @@ MainWindow QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
 MainWindow QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
     background-color: transparent;
     border: 0;
+}
+
+VersionWidget QPushButton,
+VersionWidget QPushButton:hover,
+VersionWidget QPushButton:pressed,
+VersionWidget QPushButton:disabled {
+    background-color: transparent;
+    border: 0;
+}
+
+VersionWidget QPushButton {
+    font-size: 11px;
+    padding: 2px;
 }

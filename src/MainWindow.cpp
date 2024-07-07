@@ -42,7 +42,7 @@ MainWindow::MainWindow(QWidget *pParent)
     FontBarWidget *pFontBarWidget = new FontBarWidget(pCentralWidget);
     VersionWidget *pVersionWidget = new VersionWidget(pCentralWidget);
 
-    _pBionicWidget->setBionicText("Autor:\nSigifredo Escobar Gómez <sigifredo89@gmail.com>\nhttps://s9art.com/links/");
+    _pBionicWidget->setBionicText("Hello world!");
     _pBionicWidget->setFontSize(pFontBarWidget->fontSize());
 
     connect(pFontBarWidget, SIGNAL(changeFontSize(int)), _pBionicWidget, SLOT(setFontSize(int)));
