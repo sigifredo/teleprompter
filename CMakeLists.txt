@@ -1,35 +1,26 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(teleprompter VERSION 0.1 LANGUAGES CXX)
+project(teleprompter VERSION 0.1.1 LANGUAGES CXX)
 
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+include(config/build.cmake)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 
-include_directories(include)
-
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-add_definitions( -Wall -Wextra -O3 )
+include_directories(include ${PROJECT_BINARY_DIR}/include/)
 
 qt_add_resources(RESOURCES resources/resources.qrc)
 
 set(PROJECT_SOURCES
     include/BionicWidget.hpp
     include/ChronometerWidget.hpp
+    include/CreditsDialog.hpp
     include/FontBarWidget.hpp
     include/MainWindow.hpp
     include/VersionWidget.hpp
     src/BionicWidget.cpp
     src/ChronometerWidget.cpp
+    src/CreditsDialog.cpp
     src/FontBarWidget.cpp
     src/main.cpp
     src/MainWindow.cpp

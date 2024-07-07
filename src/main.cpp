@@ -2,6 +2,7 @@
 
 // Own
 #include <MainWindow.hpp>
+#include <Version.hpp>
 
 // Qt
 #include <QApplication>
@@ -30,7 +31,7 @@ int main(int argc, char **argv)
 
     MainWindow mw;
     mw.setGeometry(centerGeometry());
-    mw.setWindowTitle("Teleprompter v0.1");
+    mw.setWindowTitle("Teleprompter v" PROJECT_VERSION);
     mw.show();
 
     return app.exec();
