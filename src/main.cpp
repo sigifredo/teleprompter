@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
 
     MainWindow mw;
     mw.setGeometry(centerGeometry());
+    mw.setWindowTitle("Teleprompter v0.1");
     mw.show();
 
     return app.exec();
