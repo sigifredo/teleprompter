@@ -13,7 +13,7 @@ VersionWidget::VersionWidget(QWidget *pParent)
     : QWidget(pParent)
 {
     QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
-    QPushButton *pVersionButton = new QPushButton("Versión v" PROJECT_VERSION, this);
+    QPushButton *pVersionButton = new QPushButton("Version v" PROJECT_VERSION, this);
 
     connect(pVersionButton, SIGNAL(clicked()), this, SLOT(showCredits()));
 
