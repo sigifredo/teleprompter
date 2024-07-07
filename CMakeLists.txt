@@ -20,6 +20,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 add_definitions( -Wall -Wextra -O3 )
 
+qt_add_resources(RESOURCES resources/resources.qrc)
+
 set(PROJECT_SOURCES
     include/BionicWidget.hpp
     include/ChronometerWidget.hpp
@@ -30,6 +32,7 @@ set(PROJECT_SOURCES
     src/main.cpp
     src/MainWindow.cpp
     src/TextReaderWidget.cpp
+    ${RESOURCES}
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
@@ -57,7 +60,7 @@ target_link_libraries(teleprompter PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
 if(${QT_VERSION} VERSION_LESS 6.1.0)
-    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.teleprompter)
+    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.nowhere.teleprompter)
 endif()
 
 set_target_properties(teleprompter PROPERTIES

@@ -56,6 +56,7 @@ void ChronometerWidget::stop()
     if (_pTimer->isActive())
     {
         _pTimer->stop();
+        _pStartButton->setText("St&art");
         _pTimeLabel->setStyleSheet("font: 24pt;");
     }
 

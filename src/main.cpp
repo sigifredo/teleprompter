@@ -5,28 +5,27 @@
 
 // Qt
 #include <QApplication>
-#include <QLocale>
+#include <QFile>
 #include <QScreen>
-#include <QTranslator>
+
+// std
+#include <iostream>
 
 QRect centerGeometry();
 
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
 
-    QTranslator translator;
-    const QStringList uiLanguages = QLocale::system().uiLanguages();
+    QFile styleFile(":/styles.qss");
 
-    for (const QString &locale : uiLanguages)
+    if (styleFile.open(QFile::ReadOnly))
     {
-        const QString baseName = "teleprompter_" + QLocale(locale).name();
-
-        if (translator.load(":/i18n/" + baseName))
-        {
-            app.installTranslator(&translator);
-            break;
-        }
+        app.setStyleSheet(QLatin1String(styleFile.readAll()));
+    }
+    else
+    {
+        std::cerr << "[Error] Could not open style file." << std::endl;
     }
 
     MainWindow mw;
