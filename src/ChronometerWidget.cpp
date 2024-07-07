@@ -89,7 +89,7 @@ void ChronometerWidget::updateTime()
 
     if (_iTimeElapsed >= 3600)
     {
-        sFormat = "hh:mm:ss";
+        sFormat = "H:mm:ss";
     }
 
     _pTimeLabel->setText(time.addSecs(_iTimeElapsed).toString(sFormat));
