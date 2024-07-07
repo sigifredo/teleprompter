@@ -12,6 +12,11 @@ MainWindow QLabel {
     color: #212121;
 }
 
+MainWindow QLabel#fontSizeLabel {
+    font: 18pt;
+    text-align: center;
+}
+
 MainWindow QLabel#timer {
     font: 24pt;
 }

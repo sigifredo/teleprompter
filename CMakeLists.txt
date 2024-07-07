@@ -25,10 +25,12 @@ qt_add_resources(RESOURCES resources/resources.qrc)
 set(PROJECT_SOURCES
     include/BionicWidget.hpp
     include/ChronometerWidget.hpp
+    include/FontBarWidget.hpp
     include/MainWindow.hpp
     include/TextReaderWidget.hpp
     src/BionicWidget.cpp
     src/ChronometerWidget.cpp
+    src/FontBarWidget.cpp
     src/main.cpp
     src/MainWindow.cpp
     src/TextReaderWidget.cpp

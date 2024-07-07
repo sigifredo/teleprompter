@@ -7,33 +7,6 @@ BionicWidget::BionicWidget(QWidget *pParent)
     : QTextEdit(pParent)
 {
     setReadOnly(true);
-
-    QFont defaultFont = font();
-    defaultFont.setPointSize(DEFAULT_FONT_SIZE);
-
-    setFont(defaultFont);
-}
-
-void BionicWidget::decrementFontSize()
-{
-    QFont defaultFont = font();
-    int fontSize = defaultFont.pointSize() - 2;
-
-    defaultFont.setPointSize(fontSize);
-
-    setFont(defaultFont);
-    emit fontSizeChanged(fontSize);
-}
-
-void BionicWidget::incrementFontSize()
-{
-    QFont defaultFont = font();
-    int fontSize = defaultFont.pointSize() + 2;
-
-    defaultFont.setPointSize(fontSize);
-
-    setFont(defaultFont);
-    emit fontSizeChanged(fontSize);
 }
 
 void BionicWidget::setBionicText(const QString &sText)
@@ -76,4 +49,12 @@ void BionicWidget::setBionicText(const QString &sText)
     }
 
     setHtml(sResult);
+}
+
+void BionicWidget::setFontSize(const int &iFontSize)
+{
+    QFont defaultFont = font();
+    defaultFont.setPointSize(iFontSize);
+
+    setFont(defaultFont);
 }

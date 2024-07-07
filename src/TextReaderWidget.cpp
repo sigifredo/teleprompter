@@ -4,6 +4,7 @@
 #include <TextReaderWidget.hpp>
 #include <BionicWidget.hpp>
 #include <ChronometerWidget.hpp>
+#include <FontBarWidget.hpp>
 
 // Qt
 #include <QBoxLayout>
@@ -38,29 +39,12 @@ TextReaderWidget::TextReaderWidget(QWidget *pParent)
 
     ChronometerWidget *pChronometerWidget = new ChronometerWidget(this);
 
-    QWidget *pFontBarWidget = new QWidget(this);
+    FontBarWidget *pFontBarWidget = new FontBarWidget(this);
     {
-        QLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, pFontBarWidget);
-
-        QPushButton *pPlusButton = new QPushButton("&+", pFontBarWidget);
-        _pFontSizeLabel = new QLabel("0", pFontBarWidget);
-        QPushButton *pMinusButton = new QPushButton("&-", pFontBarWidget);
-
-        _pFontSizeLabel->setAlignment(Qt::AlignCenter);
-        _pFontSizeLabel->setStyleSheet("font: 18pt;");
-        _pFontSizeLabel->setText(QString::number(_pBionicWidget->font().pointSize()));
-
-        connect(pPlusButton, SIGNAL(clicked()), _pBionicWidget, SLOT(incrementFontSize()));
-        connect(pMinusButton, SIGNAL(clicked()), _pBionicWidget, SLOT(decrementFontSize()));
-
-        pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-        pLayout->addWidget(pPlusButton);
-        pLayout->addWidget(_pFontSizeLabel);
-        pLayout->addWidget(pMinusButton);
-        pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+        connect(pFontBarWidget, SIGNAL(changeFontSize(int)), _pBionicWidget, SLOT(setFontSize(int)));
     }
 
-    connect(_pBionicWidget, SIGNAL(fontSizeChanged(int)), this, SLOT(fontSizeChanged(int)));
+    _pBionicWidget->setFontSize(pFontBarWidget->fontSize());
 
     pLayout->addWidget(pFileWidget);
     pLayout->addWidget(_pBionicWidget);
