@@ -38,7 +38,7 @@ CreditsDialog::CreditsDialog(QWidget *pParent)
             QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, pAboutTabWidget);
             QLabel *pDescriptionLabel = new QLabel(pAboutTabWidget);
 
-            QString sDescription = QString::fromUtf8(PROJECT_NAME " es una utilidad creada para todas aquellas personas que\njuegan en mas de un servidor de WoW. El programa administra de\nforma automática el archivo \"realmlist.wtf\" para que el jugador no se\ntenga que preocupar por editar archivos para cambiar de servidor.\n\nEste programa es distribuido bajo licencia GPLv3, no hace parte de\nBlizzard, no modifica ninguna funcionalidad del juego.\n\nIdiomas soportados:\n");
+            QString sDescription = QString::fromUtf8(PROJECT_NAME " is an application designed to enhance reading\nefficiency and manage time effectively. Utilizing the concept of\nbionic reading, it aids users in improving their reading speed and\ncomprehension by guiding the eyes through text with strategically\nhighlighted focal points. Additionally, the app includes time\ncontrol via a chronometer, allowing users to check the time while\nreading. This software is distributed under the terms of the GNU\nGeneral Public License.");
             pDescriptionLabel->setText(sDescription);
 
             pLayout->addWidget(pDescriptionLabel);
