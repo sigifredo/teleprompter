@@ -18,8 +18,6 @@
 MainWindow::MainWindow(QWidget *pParent)
     : QMainWindow(pParent)
 {
-    setWindowFlag(Qt::WindowStaysOnTopHint);
-
     QWidget *pCentralWidget = new QWidget(this);
     QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, pCentralWidget);
 
@@ -43,6 +41,14 @@ MainWindow::MainWindow(QWidget *pParent)
     pLayout->addWidget(pVersionWidget);
 
     setCentralWidget(pCentralWidget);
+    setWindowFlag(Qt::WindowStaysOnTopHint);
+#ifdef _WIN32
+    setWindowIcon(QIcon(":/app-icons/teleprompter.ico"));
+#elif defined(__APPLE__)
+    setWindowIcon(QIcon(":/app-icons/teleprompter.icns"));
+#else
+    setWindowIcon(QIcon(":/app-icons/teleprompter.png"));
+#endif
 }
 
 void MainWindow::fontSizeChanged(const int &iSize)
