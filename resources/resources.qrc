@@ -4,5 +4,6 @@
         <file>s9art.png</file>
         <file>app-icons/teleprompter.icns</file>
         <file>app-icons/teleprompter.ico</file>
+        <file>app-icons/teleprompter.png</file>
     </qresource>
 </RCC>
