@@ -45,16 +45,6 @@ int main(int argc, char **argv)
         std::cerr << "[Error] Could not open style file." << std::endl;
     }
 
-#if defined(_WIN32) || defined(_WIN64)
-    std::cout << "Running on Windows" << std::endl;
-#elif defined(__linux__)
-    std::cout << "Running on Linux" << std::endl;
-#elif defined(__APPLE__) || defined(__MACH__)
-    std::cout << "Running on macOS" << std::endl;
-#else
-    std::cout << "Unknown operating system" << std::endl;
-#endif
-
     MainWindow mw;
     mw.setGeometry(centerGeometry());
     mw.setWindowTitle("Teleprompter v" PROJECT_VERSION);

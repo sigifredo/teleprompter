@@ -42,9 +42,10 @@ MainWindow::MainWindow(QWidget *pParent)
 
     setCentralWidget(pCentralWidget);
     setWindowFlag(Qt::WindowStaysOnTopHint);
-#ifdef _WIN32
+
+#if defined(Q_OS_WIN)
     setWindowIcon(QIcon(":/app-icons/teleprompter.ico"));
-#elif defined(__APPLE__)
+#elif defined(Q_OS_MACOS)
     setWindowIcon(QIcon(":/app-icons/teleprompter.icns"));
 #else
     setWindowIcon(QIcon(":/app-icons/teleprompter.png"));
