@@ -34,7 +34,7 @@ void FileWidget::chooseFile()
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
-    dialog.setNameFilter(tr("Text file (*.txt)"));
+    dialog.setNameFilter(tr("Markdown (*.md)"));
 
     if (dialog.exec() == QDialog::Accepted)
     {

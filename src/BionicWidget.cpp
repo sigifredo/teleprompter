@@ -3,6 +3,9 @@
 // Own
 #include <BionicWidget.hpp>
 
+// Qt
+#include <QTextBlock>
+
 BionicWidget::BionicWidget(QWidget *pParent)
     : QTextEdit(pParent)
 {
@@ -11,44 +14,54 @@ BionicWidget::BionicWidget(QWidget *pParent)
 
 void BionicWidget::setBionicText(const QString &sText)
 {
-    QString sResult;
-    QString sFixedText(sText);
+    clear();
+    setMarkdown(sText);
 
-    sFixedText
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace("\r", "\n")
-        .replace("\f", "\n")
-        .replace("\v", "\n")
-        .replace("\t", " ");
+    QTextDocument *doc = document();
+    QTextCursor cursor(doc);
 
-    QStringList paragraphs = sFixedText.split("\n");
+    cursor.beginEditBlock();
 
-    for (const QString &paragraph : paragraphs)
+    for (QTextBlock block = doc->begin(); block != doc->end(); block = block.next())
     {
-        if (!paragraph.isEmpty())
+        const QString text = block.text();
+        const int blockPos = block.position(); // posición absoluta del bloque en el documento
+
+        int i = 0;
+        const int n = text.length();
+
+        while (i < n)
         {
-            QString sNewParagraph;
-            QStringList words = paragraph.split(" ");
+            while (i < n && text[i].isSpace())
+                ++i;
 
-            for (const QString &sWord : words)
-            {
-                QString sFixedWord = sWord.trimmed();
+            const int wordStart = i;
 
-                if (!sFixedWord.isEmpty())
-                {
-                    int iLen = sFixedWord.length();
-                    int iBoldPart = iLen / 2;
+            while (i < n && !text[i].isSpace())
+                ++i;
 
-                    sNewParagraph.append("<strong>" + sFixedWord.left(iBoldPart) + "</strong>" + sFixedWord.mid(iBoldPart) + " ");
-                }
-            }
+            const int wordEnd = i;
 
-            sResult.append(sNewParagraph.trimmed().append("<br><br>"));
+            if (wordEnd <= wordStart)
+                continue;
+
+            const int wordLen = wordEnd - wordStart;
+            const int boldLen = wordLen / 2;
+
+            if (boldLen <= 0)
+                continue;
+
+            QTextCharFormat fmt;
+            fmt.setFontWeight(QFont::Bold);
+
+            // Seleccionar y aplicar formato a la primera mitad de la palabra
+            cursor.setPosition(blockPos + wordStart);
+            cursor.setPosition(blockPos + wordStart + boldLen, QTextCursor::KeepAnchor);
+            cursor.mergeCharFormat(fmt);
         }
     }
 
-    setHtml(sResult);
+    cursor.endEditBlock();
 }
 
 void BionicWidget::setFontSize(const int &iFontSize)
