@@ -29,7 +29,7 @@ class FileWidget : public QWidget
     Q_OBJECT
 
 public:
-    FileWidget(QWidget *pParent = nullptr);
+    FileWidget(const QString &sButtonText, const QString &sFilter, QWidget *pParent = nullptr);
 
     void setFileName(const QString &sFileName);
 
@@ -41,6 +41,7 @@ public slots:
 
 private:
     QLabel *_pFileNameLabel;
+    QString _sFilter;
 };
 
 #endif

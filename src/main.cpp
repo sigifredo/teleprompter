@@ -60,8 +60,8 @@ QRect centerGeometry()
     int screenWidth = screenGeometry.width();
     int screenHeight = screenGeometry.height();
 
-    int windowWidth = screenWidth * 0.3;
-    int windowHeight = screenHeight * 0.5;
+    int windowWidth = screenWidth * 0.5;
+    int windowHeight = screenHeight * 0.7;
 
     int posX = (screenWidth - windowWidth) / 2;
     int posY = (screenHeight - windowHeight) / 2;

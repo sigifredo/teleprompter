@@ -96,3 +96,24 @@ VersionWidget QPushButton {
     font-size: 11px;
     padding: 2px;
 }
+
+SlideStripWidget {
+    background-color: white;
+    border: 2px solid #dadbdf;
+    color: #6b717f;
+}
+
+SlideStripWidget::item {
+    border: 2px solid transparent;
+    padding: 2px;
+}
+
+SlideStripWidget::item:selected {
+    background-color: #ccced3;
+    border-color: #803c3c;
+    color: #212121;
+}
+
+PresentationWindow {
+    background-color: black;
+}

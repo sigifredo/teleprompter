@@ -9,13 +9,13 @@
 #include <QLabel>
 #include <QPushButton>
 
-FileWidget::FileWidget(QWidget *pParent)
-    : QWidget(pParent)
+FileWidget::FileWidget(const QString &sButtonText, const QString &sFilter, QWidget *pParent)
+    : QWidget(pParent), _sFilter(sFilter)
 {
     QLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
 
     _pFileNameLabel = new QLabel(this);
-    QPushButton *pOpenFileButton = new QPushButton("&Open file...", this);
+    QPushButton *pOpenFileButton = new QPushButton(sButtonText, this);
 
     connect(pOpenFileButton, SIGNAL(clicked()), this, SLOT(chooseFile()));
 
@@ -34,7 +34,7 @@ void FileWidget::chooseFile()
     QFileDialog dialog(this);
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
-    dialog.setNameFilter(tr("Text file (*.txt)"));
+    dialog.setNameFilter(_sFilter);
 
     if (dialog.exec() == QDialog::Accepted)
     {

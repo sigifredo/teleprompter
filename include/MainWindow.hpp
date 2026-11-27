@@ -23,7 +23,11 @@
 
 class BionicWidget;
 class FileWidget;
+class PresentationWindow;
 class QLabel;
+class QPushButton;
+class SlideDeck;
+class SlideStripWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -35,11 +39,26 @@ public:
 public slots:
     void fontSizeChanged(const int &iSize);
     void openFile(const QString &sFilePath);
+    void openSlides(const QString &sFilePath);
+    void startPresentation();
+    void stopPresentation();
+
+protected:
+    bool eventFilter(QObject *pObject, QEvent *pEvent) override;
 
 private:
     BionicWidget *_pBionicWidget;
     QLabel *_pFontSizeLabel;
     FileWidget *_pFileWidget;
+    FileWidget *_pSlidesFileWidget;
+    SlideDeck *_pDeck;
+    SlideStripWidget *_pSlideStrip;
+    QLabel *_pSlideCounterLabel;
+    QPushButton *_pPresentButton;
+    PresentationWindow *_pPresentation;
+
+private slots:
+    void updateSlideCounter();
 };
 
 #endif

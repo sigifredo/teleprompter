@@ -1,11 +1,10 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
 project(Teleprompter VERSION 0.1.1 LANGUAGES CXX)
 
 include(config/build.cmake)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Pdf)
 
 include_directories(include ${PROJECT_BINARY_DIR}/include/)
 
@@ -34,6 +33,9 @@ set(PROJECT_SOURCES
     include/FileWidget.hpp
     include/FontBarWidget.hpp
     include/MainWindow.hpp
+    include/PresentationWindow.hpp
+    include/SlideDeck.hpp
+    include/SlideStripWidget.hpp
     include/VersionWidget.hpp
     src/BionicWidget.cpp
     src/ChronometerWidget.cpp
@@ -42,36 +44,25 @@ set(PROJECT_SOURCES
     src/FontBarWidget.cpp
     src/main.cpp
     src/MainWindow.cpp
+    src/PresentationWindow.cpp
+    src/SlideDeck.cpp
+    src/SlideStripWidget.cpp
     src/VersionWidget.cpp
     ${RESOURCES}
     ${app_icon}
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(teleprompter
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-    )
-else()
-    if(ANDROID)
-        add_library(teleprompter SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(teleprompter
-            ${PROJECT_SOURCES}
-        )
-    endif()
-endif()
+qt_add_executable(teleprompter
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+)
 
-target_link_libraries(teleprompter PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(teleprompter PRIVATE Qt6::Widgets Qt6::Pdf)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
-if(${QT_VERSION} VERSION_LESS 6.1.0)
+if(Qt6_VERSION VERSION_LESS 6.1.0)
     set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.nowhere.teleprompter)
 endif()
 
@@ -90,6 +81,4 @@ install(TARGETS teleprompter
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(teleprompter)
-endif()
+qt_finalize_executable(teleprompter)

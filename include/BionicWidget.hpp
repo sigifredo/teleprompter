@@ -31,6 +31,8 @@ public:
 
 public slots:
     void setBionicText(const QString &sText);
+    void setBionicMarkdown(const QString &sText);
+    void scrollStep(int iDirection);
     void setFontSize(const int &iFontSize);
 };
 
