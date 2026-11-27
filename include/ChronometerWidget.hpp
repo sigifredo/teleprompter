@@ -59,12 +59,12 @@ private slots:
     void updateTime();
 
 private:
-    void setActiveStyle(bool active);
-
     QPushButton *startButton_;
     QLabel *timeLabel_;
     QTimer *timer_;
     int timeElapsed_ = 0;
+
+    void setActiveStyle(bool active);
 };
 
 #endif

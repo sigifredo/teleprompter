@@ -56,11 +56,11 @@ private slots:
     void deckCurrentChanged(int index);
 
 private:
-    void updateSlide();
-
     SlideDeck *deck_;
     QImage slide_;
     bool blackout_ = false;
+
+    void updateSlide();
 };
 
 #endif

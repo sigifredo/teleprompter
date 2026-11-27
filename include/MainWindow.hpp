@@ -85,12 +85,6 @@ private slots:
     void updateSlideCounter();
 
 private:
-    int translateKey(int key) const;
-    bool handleSlideKey(int key, bool plain);
-    bool handleScriptKey(int key, Qt::KeyboardModifiers modifiers, const QString &text);
-    void loadSettings();
-    void saveSettings();
-
     BionicWidget *bionicWidget_;
     ChronometerWidget *chronometer_;
     FileWidget *fileWidget_;
@@ -107,6 +101,12 @@ private:
     bool alwaysOnTop_ = true;
     bool startTimerOnPresent_ = false;
     bool vimKeys_ = false;
+
+    int translateKey(int key) const;
+    bool handleSlideKey(int key, bool plain);
+    bool handleScriptKey(int key, Qt::KeyboardModifiers modifiers, const QString &text);
+    void loadSettings();
+    void saveSettings();
 };
 
 #endif

@@ -92,14 +92,6 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
-    QRect bandRect() const;
-    int lineHalfHeight(const QTextBlock &block, bool last) const;
-    void render();
-    void renderMarkdown();
-    void renderText();
-    void updateColumn();
-    void updatePadding();
-
     bool bionic_ = true;
     bool bandVisible_ = false;
     bool loaded_ = false;
@@ -107,6 +99,14 @@ private:
     int bandPercent_ = DefaultBandPercent;
     int columnChars_ = DefaultColumnChars;
     QString source_; ///< Texto original, sin la lectura biónica aplicada.
+
+    QRect bandRect() const;
+    int lineHalfHeight(const QTextBlock &block, bool last) const;
+    void render();
+    void renderMarkdown();
+    void renderText();
+    void updateColumn();
+    void updatePadding();
 };
 
 #endif

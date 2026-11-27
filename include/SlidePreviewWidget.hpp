@@ -48,13 +48,13 @@ private slots:
     void deckCurrentChanged(int index);
 
 private:
-    QRect slideArea() const;
-    void updateImage();
-
     SlideDeck *deck_;
     int offset_;
     QString caption_;
     QImage image_;
+
+    QRect slideArea() const;
+    void updateImage();
 };
 
 #endif

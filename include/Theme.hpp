@@ -100,16 +100,16 @@ signals:
     void changed();
 
 private:
+    Mode mode_ = Mode::Dark;
+    QHash<QString, QString> values_;
+    QHash<QString, QString> themeDark_;
+    QHash<QString, QString> themeLight_;
+
     Theme();
 
     void apply();
     void loadTokens();
     void rebuildValues();
-
-    Mode mode_ = Mode::Dark;
-    QHash<QString, QString> values_;
-    QHash<QString, QString> themeDark_;
-    QHash<QString, QString> themeLight_;
 };
 
 #endif
