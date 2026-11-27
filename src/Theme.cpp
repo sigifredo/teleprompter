@@ -1,50 +1,40 @@
 
 
-// Own
+// own
 #include <Theme.hpp>
 
-// Qt
+// qt
 #include <QApplication>
+#include <QDebug>
 #include <QFile>
 #include <QGuiApplication>
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QPalette>
+#include <QRegularExpression>
 #include <QSettings>
 #include <QStyleHints>
 
+#define CLASS_NAME "Theme"
+#define TELEPROMPTER_WARNING() qWarning() << "[" CLASS_NAME "]"
+
 namespace
 {
-struct Tokens
-{
-    QColor bg, surface, hover, pressed, border;
-    QColor text, muted, accent, accentText;
-    QColor script, scriptText, disabledBg, disabledText;
-    QColor primary, primaryHover, primaryText;
-};
+    QHash<QString, QString> readStrings(const QJsonObject &object)
+    {
+        QHash<QString, QString> out;
 
-// Neutral cool greys with a single blue accent, after GitHub's Primer palette. Text contrast is
-// kept around 13:1 for the script instead of the maximum, because glare is what tires the eyes.
-Tokens darkTokens()
-{
-    return {
-        "#0d1117", "#151b23", "#212830", "#262c36", "#30363d",
-        "#e6edf3", "#9198a1", "#4493f8", "#0d1117",
-        "#0d1117", "#d1d9e0", "#151b23", "#656c76",
-        "#1f6feb", "#1a65d8", "#ffffff"};
-}
+        for (auto it = object.begin(); it != object.end(); ++it)
+            out.insert(it.key(), it.value().toString());
 
-Tokens lightTokens()
-{
-    return {
-        "#ffffff", "#f6f8fa", "#eff2f5", "#e6eaef", "#d1d9e0",
-        "#1f2328", "#59636e", "#0969da", "#ffffff",
-        "#ffffff", "#1f2328", "#eff2f5", "#818b98",
-        "#0969da", "#0860ca", "#ffffff"};
-}
-}
+        return out;
+    }
+} // namespace
 
 Theme::Theme()
-    : QObject(nullptr), _mode(Dark)
 {
+    loadTokens();
+    rebuildValues();
 }
 
 Theme &Theme::instance()
@@ -54,106 +44,141 @@ Theme &Theme::instance()
     return theme;
 }
 
-Theme::Mode Theme::mode() const
+void Theme::load()
 {
-    return _mode;
+    const int mode = QSettings().value("ui/theme", static_cast<int>(Mode::Dark)).toInt();
+
+    mode_ = mode >= static_cast<int>(Mode::Dark) && mode <= static_cast<int>(Mode::Auto) ? static_cast<Mode>(mode) : Mode::Dark;
+
+    // En modo automático el tema se vuelve a aplicar cuando el sistema cambia de esquema.
+    connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this]()
+            {
+        if (mode_ == Mode::Auto)
+            apply(); });
+
+    apply();
 }
 
 bool Theme::isDark() const
 {
-    if (_mode == Auto)
-    {
+    if (mode_ == Mode::Auto)
         return QGuiApplication::styleHints()->colorScheme() != Qt::ColorScheme::Light;
-    }
 
-    return _mode == Dark;
+    return mode_ == Mode::Dark;
 }
 
-QString Theme::modeName() const
+QString Theme::variantName() const
 {
-    switch (_mode)
+    return isDark() ? QStringLiteral("dark") : QStringLiteral("light");
+}
+
+QString Theme::token(const QString &name) const
+{
+    return values_.value(name);
+}
+
+QColor Theme::color(const QString &name) const
+{
+    const QString value = values_.value(name);
+
+    return value.startsWith('#') ? QColor(value) : QColor();
+}
+
+QString Theme::expand(const QString &templateText) const
+{
+    static const QRegularExpression placeholder(QStringLiteral("\\{\\{([a-z0-9-]+)\\}\\}"));
+
+    QString out;
+    qsizetype last = 0;
+
+    for (auto it = placeholder.globalMatch(templateText); it.hasNext();)
     {
-    case Light:
-        return "Light";
-    case Auto:
-        return "Auto";
-    default:
-        return "Dark";
+        const QRegularExpressionMatch match = it.next();
+        const QString name = match.captured(1);
+
+        if (!values_.contains(name))
+            TELEPROMPTER_WARNING() << "Token desconocido en la hoja de estilos:" << name;
+
+        out += QStringView(templateText).mid(last, match.capturedStart() - last);
+        out += values_.value(name);
+        last = match.capturedEnd();
     }
+
+    out += QStringView(templateText).mid(last);
+
+    return out;
 }
 
-void Theme::load()
+QString Theme::styleSheet() const
 {
-    int iMode = QSettings().value("ui/theme", Dark).toInt();
+    QFile file(QStringLiteral(":/teleprompter/qss/teleprompter.qss"));
 
-    _mode = (iMode >= Dark && iMode <= Auto) ? static_cast<Mode>(iMode) : Dark;
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        TELEPROMPTER_WARNING() << "No se pudo abrir la hoja de estilos.";
+        return {};
+    }
 
-    // Auto follows the operating system, so repaint when it changes.
-    connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this]()
-            {
-        if (_mode == Auto)
-        {
-            apply();
-        } });
-
-    apply();
+    return expand(QString::fromUtf8(file.readAll()));
 }
 
 void Theme::setMode(Mode mode)
 {
-    _mode = mode;
+    mode_ = mode;
     QSettings().setValue("ui/theme", static_cast<int>(mode));
     apply();
 }
 
-void Theme::cycle()
-{
-    setMode(static_cast<Mode>((_mode + 1) % 3));
-}
-
 void Theme::apply()
 {
-    Tokens t = isDark() ? darkTokens() : lightTokens();
+    rebuildValues();
 
+    const QColor fg = color("fg");
+    const QColor subtle = color("fg-subtle");
     QPalette palette;
-    palette.setColor(QPalette::Window, t.bg);
-    palette.setColor(QPalette::WindowText, t.text);
-    palette.setColor(QPalette::Base, t.script);
-    palette.setColor(QPalette::AlternateBase, t.surface);
-    palette.setColor(QPalette::Text, t.scriptText);
-    palette.setColor(QPalette::Button, t.surface);
-    palette.setColor(QPalette::ButtonText, t.text);
-    palette.setColor(QPalette::Highlight, t.accent);
-    palette.setColor(QPalette::HighlightedText, t.accentText);
-    palette.setColor(QPalette::PlaceholderText, t.muted);
-    palette.setColor(QPalette::ToolTipBase, t.surface);
-    palette.setColor(QPalette::ToolTipText, t.text);
-    palette.setColor(QPalette::Link, t.accent);
-    palette.setColor(QPalette::Mid, t.border);
-    palette.setColor(QPalette::Disabled, QPalette::ButtonText, t.disabledText);
-    palette.setColor(QPalette::Disabled, QPalette::WindowText, t.disabledText);
-    palette.setColor(QPalette::Disabled, QPalette::Text, t.disabledText);
+
+    palette.setColor(QPalette::Window, color("bg"));
+    palette.setColor(QPalette::WindowText, fg);
+    palette.setColor(QPalette::Base, color("script-bg"));
+    palette.setColor(QPalette::Text, color("script-fg"));
+    palette.setColor(QPalette::AlternateBase, color("surface"));
+    palette.setColor(QPalette::Button, color("surface"));
+    palette.setColor(QPalette::ButtonText, fg);
+    palette.setColor(QPalette::ToolTipBase, color("surface"));
+    palette.setColor(QPalette::ToolTipText, fg);
+    palette.setColor(QPalette::Highlight, color("accent"));
+    palette.setColor(QPalette::HighlightedText, color("accent-text"));
+    palette.setColor(QPalette::PlaceholderText, color("fg-muted"));
+    palette.setColor(QPalette::Link, color("accent"));
+    palette.setColor(QPalette::Mid, color("line"));
+    palette.setColor(QPalette::Disabled, QPalette::WindowText, subtle);
+    palette.setColor(QPalette::Disabled, QPalette::ButtonText, subtle);
+    palette.setColor(QPalette::Disabled, QPalette::Text, subtle);
+
     qApp->setPalette(palette);
+    qApp->setStyleSheet(styleSheet());
 
-    QFile file(":/styles.qss");
-    QString sStyle;
-
-    if (file.open(QFile::ReadOnly))
-    {
-        sStyle = QString::fromUtf8(file.readAll());
-    }
-
-    const QList<QPair<QString, QColor>> replacements = {
-        {"@bg@", t.bg}, {"@surface@", t.surface}, {"@hover@", t.hover}, {"@pressed@", t.pressed}, {"@border@", t.border}, {"@text@", t.text}, {"@muted@", t.muted}, {"@accent@", t.accent}, {"@accentText@", t.accentText}, {"@script@", t.script}, {"@scriptText@", t.scriptText}, {"@disabledBg@", t.disabledBg}, {"@disabledText@", t.disabledText}, {"@primary@", t.primary}, {"@primaryHover@", t.primaryHover}, {"@primaryText@", t.primaryText}};
-
-    for (const QPair<QString, QColor> &replacement : replacements)
-    {
-        sStyle.replace(replacement.first, replacement.second.name());
-    }
-
-    // The check mark must contrast with the accent: dark on the light blue, white on the dark blue.
-    sStyle.replace("@check@", isDark() ? ":/icons/check-dark.png" : ":/icons/check-light.png");
-
-    qApp->setStyleSheet(sStyle);
     emit changed();
+}
+
+void Theme::loadTokens()
+{
+    QFile file(QStringLiteral(":/teleprompter/tokens.json"));
+
+    if (!file.open(QIODevice::ReadOnly))
+    {
+        TELEPROMPTER_WARNING() << "No se pudieron leer los tokens del tema.";
+        return;
+    }
+
+    const QJsonObject themes = QJsonDocument::fromJson(file.readAll()).object().value("themes").toObject();
+
+    themeDark_ = readStrings(themes.value("dark").toObject());
+    themeLight_ = readStrings(themes.value("light").toObject());
+}
+
+void Theme::rebuildValues()
+{
+    values_ = isDark() ? themeDark_ : themeLight_;
+    values_.insert("theme", variantName());
 }

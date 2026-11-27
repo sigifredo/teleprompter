@@ -19,32 +19,82 @@
 #ifndef THEME_HPP
 #define THEME_HPP
 
-// Qt
+// qt
+#include <QColor>
+#include <QHash>
 #include <QObject>
+#include <QString>
 
+/**
+ * @brief Tema visual de Teleprompter: oscuro, claro o el del sistema.
+ *
+ * Deriva la paleta de Qt y la hoja de estilos de `design/teleprompter.tokens.json`, que viaja como
+ * recurso. La hoja de estilos es una plantilla con `{{token}}`: se pasa por expand() y nunca lleva
+ * colores literales.
+ *
+ * Uso, una vez por proceso y antes de mostrar una ventana:
+ * @code
+ *   Theme::instance().load();
+ * @endcode
+ */
 class Theme : public QObject
 {
     Q_OBJECT
 
 public:
-    enum Mode
+    enum class Mode
     {
-        Dark = 0,
-        Light = 1,
-        Auto = 2
+        Dark,
+        Light,
+        Auto ///< Sigue el esquema de colores del sistema.
     };
 
     static Theme &instance();
 
-    Mode mode() const;
-    bool isDark() const;
-    QString modeName() const;
-
+    /**
+     * @brief Lee el modo guardado, aplica el tema y, en modo automático, lo mantiene al día con el sistema.
+     */
     void load();
 
+    Mode mode() const { return mode_; }
+
+    /**
+     * @brief Indica si el tema aplicado es el oscuro, sea por el modo o por el sistema.
+     */
+    bool isDark() const;
+
+    /**
+     * @brief Nombre del tema aplicado en los tokens y en los recursos: "dark" o "light".
+     */
+    QString variantName() const;
+
+    /**
+     * @brief Valor de un token del tema aplicado, tal como está en el JSON.
+     *
+     * @return Una cadena vacía si no existe.
+     */
+    QString token(const QString &name) const;
+
+    /**
+     * @brief Color de un token. Si no existe devuelve un QColor inválido.
+     */
+    QColor color(const QString &name) const;
+
+    /**
+     * @brief Sustituye cada `{{token}}` de una plantilla de hoja de estilos por su valor.
+     */
+    QString expand(const QString &templateText) const;
+
+    /**
+     * @brief Hoja de estilos base ya expandida.
+     */
+    QString styleSheet() const;
+
 public slots:
+    /**
+     * @brief Cambia el modo, lo guarda y aplica el tema.
+     */
     void setMode(Mode mode);
-    void cycle();
 
 signals:
     void changed();
@@ -52,9 +102,14 @@ signals:
 private:
     Theme();
 
-    Mode _mode;
-
     void apply();
+    void loadTokens();
+    void rebuildValues();
+
+    Mode mode_ = Mode::Dark;
+    QHash<QString, QString> values_;
+    QHash<QString, QString> themeDark_;
+    QHash<QString, QString> themeLight_;
 };
 
 #endif

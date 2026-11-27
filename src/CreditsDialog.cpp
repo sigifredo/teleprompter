@@ -1,81 +1,56 @@
 
-// Own
+
+// own
 #include <CreditsDialog.hpp>
 #include <Version.hpp>
 
-// Qt
-#include <QGridLayout>
-#include <QLabel>
-#include <QTextEdit>
-#include <QTabWidget>
+// qt
+#include <QBoxLayout>
 #include <QDialogButtonBox>
+#include <QLabel>
+#include <QTabWidget>
+#include <QTextEdit>
 
-CreditsDialog::CreditsDialog(QWidget *pParent)
-    : QDialog(pParent)
+CreditsDialog::CreditsDialog(QWidget *parent)
+    : QDialog(parent)
 {
-    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, this);
+    auto *layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
 
-    QWidget *pInfoWidget = new QWidget(this);
-    {
-        QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, pInfoWidget);
-        QLabel *pAppInfoLabel = new QLabel(pInfoWidget);
+    auto *appInfoLabel = new QLabel(tr("<h2>%1</h2>Project version: %2<br>Qt version: %3").arg(PROJECT_NAME, PROJECT_VERSION, qVersion()), this);
 
-        pLayout->setSpacing(10);
-        pAppInfoLabel->setText("<h2>" PROJECT_NAME "</h2>" + QString::fromUtf8("Project version: ") + PROJECT_VERSION "<br>Qt version: " + qVersion());
+    auto *tabs = new QTabWidget(this);
 
-        pLayout->addWidget(pAppInfoLabel);
-        pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-    }
+    auto *aboutTab = new QWidget(tabs);
+    auto *aboutLayout = new QBoxLayout(QBoxLayout::LeftToRight, aboutTab);
+    auto *descriptionLabel = new QLabel(tr("%1 is an application designed to enhance reading\nefficiency and manage time effectively. Utilizing the concept of\nbionic reading, it aids users in improving their reading speed and\ncomprehension by guiding the eyes through text with strategically\nhighlighted focal points. Additionally, the app includes time\ncontrol via a chronometer, allowing users to check the time while\nreading. This software is distributed under the terms of the GNU\nGeneral Public License.").arg(PROJECT_NAME), aboutTab);
 
-    QTabWidget *pTabWidget = new QTabWidget(this);
-    {
-        QWidget *pAboutTabWidget = new QWidget(pTabWidget);
-        {
-            QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, pAboutTabWidget);
-            QLabel *pDescriptionLabel = new QLabel(pAboutTabWidget);
+    aboutLayout->addWidget(descriptionLabel);
 
-            QString sDescription = QString::fromUtf8(PROJECT_NAME " is an application designed to enhance reading\nefficiency and manage time effectively. Utilizing the concept of\nbionic reading, it aids users in improving their reading speed and\ncomprehension by guiding the eyes through text with strategically\nhighlighted focal points. Additionally, the app includes time\ncontrol via a chronometer, allowing users to check the time while\nreading. This software is distributed under the terms of the GNU\nGeneral Public License.");
-            pDescriptionLabel->setText(sDescription);
+    auto *authorTab = new QWidget(tabs);
+    auto *authorLayout = new QBoxLayout(QBoxLayout::TopToBottom, authorTab);
+    auto *authorLabel = new QLabel(tr("<strong>Sigifredo Escobar Gómez</strong><br><em>Developer</em><br><a href=\"https://sigifredo.dev\">sigifredo.dev</a>"), authorTab);
 
-            pLayout->addWidget(pDescriptionLabel);
-        }
+    authorLayout->addWidget(authorLabel);
 
-        QWidget *pAuthorTabWidget = new QWidget(pTabWidget);
-        {
-            QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, pAuthorTabWidget);
-            QLabel *pAuthorLabel = new QLabel(pAuthorTabWidget);
+    auto *licenceTab = new QWidget(tabs);
+    auto *licenceLayout = new QBoxLayout(QBoxLayout::TopToBottom, licenceTab);
+    auto *licenceTextEdit = new QTextEdit(licenceTab);
 
-            pAuthorLabel->setText("<strong>Sigifredo Escobar Gómez</strong><br><em>Developer</em><br><a href=\"https://sigifredo.dev\">sigifredo.dev</a>");
+    licenceTextEdit->setReadOnly(true);
+    licenceTextEdit->setHtml(tr("<strong>%1:</strong> A bionic reading and time control application.<br>Copyright (C) 2024 Sigifredo Escobar Gómez<br><br>This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.<br><br>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.<br><br>You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.").arg(PROJECT_NAME));
+    licenceLayout->addWidget(licenceTextEdit);
 
-            pLayout->addWidget(pAuthorLabel);
-        }
+    tabs->addTab(aboutTab, tr("About"));
+    tabs->addTab(authorTab, tr("Author"));
+    tabs->addTab(licenceTab, tr("Licence"));
 
-        QWidget *pLicenceTabWidget = new QWidget(pTabWidget);
-        {
-            QVBoxLayout *pLayout = new QVBoxLayout(pLicenceTabWidget);
-            QTextEdit *pLicenceTextEdit = new QTextEdit(pLicenceTabWidget);
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close, this);
 
-            pLicenceTextEdit->setReadOnly(true);
-            pLicenceTextEdit->setHtml(QString::fromUtf8(
-                "<strong>" PROJECT_NAME ":</strong> A bionic reading and time control application.<br>Copyright (C) 2024 Sigifredo Escobar Gómez<br><br>This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.<br><br>This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.<br><br>You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>."));
+    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
-            pLayout->addWidget(pLicenceTextEdit);
-        }
+    layout->addWidget(appInfoLabel);
+    layout->addWidget(tabs);
+    layout->addWidget(buttons);
 
-        pTabWidget->addTab(pAboutTabWidget, "About");
-        pTabWidget->addTab(pAuthorTabWidget, "Author");
-        pTabWidget->addTab(pLicenceTabWidget, "Licence");
-    }
-
-    QDialogButtonBox *pButtonBox = new QDialogButtonBox(this);
-    pButtonBox->setOrientation(Qt::Horizontal);
-    pButtonBox->setStandardButtons(QDialogButtonBox::Close);
-
-    connect(pButtonBox, SIGNAL(rejected()), this, SLOT(reject()));
-
-    pLayout->addWidget(pInfoWidget);
-    pLayout->addWidget(pTabWidget);
-    pLayout->addWidget(pButtonBox);
-
-    setWindowTitle("About " PROJECT_NAME);
+    setWindowTitle(tr("About %1").arg(PROJECT_NAME));
 }

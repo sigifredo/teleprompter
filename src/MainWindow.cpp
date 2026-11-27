@@ -1,6 +1,6 @@
 
 
-// Own
+// own
 #include <MainWindow.hpp>
 #include <BionicWidget.hpp>
 #include <ChronometerWidget.hpp>
@@ -14,7 +14,7 @@
 #include <Theme.hpp>
 #include <VersionWidget.hpp>
 
-// Qt
+// qt
 #include <QApplication>
 #include <QBoxLayout>
 #include <QCloseEvent>
@@ -32,110 +32,121 @@
 #include <QStatusBar>
 #include <QTextStream>
 
-MainWindow::MainWindow(QWidget *pParent)
-    : QMainWindow(pParent), _pPresentation(nullptr), _bAlwaysOnTop(true), _bStartTimerOnPresent(false), _bVimKeys(false)
+namespace
 {
-    QWidget *pCentralWidget = new QWidget(this);
-    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, pCentralWidget);
+    // Separaciones del diseño, en píxeles.
+    constexpr int LayoutSpacing = 10;
+    constexpr int BarSpacing = 16;
+    constexpr int BarBottomMargin = 10;
+    constexpr int BodySpacing = 12;
+    constexpr int PreviewSpacing = 8;
 
-    _pDeck = new SlideDeck(this);
-    _pFileWidget = new FileWidget("Open &script...", "Script (*.md *.txt)", pCentralWidget);
-    _pSlidesFileWidget = new FileWidget("Open s&lides...", "Slides (*.pdf)", pCentralWidget);
-    _pChronometer = new ChronometerWidget(pCentralWidget);
-    _pFontBar = new FontBarWidget(pCentralWidget);
-    _pPresentButton = new QPushButton("Present (F5)", pCentralWidget);
-    _pBionicWidget = new BionicWidget(pCentralWidget);
-    _pSlideStrip = new SlideStripWidget(pCentralWidget);
+    // Reparto del espacio: guion y vistas a un lado, diapositiva actual y siguiente en el otro.
+    constexpr int ScriptStretch = 3;
+    constexpr int PreviewStretch = 2;
+    constexpr int CurrentSlideStretch = 3;
+    constexpr int NextSlideStretch = 2;
+} // namespace
 
-    // Single control bar: files, timer, font size and presentation.
-    QWidget *pBar = new QWidget(pCentralWidget);
-    {
-        QBoxLayout *pBarLayout = new QBoxLayout(QBoxLayout::LeftToRight, pBar);
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+{
+    auto *centralWidget = new QWidget(this);
+    auto *layout = new QBoxLayout(QBoxLayout::TopToBottom, centralWidget);
 
-        pBar->setObjectName("topbar");
-        pBarLayout->setContentsMargins(0, 0, 0, 10);
-        pBarLayout->setSpacing(16);
-        pBarLayout->addWidget(_pFileWidget);
-        pBarLayout->addWidget(_pSlidesFileWidget);
-        pBarLayout->addStretch(1);
-        pBarLayout->addWidget(_pChronometer);
-        pBarLayout->addWidget(_pFontBar);
-        pBarLayout->addWidget(_pPresentButton);
-    }
+    deck_ = new SlideDeck(this);
+    fileWidget_ = new FileWidget(tr("Open &script..."), tr("Script (*.md *.txt)"), centralWidget);
+    slidesFileWidget_ = new FileWidget(tr("Open s&lides..."), tr("Slides (*.pdf)"), centralWidget);
+    chronometer_ = new ChronometerWidget(centralWidget);
+    fontBar_ = new FontBarWidget(centralWidget);
+    presentButton_ = new QPushButton(tr("Present (F5)"), centralWidget);
+    bionicWidget_ = new BionicWidget(centralWidget);
+    slideStrip_ = new SlideStripWidget(centralWidget);
 
-    // Script on the left, current and next slide on the right (presenter view).
-    QWidget *pBody = new QWidget(pCentralWidget);
-    {
-        QBoxLayout *pBodyLayout = new QBoxLayout(QBoxLayout::LeftToRight, pBody);
-        QBoxLayout *pPreviewLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+    // Barra única de controles: archivos, cronómetro, tamaño de letra y presentación.
+    auto *bar = new QWidget(centralWidget);
+    auto *barLayout = new QBoxLayout(QBoxLayout::LeftToRight, bar);
 
-        pBodyLayout->setContentsMargins(0, 0, 0, 0);
-        pBodyLayout->setSpacing(12);
-        pPreviewLayout->setSpacing(8);
-        pPreviewLayout->addWidget(new SlidePreviewWidget(_pDeck, 0, "Current", pBody), 3);
-        pPreviewLayout->addWidget(new SlidePreviewWidget(_pDeck, 1, "Next", pBody), 2);
+    bar->setProperty("role", "toolbar");
+    barLayout->setContentsMargins(0, 0, 0, BarBottomMargin);
+    barLayout->setSpacing(BarSpacing);
+    barLayout->addWidget(fileWidget_);
+    barLayout->addWidget(slidesFileWidget_);
+    barLayout->addStretch(1);
+    barLayout->addWidget(chronometer_);
+    barLayout->addWidget(fontBar_);
+    barLayout->addWidget(presentButton_);
 
-        pBodyLayout->addWidget(_pBionicWidget, 3);
-        pBodyLayout->addLayout(pPreviewLayout, 2);
-    }
+    // El guion a la izquierda y, a la derecha, la diapositiva actual y la siguiente (vista del presentador).
+    auto *body = new QWidget(centralWidget);
+    auto *bodyLayout = new QBoxLayout(QBoxLayout::LeftToRight, body);
+    auto *previewLayout = new QBoxLayout(QBoxLayout::TopToBottom);
 
-    _pPresentButton->setObjectName("primary");
-    _pPresentButton->setEnabled(false);
-    _pPresentButton->setToolTip("Start the presentation (F5)");
-    _pBionicWidget->setPlaceholderText("Open a script (.md / .txt)\nand slides (.pdf)\n\nPress ? for shortcuts");
+    bodyLayout->setContentsMargins(0, 0, 0, 0);
+    bodyLayout->setSpacing(BodySpacing);
+    previewLayout->setSpacing(PreviewSpacing);
+    previewLayout->addWidget(new SlidePreviewWidget(deck_, 0, tr("Current"), body), CurrentSlideStretch);
+    previewLayout->addWidget(new SlidePreviewWidget(deck_, 1, tr("Next"), body), NextSlideStretch);
 
-    pLayout->setSpacing(10);
-    pLayout->addWidget(pBar);
-    pLayout->addWidget(pBody, 1);
-    pLayout->addWidget(_pSlideStrip);
-    setCentralWidget(pCentralWidget);
+    bodyLayout->addWidget(bionicWidget_, ScriptStretch);
+    bodyLayout->addLayout(previewLayout, PreviewStretch);
 
-    // Status bar: slide counter and view options.
-    _pSlideCounterLabel = new QLabel("No slides", this);
-    QPushButton *pSettingsButton = new QPushButton("Settings", this);
-    QPushButton *pHelpButton = new QPushButton("?", this);
+    presentButton_->setProperty("variant", "primary");
+    presentButton_->setEnabled(false);
+    presentButton_->setToolTip(tr("Start the presentation (F5)"));
+    bionicWidget_->setPlaceholderText(tr("Open a script (.md / .txt)\nand slides (.pdf)\n\nPress ? for shortcuts"));
 
-    pSettingsButton->setObjectName("flat");
-    pSettingsButton->setToolTip("Settings (Ctrl+,)");
-    pHelpButton->setObjectName("flat");
-    pHelpButton->setToolTip("Keyboard shortcuts (?)");
+    layout->setSpacing(LayoutSpacing);
+    layout->addWidget(bar);
+    layout->addWidget(body, 1);
+    layout->addWidget(slideStrip_);
+    setCentralWidget(centralWidget);
+
+    // Barra de estado: contador de diapositivas y opciones de la vista.
+    slideCounterLabel_ = new QLabel(tr("No slides"), this);
+
+    auto *settingsButton = new QPushButton(tr("Settings"), this);
+    auto *helpButton = new QPushButton(QStringLiteral("?"), this);
+
+    settingsButton->setProperty("variant", "ghost");
+    settingsButton->setToolTip(tr("Settings (Ctrl+,)"));
+    helpButton->setProperty("variant", "ghost");
+    helpButton->setToolTip(tr("Keyboard shortcuts (?)"));
 
     statusBar()->setSizeGripEnabled(false);
-    statusBar()->addWidget(_pSlideCounterLabel);
-    statusBar()->addPermanentWidget(pHelpButton);
-    statusBar()->addPermanentWidget(pSettingsButton);
+    statusBar()->addWidget(slideCounterLabel_);
+    statusBar()->addPermanentWidget(helpButton);
+    statusBar()->addPermanentWidget(settingsButton);
     statusBar()->addPermanentWidget(new VersionWidget(this));
 
-    // Buttons take focus with Tab only, so a mouse click never moves the keyboard focus away from the script.
-    for (QPushButton *pButton : findChildren<QPushButton *>())
-    {
-        pButton->setFocusPolicy(Qt::TabFocus);
-    }
+    // Los botones solo toman el foco con Tab: un clic no le quita el teclado al guion.
+    for (QPushButton *button : findChildren<QPushButton *>())
+        button->setFocusPolicy(Qt::TabFocus);
 
-    connect(_pFileWidget, SIGNAL(fileSelected(QString)), this, SLOT(openFile(QString)));
-    connect(_pSlidesFileWidget, SIGNAL(fileSelected(QString)), this, SLOT(openSlides(QString)));
-    connect(_pFontBar, SIGNAL(changeFontSize(int)), _pBionicWidget, SLOT(setFontSize(int)));
-    connect(_pDeck, SIGNAL(currentChanged(int)), this, SLOT(updateSlideCounter()));
-    connect(_pPresentButton, SIGNAL(clicked()), this, SLOT(startPresentation()));
-    connect(pSettingsButton, SIGNAL(clicked()), this, SLOT(openSettings()));
-    connect(pHelpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
+    connect(fileWidget_, &FileWidget::fileSelected, this, &MainWindow::openFile);
+    connect(slidesFileWidget_, &FileWidget::fileSelected, this, &MainWindow::openSlides);
+    connect(fontBar_, &FontBarWidget::changeFontSize, bionicWidget_, &BionicWidget::setFontSize);
+    connect(deck_, &SlideDeck::currentChanged, this, &MainWindow::updateSlideCounter);
+    connect(presentButton_, &QPushButton::clicked, this, &MainWindow::startPresentation);
+    connect(settingsButton, &QPushButton::clicked, this, &MainWindow::openSettings);
+    connect(helpButton, &QPushButton::clicked, this, &MainWindow::showHelp);
 
 #if defined(Q_OS_WIN)
-    setWindowIcon(QIcon(":/app-icons/teleprompter.ico"));
+    setWindowIcon(QIcon(":/teleprompter/app-icons/teleprompter.ico"));
 #elif defined(Q_OS_MACOS)
-    setWindowIcon(QIcon(":/app-icons/teleprompter.icns"));
+    setWindowIcon(QIcon(":/teleprompter/app-icons/teleprompter.icns"));
 #else
-    setWindowIcon(QIcon(":/app-icons/teleprompter.png"));
+    setWindowIcon(QIcon(":/teleprompter/app-icons/teleprompter.png"));
 #endif
 
     setAcceptDrops(true);
     qApp->installEventFilter(this);
 
-    _pBionicWidget->setFontSize(_pFontBar->fontSize());
+    bionicWidget_->setFontSize(fontBar_->fontSize());
     loadSettings();
 
-    // Keys go to the script from the start; buttons are reached with Tab.
-    _pBionicWidget->setFocus();
+    // Las teclas van al guion desde el principio; a los botones se llega con Tab.
+    bionicWidget_->setFocus();
 }
 
 bool MainWindow::hasSavedGeometry() const
@@ -143,187 +154,86 @@ bool MainWindow::hasSavedGeometry() const
     return QSettings().contains("window/geometry");
 }
 
-void MainWindow::loadSettings()
+void MainWindow::openFile(const QString &filePath)
 {
-    QSettings settings;
+    if (filePath.isEmpty())
+        return;
 
-    restoreGeometry(settings.value("window/geometry").toByteArray());
-    _pFontBar->setFontSize(settings.value("ui/fontSize", _pFontBar->fontSize()).toInt());
+    QFile file(filePath);
 
-    setAlwaysOnTop(settings.value("ui/alwaysOnTop", true).toBool());
-    _bStartTimerOnPresent = settings.value("ui/timerOnPresent", false).toBool();
-    _bVimKeys = settings.value("ui/vimKeys", false).toBool();
-    _pBionicWidget->setBionicEnabled(settings.value("ui/bionic", true).toBool());
-    _pBionicWidget->setReadingBandVisible(settings.value("ui/bandVisible", false).toBool());
-    _pBionicWidget->setReadingBandPosition(settings.value("ui/bandPercent", _pBionicWidget->readingBandPosition()).toInt());
-    _pBionicWidget->setColumnChars(settings.value("ui/columnChars", _pBionicWidget->columnChars()).toInt());
-
-    QString sScript = settings.value("files/script").toString();
-    QString sSlides = settings.value("files/slides").toString();
-
-    if (!sScript.isEmpty() && QFileInfo::exists(sScript))
+    if (!file.open(QFile::ReadOnly | QFile::Text))
     {
-        openFile(sScript);
-    }
-
-    if (!sSlides.isEmpty() && QFileInfo::exists(sSlides))
-    {
-        openSlides(sSlides);
-    }
-}
-
-void MainWindow::saveSettings()
-{
-    QSettings settings;
-
-    settings.setValue("window/geometry", saveGeometry());
-    settings.setValue("ui/fontSize", _pFontBar->fontSize());
-    settings.setValue("ui/alwaysOnTop", _bAlwaysOnTop);
-    settings.setValue("ui/timerOnPresent", _bStartTimerOnPresent);
-    settings.setValue("ui/vimKeys", _bVimKeys);
-    settings.setValue("ui/bionic", _pBionicWidget->isBionicEnabled());
-    settings.setValue("ui/bandVisible", _pBionicWidget->isReadingBandVisible());
-    settings.setValue("ui/bandPercent", _pBionicWidget->readingBandPosition());
-    settings.setValue("ui/columnChars", _pBionicWidget->columnChars());
-    settings.setValue("files/script", _sScriptPath);
-    settings.setValue("files/slides", _sSlidesPath);
-}
-
-void MainWindow::closeEvent(QCloseEvent *pEvent)
-{
-    saveSettings();
-
-    if (_pPresentation != nullptr)
-    {
-        _pPresentation->disconnect(this);
-        _pPresentation->close();
-        _pPresentation = nullptr;
-    }
-
-    QMainWindow::closeEvent(pEvent);
-}
-
-void MainWindow::dragEnterEvent(QDragEnterEvent *pEvent)
-{
-    if (pEvent->mimeData()->hasUrls())
-    {
-        pEvent->acceptProposedAction();
-    }
-}
-
-void MainWindow::dropEvent(QDropEvent *pEvent)
-{
-    for (const QUrl &url : pEvent->mimeData()->urls())
-    {
-        QString sPath = url.toLocalFile();
-        QString sSuffix = QFileInfo(sPath).suffix().toLower();
-
-        if (sSuffix == "pdf")
-        {
-            openSlides(sPath);
-        }
-        else if (sSuffix == "md" || sSuffix == "txt")
-        {
-            openFile(sPath);
-        }
-    }
-
-    pEvent->acceptProposedAction();
-}
-
-void MainWindow::openFile(const QString &sFilePath)
-{
-    if (!sFilePath.isEmpty())
-    {
-        QFile file(sFilePath);
-
-        if (file.open(QFile::ReadOnly | QFile::Text))
-        {
-            QTextStream in(&file);
-            QString sText = in.readAll().trimmed();
-
-            _sScriptPath = sFilePath;
-            _pFileWidget->setFileName(QFileInfo(file).fileName());
-
-            if (QFileInfo(file).suffix().compare("md", Qt::CaseInsensitive) == 0)
-            {
-                _pBionicWidget->setBionicMarkdown(sText);
-            }
-            else
-            {
-                _pBionicWidget->setBionicText(sText);
-            }
-
-            file.close();
-        }
-        else
-        {
-            QMessageBox::warning(this, "Error", "Could not open the file: " + file.errorString());
-        }
-    }
-}
-
-void MainWindow::openSlides(const QString &sFilePath)
-{
-    if (sFilePath.isEmpty())
-    {
+        QMessageBox::warning(this, tr("Error"), tr("Could not open the file: %1").arg(file.errorString()));
         return;
     }
 
-    if (_pDeck->load(sFilePath))
-    {
-        _sSlidesPath = sFilePath;
-        _pSlidesFileWidget->setFileName(QFileInfo(sFilePath).fileName());
-        _pSlideStrip->setDeck(_pDeck);
-        _pPresentButton->setEnabled(true);
-        updateSlideCounter();
-    }
+    QTextStream in(&file);
+    const QString text = in.readAll().trimmed();
+    const QFileInfo info(file);
+
+    scriptPath_ = filePath;
+    fileWidget_->setFileName(info.fileName());
+
+    if (info.suffix().compare("md", Qt::CaseInsensitive) == 0)
+        bionicWidget_->setBionicMarkdown(text);
     else
+        bionicWidget_->setBionicText(text);
+}
+
+void MainWindow::openSlides(const QString &filePath)
+{
+    if (filePath.isEmpty())
+        return;
+
+    if (!deck_->load(filePath))
     {
-        QMessageBox::warning(this, "Error", "Could not open the slides: " + sFilePath);
+        QMessageBox::warning(this, tr("Error"), tr("Could not open the slides: %1").arg(filePath));
+        return;
     }
+
+    slidesPath_ = filePath;
+    slidesFileWidget_->setFileName(QFileInfo(filePath).fileName());
+    slideStrip_->setDeck(deck_);
+    presentButton_->setEnabled(true);
+    updateSlideCounter();
 }
 
 void MainWindow::startPresentation()
 {
-    if (_pPresentation != nullptr || _pDeck->count() == 0)
-    {
+    if (presentation_ != nullptr || deck_->count() == 0)
         return;
-    }
 
-    // On a single screen the admin window must not stay above the presentation.
+    // Con una sola pantalla, esta ventana no puede quedar por encima de la presentación.
     setWindowFlag(Qt::WindowStaysOnTopHint, false);
     show();
 
-    _pPresentation = new PresentationWindow(_pDeck);
-    _pPresentation->setAttribute(Qt::WA_DeleteOnClose);
-    connect(_pPresentation, SIGNAL(closed()), this, SLOT(stopPresentation()));
+    presentation_ = new PresentationWindow(deck_);
+    presentation_->setAttribute(Qt::WA_DeleteOnClose);
+    connect(presentation_, &PresentationWindow::closed, this, &MainWindow::stopPresentation);
 
-    QScreen *pTarget = nullptr;
+    QScreen *target = nullptr;
 
-    for (QScreen *pScreen : QGuiApplication::screens())
+    for (QScreen *candidate : QGuiApplication::screens())
     {
-        if (pScreen != screen())
+        if (candidate != screen())
         {
-            pTarget = pScreen;
+            target = candidate;
             break;
         }
     }
 
-    if (pTarget != nullptr)
+    if (target != nullptr)
     {
-        _pPresentation->move(pTarget->geometry().topLeft());
-        _pPresentation->showFullScreen();
+        presentation_->move(target->geometry().topLeft());
+        presentation_->showFullScreen();
     }
     else
     {
-        _pPresentation->showMaximized();
+        presentation_->showMaximized();
     }
 
-    if (_bStartTimerOnPresent && !_pChronometer->isRunning())
-    {
-        _pChronometer->start();
-    }
+    if (startTimerOnPresent_ && !chronometer_->isRunning())
+        chronometer_->start();
 
     activateWindow();
     raise();
@@ -331,125 +241,184 @@ void MainWindow::startPresentation()
 
 void MainWindow::stopPresentation()
 {
-    if (_pPresentation == nullptr)
-    {
+    if (presentation_ == nullptr)
         return;
-    }
 
-    PresentationWindow *pPresentation = _pPresentation;
+    PresentationWindow *presentation = presentation_;
 
-    _pPresentation = nullptr;
-    pPresentation->disconnect(this);
-    pPresentation->close();
+    presentation_ = nullptr;
+    presentation->disconnect(this);
+    presentation->close();
 
-    setWindowFlag(Qt::WindowStaysOnTopHint, _bAlwaysOnTop);
+    setWindowFlag(Qt::WindowStaysOnTopHint, alwaysOnTop_);
     show();
     activateWindow();
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    saveSettings();
+
+    if (presentation_ != nullptr)
+    {
+        presentation_->disconnect(this);
+        presentation_->close();
+        presentation_ = nullptr;
+    }
+
+    QMainWindow::closeEvent(event);
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasUrls())
+        event->acceptProposedAction();
+}
+
+void MainWindow::dropEvent(QDropEvent *event)
+{
+    for (const QUrl &url : event->mimeData()->urls())
+    {
+        const QString path = url.toLocalFile();
+        const QString suffix = QFileInfo(path).suffix().toLower();
+
+        if (suffix == "pdf")
+            openSlides(path);
+        else if (suffix == "md" || suffix == "txt")
+            openFile(path);
+    }
+
+    event->acceptProposedAction();
+}
+
+bool MainWindow::eventFilter(QObject *object, QEvent *event)
+{
+    if (event->type() != QEvent::KeyPress || QApplication::activeModalWidget() != nullptr)
+        return QMainWindow::eventFilter(object, event);
+
+    const auto *keyEvent = static_cast<QKeyEvent *>(event);
+    const Qt::KeyboardModifiers modifiers = keyEvent->modifiers() & ~Qt::KeypadModifier;
+    int key = keyEvent->key();
+
+    // Las combinaciones con Alt o Meta se dejan pasar para que sigan funcionando los mnemónicos.
+    if (modifiers & (Qt::AltModifier | Qt::MetaModifier))
+        return QMainWindow::eventFilter(object, event);
+
+    // Solo se traduce una letra sola, así Ctrl y Shift conservan su significado.
+    if (modifiers == Qt::NoModifier)
+        key = translateKey(key);
+
+    if ((key == Qt::Key_Escape || key == Qt::Key_Q) && modifiers == Qt::NoModifier && goToBuffer_.isEmpty() && presentation_ != nullptr)
+    {
+        stopPresentation();
+        return true;
+    }
+
+    if (handleSlideKey(key, modifiers == Qt::NoModifier) || handleScriptKey(key, modifiers, keyEvent->text()))
+        return true;
+
+    return QMainWindow::eventFilter(object, event);
+}
+
 void MainWindow::openSettings()
 {
-    SettingsValues values = {
+    const SettingsValues values = {
         static_cast<int>(Theme::instance().mode()),
-        _bAlwaysOnTop,
-        _pBionicWidget->isReadingBandVisible(),
-        _pBionicWidget->readingBandPosition(),
-        _pBionicWidget->columnChars(),
-        _pBionicWidget->isBionicEnabled(),
-        _bStartTimerOnPresent,
-        _bVimKeys};
+        alwaysOnTop_,
+        bionicWidget_->isReadingBandVisible(),
+        bionicWidget_->readingBandPosition(),
+        bionicWidget_->columnChars(),
+        bionicWidget_->isBionicEnabled(),
+        startTimerOnPresent_,
+        vimKeys_};
     SettingsDialog dialog(values, this);
 
-    // Changes are applied as they are made; the dialog has nothing to confirm.
-    connect(&dialog, &SettingsDialog::themeChanged, this, [](int iTheme)
-            { Theme::instance().setMode(static_cast<Theme::Mode>(iTheme)); });
-    connect(&dialog, SIGNAL(alwaysOnTopChanged(bool)), this, SLOT(setAlwaysOnTop(bool)));
-    connect(&dialog, SIGNAL(bandVisibleChanged(bool)), _pBionicWidget, SLOT(setReadingBandVisible(bool)));
-    connect(&dialog, SIGNAL(bandPositionChanged(int)), _pBionicWidget, SLOT(setReadingBandPosition(int)));
-    connect(&dialog, SIGNAL(columnCharsChanged(int)), _pBionicWidget, SLOT(setColumnChars(int)));
-    connect(&dialog, SIGNAL(bionicChanged(bool)), _pBionicWidget, SLOT(setBionicEnabled(bool)));
-    connect(&dialog, &SettingsDialog::timerOnPresentChanged, this, [this](bool bEnabled)
-            { _bStartTimerOnPresent = bEnabled; });
-    connect(&dialog, &SettingsDialog::vimKeysChanged, this, [this](bool bEnabled)
-            { _bVimKeys = bEnabled; });
+    // Los cambios se aplican al hacerlos: el diálogo no tiene nada que confirmar.
+    connect(&dialog, &SettingsDialog::themeChanged, this, [](int theme)
+            { Theme::instance().setMode(static_cast<Theme::Mode>(theme)); });
+    connect(&dialog, &SettingsDialog::alwaysOnTopChanged, this, &MainWindow::setAlwaysOnTop);
+    connect(&dialog, &SettingsDialog::bandVisibleChanged, bionicWidget_, &BionicWidget::setReadingBandVisible);
+    connect(&dialog, &SettingsDialog::bandPositionChanged, bionicWidget_, &BionicWidget::setReadingBandPosition);
+    connect(&dialog, &SettingsDialog::columnCharsChanged, bionicWidget_, &BionicWidget::setColumnChars);
+    connect(&dialog, &SettingsDialog::bionicChanged, bionicWidget_, &BionicWidget::setBionicEnabled);
+    connect(&dialog, &SettingsDialog::timerOnPresentChanged, this, [this](bool enabled)
+            { startTimerOnPresent_ = enabled; });
+    connect(&dialog, &SettingsDialog::vimKeysChanged, this, [this](bool enabled)
+            { vimKeys_ = enabled; });
 
     dialog.exec();
 }
 
-void MainWindow::setAlwaysOnTop(bool bEnabled)
+void MainWindow::setAlwaysOnTop(bool enabled)
 {
-    _bAlwaysOnTop = bEnabled;
+    alwaysOnTop_ = enabled;
 
-    // While presenting, the flag stays off; stopPresentation restores it.
-    if (_pPresentation == nullptr)
-    {
-        bool bVisible = isVisible();
+    // Durante la presentación la marca queda apagada; stopPresentation() la restablece.
+    if (presentation_ != nullptr)
+        return;
 
-        setWindowFlag(Qt::WindowStaysOnTopHint, bEnabled);
+    const bool visible = isVisible();
 
-        if (bVisible)
-        {
-            show();
-        }
-    }
+    setWindowFlag(Qt::WindowStaysOnTopHint, enabled);
+
+    // Cambiar una marca de ventana la oculta: si estaba a la vista, se vuelve a mostrar.
+    if (visible)
+        show();
 }
 
 void MainWindow::showHelp()
 {
     QDialog dialog(this);
-    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, &dialog);
-    QLabel *pLabel = new QLabel(&dialog);
-    QDialogButtonBox *pButtons = new QDialogButtonBox(QDialogButtonBox::Close, &dialog);
+    auto *layout = new QBoxLayout(QBoxLayout::TopToBottom, &dialog);
+    auto *label = new QLabel(&dialog);
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close, &dialog);
 
-    QString sPrevious = _bVimKeys ? "&larr; / h" : "&larr; / a";
-    QString sNext = _bVimKeys ? "&rarr; / l" : "&rarr; / d";
-    QString sScroll = _bVimKeys ? "&uarr; / k, &darr; / j" : "&uarr; / w, &darr; / s";
-    QString sEdges = _bVimKeys ? "Home / g, End / G" : "Home, End";
+    const auto row = [](const QString &keys, const QString &action)
+    { return "<tr><td><b>" + keys + "</b></td><td>" + action + "</td></tr>"; };
 
-    pLabel->setTextFormat(Qt::RichText);
-    pLabel->setText(
-        "<h3>Keyboard shortcuts</h3>"
-        "<table cellspacing='6'>"
-        "<tr><td><b>" + sPrevious + "</b></td><td>Previous slide</td></tr>"
-        "<tr><td><b>" + sNext + "</b></td><td>Next slide</td></tr>"
-        "<tr><td><b>1-9 + Enter</b></td><td>Go to slide number</td></tr>"
-        "<tr><td><b>" + sScroll + "</b></td><td>Scroll the script</td></tr>"
-        "<tr><td><b>PgUp / PgDn</b></td><td>Scroll a page</td></tr>"
-        "<tr><td><b>" + sEdges + "</b></td><td>Top / bottom of the script</td></tr>"
-        "<tr><td><b>Ctrl++ / Ctrl+-</b></td><td>Bigger / smaller font</td></tr>"
-        "<tr><td><b>Ctrl+,</b></td><td>Open the settings</td></tr>"
-        "<tr><td><b>F5</b></td><td>Start the presentation</td></tr>"
-        "<tr><td><b>b</b></td><td>Black out the presentation</td></tr>"
-        "<tr><td><b>Esc / q</b></td><td>End the presentation</td></tr>"
-        "</table>");
+    const QString previous = vimKeys_ ? "&larr; / h" : "&larr; / a";
+    const QString next = vimKeys_ ? "&rarr; / l" : "&rarr; / d";
+    const QString scroll = vimKeys_ ? "&uarr; / k, &darr; / j" : "&uarr; / w, &darr; / s";
+    const QString edges = vimKeys_ ? "Home / g, End / G" : "Home, End";
 
-    connect(pButtons, SIGNAL(rejected()), &dialog, SLOT(reject()));
+    label->setTextFormat(Qt::RichText);
+    label->setText("<h3>" + tr("Keyboard shortcuts") + "</h3><table cellspacing='6'>" +
+                   row(previous, tr("Previous slide")) +
+                   row(next, tr("Next slide")) +
+                   row("1-9 + Enter", tr("Go to slide number")) +
+                   row(scroll, tr("Scroll the script")) +
+                   row("PgUp / PgDn", tr("Scroll a page")) +
+                   row(edges, tr("Top / bottom of the script")) +
+                   row("Ctrl++ / Ctrl+-", tr("Bigger / smaller font")) +
+                   row("Ctrl+,", tr("Open the settings")) +
+                   row("F5", tr("Start the presentation")) +
+                   row("b", tr("Black out the presentation")) +
+                   row("Esc / q", tr("End the presentation")) +
+                   "</table>");
 
-    pLayout->addWidget(pLabel);
-    pLayout->addWidget(pButtons);
+    connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
 
-    dialog.setWindowTitle("Shortcuts");
+    layout->addWidget(label);
+    layout->addWidget(buttons);
+
+    dialog.setWindowTitle(tr("Shortcuts"));
     dialog.exec();
 }
 
 void MainWindow::updateSlideCounter()
 {
-    if (_pDeck->count() == 0)
-    {
-        _pSlideCounterLabel->setText("No slides");
-    }
+    if (deck_->count() == 0)
+        slideCounterLabel_->setText(tr("No slides"));
     else
-    {
-        _pSlideCounterLabel->setText(QString("Slide %1 / %2").arg(_pDeck->currentIndex() + 1).arg(_pDeck->count()));
-    }
+        slideCounterLabel_->setText(tr("Slide %1 / %2").arg(deck_->currentIndex() + 1).arg(deck_->count()));
 }
 
-int MainWindow::translateKey(int iKey) const
+int MainWindow::translateKey(int key) const
 {
-    // The letter keys stand for the arrows: WASD by default, hjkl when the vim keys are enabled.
-    if (_bVimKeys)
+    // Las letras hacen de flechas: WASD por defecto, hjkl con las teclas de vim.
+    if (vimKeys_)
     {
-        switch (iKey)
+        switch (key)
         {
         case Qt::Key_H:
             return Qt::Key_Left;
@@ -460,191 +429,187 @@ int MainWindow::translateKey(int iKey) const
         case Qt::Key_J:
             return Qt::Key_Down;
         default:
-            break;
-        }
-    }
-    else
-    {
-        switch (iKey)
-        {
-        case Qt::Key_A:
-            return Qt::Key_Left;
-        case Qt::Key_D:
-            return Qt::Key_Right;
-        case Qt::Key_W:
-            return Qt::Key_Up;
-        case Qt::Key_S:
-            return Qt::Key_Down;
-        default:
-            break;
+            return key;
         }
     }
 
-    return iKey;
+    switch (key)
+    {
+    case Qt::Key_A:
+        return Qt::Key_Left;
+    case Qt::Key_D:
+        return Qt::Key_Right;
+    case Qt::Key_W:
+        return Qt::Key_Up;
+    case Qt::Key_S:
+        return Qt::Key_Down;
+    default:
+        return key;
+    }
 }
 
-bool MainWindow::handleSlideKey(int iKey, bool bPlain)
+bool MainWindow::handleSlideKey(int key, bool plain)
 {
-    if (_pDeck->count() == 0 || !bPlain)
-    {
+    if (deck_->count() == 0 || !plain)
         return false;
-    }
 
-    if (iKey >= Qt::Key_0 && iKey <= Qt::Key_9)
+    if (key >= Qt::Key_0 && key <= Qt::Key_9)
     {
-        _sGoToBuffer.append(QChar('0' + (iKey - Qt::Key_0)));
-        statusBar()->showMessage("Go to slide: " + _sGoToBuffer + " (Enter)");
+        goToBuffer_.append(QChar('0' + (key - Qt::Key_0)));
+        statusBar()->showMessage(tr("Go to slide: %1 (Enter)").arg(goToBuffer_));
         return true;
     }
 
-    if ((iKey == Qt::Key_Return || iKey == Qt::Key_Enter) && !_sGoToBuffer.isEmpty())
+    if ((key == Qt::Key_Return || key == Qt::Key_Enter) && !goToBuffer_.isEmpty())
     {
-        _pDeck->setCurrent(_sGoToBuffer.toInt() - 1);
-        _sGoToBuffer.clear();
+        deck_->setCurrent(goToBuffer_.toInt() - 1);
+        goToBuffer_.clear();
         statusBar()->clearMessage();
         return true;
     }
 
-    if (iKey == Qt::Key_Escape && !_sGoToBuffer.isEmpty())
+    if (key == Qt::Key_Escape && !goToBuffer_.isEmpty())
     {
-        _sGoToBuffer.clear();
+        goToBuffer_.clear();
         statusBar()->clearMessage();
         return true;
     }
 
-    switch (iKey)
+    switch (key)
     {
     case Qt::Key_Left:
-        _pDeck->previous();
+        deck_->previous();
         return true;
     case Qt::Key_Right:
-        _pDeck->next();
+        deck_->next();
         return true;
     case Qt::Key_F5:
         startPresentation();
         return true;
     case Qt::Key_B:
-        if (_pPresentation != nullptr)
-        {
-            _pPresentation->toggleBlackout();
-            return true;
-        }
-        break;
-    default:
-        break;
-    }
+        if (presentation_ == nullptr)
+            return false;
 
-    return false;
+        presentation_->toggleBlackout();
+        return true;
+    default:
+        return false;
+    }
 }
 
-bool MainWindow::handleScriptKey(int iKey, Qt::KeyboardModifiers modifiers, const QString &sText)
+bool MainWindow::handleScriptKey(int key, Qt::KeyboardModifiers modifiers, const QString &text)
 {
-    bool bPlain = modifiers == Qt::NoModifier;
-    bool bShift = modifiers == Qt::ShiftModifier;
-    bool bCtrl = (modifiers & ~Qt::ShiftModifier) == Qt::ControlModifier;
+    const bool plain = modifiers == Qt::NoModifier;
+    const bool shift = modifiers == Qt::ShiftModifier;
+    const bool ctrl = (modifiers & ~Qt::ShiftModifier) == Qt::ControlModifier;
 
-    if (bCtrl)
+    if (ctrl)
     {
-        if (iKey == Qt::Key_Comma)
+        if (key == Qt::Key_Comma)
         {
             openSettings();
             return true;
         }
 
-        if (iKey == Qt::Key_Plus || iKey == Qt::Key_Equal)
+        if (key == Qt::Key_Plus || key == Qt::Key_Equal)
         {
-            _pFontBar->setFontSize(_pFontBar->fontSize() + 2);
+            fontBar_->incrementFontSize();
             return true;
         }
 
-        if (iKey == Qt::Key_Minus && _pFontBar->fontSize() > 2)
+        if (key == Qt::Key_Minus)
         {
-            _pFontBar->setFontSize(_pFontBar->fontSize() - 2);
+            fontBar_->decrementFontSize();
             return true;
         }
 
         return false;
     }
 
-    if (sText == "?" && (bPlain || bShift))
+    if (text == "?" && (plain || shift))
     {
         showHelp();
         return true;
     }
 
-    if (_bVimKeys && bShift && iKey == Qt::Key_G)
+    if (vimKeys_ && shift && key == Qt::Key_G)
     {
-        _pBionicWidget->scrollToEdge(true);
+        bionicWidget_->scrollToEdge(true);
         return true;
     }
 
-    if (!bPlain)
-    {
+    if (!plain)
         return false;
-    }
 
-    if (_bVimKeys && iKey == Qt::Key_G)
+    if (vimKeys_ && key == Qt::Key_G)
     {
-        _pBionicWidget->scrollToEdge(false);
+        bionicWidget_->scrollToEdge(false);
         return true;
     }
 
-    switch (iKey)
+    switch (key)
     {
     case Qt::Key_Up:
-        _pBionicWidget->scrollStep(-1);
+        bionicWidget_->scrollStep(-1);
         return true;
     case Qt::Key_Down:
-        _pBionicWidget->scrollStep(1);
+        bionicWidget_->scrollStep(1);
         return true;
     case Qt::Key_PageUp:
-        _pBionicWidget->scrollPage(-1);
+        bionicWidget_->scrollPage(-1);
         return true;
     case Qt::Key_PageDown:
-        _pBionicWidget->scrollPage(1);
+        bionicWidget_->scrollPage(1);
         return true;
     case Qt::Key_Home:
-        _pBionicWidget->scrollToEdge(false);
+        bionicWidget_->scrollToEdge(false);
         return true;
     case Qt::Key_End:
-        _pBionicWidget->scrollToEdge(true);
+        bionicWidget_->scrollToEdge(true);
         return true;
     default:
-        break;
+        return false;
     }
-
-    return false;
 }
 
-bool MainWindow::eventFilter(QObject *pObject, QEvent *pEvent)
+void MainWindow::loadSettings()
 {
-    if (pEvent->type() == QEvent::KeyPress && QApplication::activeModalWidget() == nullptr)
-    {
-        QKeyEvent *pKeyEvent = static_cast<QKeyEvent *>(pEvent);
-        Qt::KeyboardModifiers modifiers = pKeyEvent->modifiers() & ~Qt::KeypadModifier;
-        int iKey = pKeyEvent->key();
+    QSettings settings;
 
-        // Only a bare letter is translated, so Ctrl and Alt combinations keep their meaning.
-        if (modifiers == Qt::NoModifier)
-        {
-            iKey = translateKey(iKey);
-        }
+    restoreGeometry(settings.value("window/geometry").toByteArray());
+    fontBar_->setFontSize(settings.value("ui/fontSize", fontBar_->fontSize()).toInt());
 
-        // Alt and Meta combinations are left alone so the mnemonics keep working.
-        if (!(modifiers & (Qt::AltModifier | Qt::MetaModifier)))
-        {
-            if ((iKey == Qt::Key_Escape || iKey == Qt::Key_Q) && modifiers == Qt::NoModifier && _sGoToBuffer.isEmpty() && _pPresentation != nullptr)
-            {
-                stopPresentation();
-                return true;
-            }
+    setAlwaysOnTop(settings.value("ui/alwaysOnTop", true).toBool());
+    startTimerOnPresent_ = settings.value("ui/timerOnPresent", false).toBool();
+    vimKeys_ = settings.value("ui/vimKeys", false).toBool();
+    bionicWidget_->setBionicEnabled(settings.value("ui/bionic", true).toBool());
+    bionicWidget_->setReadingBandVisible(settings.value("ui/bandVisible", false).toBool());
+    bionicWidget_->setReadingBandPosition(settings.value("ui/bandPercent", bionicWidget_->readingBandPosition()).toInt());
+    bionicWidget_->setColumnChars(settings.value("ui/columnChars", bionicWidget_->columnChars()).toInt());
 
-            if (handleSlideKey(iKey, modifiers == Qt::NoModifier) || handleScriptKey(iKey, modifiers, pKeyEvent->text()))
-            {
-                return true;
-            }
-        }
-    }
+    const QString script = settings.value("files/script").toString();
+    const QString slides = settings.value("files/slides").toString();
 
-    return QMainWindow::eventFilter(pObject, pEvent);
+    if (!script.isEmpty() && QFileInfo::exists(script))
+        openFile(script);
+
+    if (!slides.isEmpty() && QFileInfo::exists(slides))
+        openSlides(slides);
+}
+
+void MainWindow::saveSettings()
+{
+    QSettings settings;
+
+    settings.setValue("window/geometry", saveGeometry());
+    settings.setValue("ui/fontSize", fontBar_->fontSize());
+    settings.setValue("ui/alwaysOnTop", alwaysOnTop_);
+    settings.setValue("ui/timerOnPresent", startTimerOnPresent_);
+    settings.setValue("ui/vimKeys", vimKeys_);
+    settings.setValue("ui/bionic", bionicWidget_->isBionicEnabled());
+    settings.setValue("ui/bandVisible", bionicWidget_->isReadingBandVisible());
+    settings.setValue("ui/bandPercent", bionicWidget_->readingBandPosition());
+    settings.setValue("ui/columnChars", bionicWidget_->columnChars());
+    settings.setValue("files/script", scriptPath_);
+    settings.setValue("files/slides", slidesPath_);
 }

@@ -1,56 +1,63 @@
 
 
-// Own
+// own
 #include <FileWidget.hpp>
 
-// Qt
+// qt
 #include <QBoxLayout>
 #include <QFileDialog>
-#include <QLabel>
 #include <QFontMetrics>
+#include <QLabel>
 #include <QPushButton>
 #include <QStyle>
 
-FileWidget::FileWidget(const QString &sButtonText, const QString &sFilter, QWidget *pParent)
-    : QWidget(pParent), _sFilter(sFilter)
+namespace
 {
-    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+    // Ancho máximo de la etiqueta con el nombre del archivo.
+    constexpr int MaxNameWidth = 110;
+} // namespace
 
-    pLayout->setContentsMargins(0, 0, 0, 0);
+FileWidget::FileWidget(const QString &buttonText, const QString &filter, QWidget *parent)
+    : QWidget(parent), filter_(filter)
+{
+    auto *layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
 
-    _pFileNameLabel = new QLabel("No file", this);
-    _pFileNameLabel->setMaximumWidth(110);
-    QPushButton *pOpenFileButton = new QPushButton(sButtonText, this);
+    layout->setContentsMargins(0, 0, 0, 0);
 
-    connect(pOpenFileButton, SIGNAL(clicked()), this, SLOT(chooseFile()));
+    fileNameLabel_ = new QLabel(tr("No file"), this);
+    fileNameLabel_->setMaximumWidth(MaxNameWidth);
 
-    pLayout->addWidget(_pFileNameLabel);
-    pLayout->addWidget(pOpenFileButton);
+    auto *openFileButton = new QPushButton(buttonText, this);
+
+    connect(openFileButton, &QPushButton::clicked, this, &FileWidget::chooseFile);
+
+    layout->addWidget(fileNameLabel_);
+    layout->addWidget(openFileButton);
 }
 
-void FileWidget::setFileName(const QString &sFileName)
+void FileWidget::setFileName(const QString &fileName)
 {
-    _pFileNameLabel->setObjectName("fileName");
-    _pFileNameLabel->setText(_pFileNameLabel->fontMetrics().elidedText(sFileName, Qt::ElideMiddle, 110));
-    _pFileNameLabel->setToolTip(sFileName);
-    style()->unpolish(_pFileNameLabel);
-    style()->polish(_pFileNameLabel);
+    // Con el nombre puesto, la hoja de estilos deja de pintar la etiqueta como texto de relleno.
+    fileNameLabel_->setProperty("role", "file");
+    fileNameLabel_->setText(fileNameLabel_->fontMetrics().elidedText(fileName, Qt::ElideMiddle, MaxNameWidth));
+    fileNameLabel_->setToolTip(fileName);
+    style()->unpolish(fileNameLabel_);
+    style()->polish(fileNameLabel_);
 }
 
 void FileWidget::chooseFile()
 {
     QFileDialog dialog(this);
+
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
-    dialog.setNameFilter(_sFilter);
+    dialog.setNameFilter(filter_);
 
-    if (dialog.exec() == QDialog::Accepted)
-    {
-        QStringList files = dialog.selectedFiles();
+    if (dialog.exec() != QDialog::Accepted)
+        return;
 
-        if (files.size() > 0)
-        {
-            emit fileSelected(files.first().trimmed());
-        }
-    }
+    const QStringList files = dialog.selectedFiles();
+
+    if (!files.isEmpty())
+        emit fileSelected(files.first().trimmed());
 }

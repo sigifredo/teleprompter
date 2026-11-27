@@ -1,65 +1,65 @@
 
 
-// Own
+// own
 #include <FontBarWidget.hpp>
 
-// Qt
+// qt
 #include <QBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 
-FontBarWidget::FontBarWidget(QWidget *pParent)
-    : QWidget(pParent)
+namespace
 {
-    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+    // Cuánto cambia el tamaño en cada pulsación; también es el tamaño mínimo.
+    constexpr int FontStep = 2;
+} // namespace
 
-    pLayout->setContentsMargins(0, 0, 0, 0);
+FontBarWidget::FontBarWidget(QWidget *parent)
+    : QWidget(parent)
+{
+    auto *layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
 
-    QPushButton *pPlusButton = new QPushButton("A+", this);
-    _pFontSizeLabel = new QLabel("0", this);
-    QPushButton *pMinusButton = new QPushButton("A-", this);
+    layout->setContentsMargins(0, 0, 0, 0);
 
-    _pFontSizeLabel->setObjectName("fontSizeLabel");
-    _pFontSizeLabel->setText(QString::number(DEFAULT_FONT_SIZE));
+    auto *plusButton = new QPushButton(QStringLiteral("A+"), this);
+    auto *minusButton = new QPushButton(QStringLiteral("A-"), this);
 
-    pPlusButton->setToolTip("Increase font size (Ctrl++)");
-    pMinusButton->setToolTip("Decrease font size (Ctrl+-)");
+    fontSizeLabel_ = new QLabel(QString::number(DefaultFontSize), this);
+    fontSizeLabel_->setProperty("role", "font-size");
 
-    connect(pPlusButton, SIGNAL(clicked()), this, SLOT(incrementFontSize()));
-    connect(pMinusButton, SIGNAL(clicked()), this, SLOT(decrementFontSize()));
+    plusButton->setToolTip(tr("Increase font size (Ctrl++)"));
+    minusButton->setToolTip(tr("Decrease font size (Ctrl+-)"));
 
-    pLayout->addWidget(pMinusButton);
-    pLayout->addWidget(_pFontSizeLabel);
-    pLayout->addWidget(pPlusButton);
+    connect(plusButton, &QPushButton::clicked, this, &FontBarWidget::incrementFontSize);
+    connect(minusButton, &QPushButton::clicked, this, &FontBarWidget::decrementFontSize);
+
+    layout->addWidget(minusButton);
+    layout->addWidget(fontSizeLabel_);
+    layout->addWidget(plusButton);
 }
 
 int FontBarWidget::fontSize() const
 {
-    return _pFontSizeLabel->text().toInt();
+    return fontSizeLabel_->text().toInt();
 }
 
-void FontBarWidget::setFontSize(int iFontSize)
+void FontBarWidget::setFontSize(int fontSize)
 {
-    _pFontSizeLabel->setText(QString::number(iFontSize));
-    emit changeFontSize(iFontSize);
+    fontSizeLabel_->setText(QString::number(fontSize));
+    emit changeFontSize(fontSize);
 }
 
 void FontBarWidget::decrementFontSize()
 {
-    int iNewFontSize = _pFontSizeLabel->text().toInt();
+    int size = fontSize();
 
-    if (iNewFontSize > 2)
-    {
-        iNewFontSize -= 2;
-    }
+    if (size > FontStep)
+        size -= FontStep;
 
-    _pFontSizeLabel->setText(QString::number(iNewFontSize));
-    emit changeFontSize(iNewFontSize);
+    setFontSize(size);
 }
 
 void FontBarWidget::incrementFontSize()
 {
-    int iNewFontSize = _pFontSizeLabel->text().toInt() + 2;
-    _pFontSizeLabel->setText(QString::number(iNewFontSize));
-    emit changeFontSize(iNewFontSize);
+    setFontSize(fontSize() + FontStep);
 }

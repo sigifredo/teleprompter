@@ -19,40 +19,45 @@
 #ifndef SETTINGSDIALOG_HPP
 #define SETTINGSDIALOG_HPP
 
-// Qt
+// qt
 #include <QDialog>
 
+/**
+ * @brief Valores con los que se abre el panel de configuración.
+ */
 struct SettingsValues
 {
-    int theme;
-    bool alwaysOnTop;
-    bool bandVisible;
-    int bandPercent;
-    int columnChars;
-    bool bionic;
-    bool timerOnPresent;
-    bool vimKeys;
+    int theme;           ///< Índice del tema: 0 oscuro, 1 claro, 2 automático.
+    bool alwaysOnTop;    ///< La ventana principal se mantiene encima de las demás.
+    bool bandVisible;    ///< Se muestra la franja de lectura.
+    int bandPercent;     ///< Posición de la franja, como porcentaje del alto del guion.
+    int columnChars;     ///< Ancho de la columna de lectura, en caracteres.
+    bool bionic;         ///< Lectura biónica activada.
+    bool timerOnPresent; ///< El cronómetro arranca al iniciar la presentación.
+    bool vimKeys;        ///< Teclas de vim en lugar de WASD.
 };
 
 /**
- * Settings panel. Every change is applied right away through its signals, so it has no Save button.
+ * @brief Panel de configuración.
+ *
+ * Cada cambio se aplica al instante por medio de sus señales, así que no tiene botón de guardar.
  */
 class SettingsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    SettingsDialog(const SettingsValues &values, QWidget *pParent = nullptr);
+    explicit SettingsDialog(const SettingsValues &values, QWidget *parent = nullptr);
 
 signals:
-    void themeChanged(int iTheme);
-    void alwaysOnTopChanged(bool bEnabled);
-    void bandVisibleChanged(bool bVisible);
-    void bandPositionChanged(int iPercent);
-    void columnCharsChanged(int iChars);
-    void bionicChanged(bool bEnabled);
-    void timerOnPresentChanged(bool bEnabled);
-    void vimKeysChanged(bool bEnabled);
+    void themeChanged(int theme);
+    void alwaysOnTopChanged(bool enabled);
+    void bandVisibleChanged(bool visible);
+    void bandPositionChanged(int percent);
+    void columnCharsChanged(int chars);
+    void bionicChanged(bool enabled);
+    void timerOnPresentChanged(bool enabled);
+    void vimKeysChanged(bool enabled);
 };
 
 #endif

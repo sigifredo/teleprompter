@@ -1,77 +1,80 @@
 
 
-// Own
+// own
 #include <SlideStripWidget.hpp>
 #include <SlideDeck.hpp>
 
-// Qt
+// qt
 #include <QPixmap>
 
-#define THUMBNAIL_WIDTH 160
-#define THUMBNAIL_HEIGHT 90
+namespace
+{
+    // Tamaño de las miniaturas, y alto que ocupan el número, los márgenes y la barra de desplazamiento.
+    constexpr int ThumbnailWidth = 160;
+    constexpr int ThumbnailHeight = 90;
+    constexpr int ChromeHeight = 56;
 
-SlideStripWidget::SlideStripWidget(QWidget *pParent)
-    : QListWidget(pParent), _pDeck(nullptr)
+    // Las miniaturas se dibujan al doble para que se vean nítidas en pantallas de alta densidad.
+    constexpr int RenderScale = 2;
+} // namespace
+
+SlideStripWidget::SlideStripWidget(QWidget *parent)
+    : QListWidget(parent)
 {
     setViewMode(QListView::IconMode);
     setFlow(QListView::LeftToRight);
     setWrapping(false);
     setMovement(QListView::Static);
     setResizeMode(QListView::Adjust);
-    setIconSize(QSize(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT));
+    setIconSize(QSize(ThumbnailWidth, ThumbnailHeight));
     setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setFocusPolicy(Qt::NoFocus);
-    setFixedHeight(THUMBNAIL_HEIGHT + 56);
+    setFixedHeight(ThumbnailHeight + ChromeHeight);
 
-    connect(this, SIGNAL(currentRowChanged(int)), this, SLOT(rowActivated(int)));
+    connect(this, &QListWidget::currentRowChanged, this, &SlideStripWidget::rowActivated);
 }
 
-void SlideStripWidget::setDeck(SlideDeck *pDeck)
+void SlideStripWidget::setDeck(SlideDeck *deck)
 {
-    _pDeck = pDeck;
+    deck_ = deck;
 
     blockSignals(true);
     clear();
 
-    for (int i = 0; i < pDeck->count(); i++)
+    for (int i = 0; i < deck->count(); i++)
     {
-        QImage image = pDeck->render(i, QSize(THUMBNAIL_WIDTH * 2, THUMBNAIL_HEIGHT * 2));
-        QPixmap pixmap = QPixmap::fromImage(image);
+        const QPixmap pixmap = QPixmap::fromImage(deck->render(i, QSize(ThumbnailWidth, ThumbnailHeight) * RenderScale));
         QIcon icon;
 
-        // The same pixmap for the selected state avoids Qt's grey selection tint.
+        // Con el mismo pixmap en el estado seleccionado, Qt no tiñe de gris la miniatura elegida.
         icon.addPixmap(pixmap, QIcon::Normal);
         icon.addPixmap(pixmap, QIcon::Selected);
 
-        QListWidgetItem *pItem = new QListWidgetItem(icon, QString::number(i + 1), this);
+        auto *item = new QListWidgetItem(icon, QString::number(i + 1), this);
 
-        pItem->setTextAlignment(Qt::AlignHCenter);
+        item->setTextAlignment(Qt::AlignHCenter);
     }
 
     blockSignals(false);
 
-    connect(pDeck, SIGNAL(currentChanged(int)), this, SLOT(deckCurrentChanged(int)), Qt::UniqueConnection);
-    deckCurrentChanged(pDeck->currentIndex());
+    connect(deck, &SlideDeck::currentChanged, this, &SlideStripWidget::deckCurrentChanged, Qt::UniqueConnection);
+    deckCurrentChanged(deck->currentIndex());
 }
 
-void SlideStripWidget::deckCurrentChanged(int iIndex)
+void SlideStripWidget::deckCurrentChanged(int index)
 {
-    // Avoid feeding the change back to the deck.
+    // Se bloquean las señales para no devolverle el cambio al SlideDeck.
     blockSignals(true);
-    setCurrentRow(iIndex);
+    setCurrentRow(index);
     blockSignals(false);
 
     if (currentItem() != nullptr)
-    {
         scrollToItem(currentItem(), QAbstractItemView::PositionAtCenter);
-    }
 }
 
-void SlideStripWidget::rowActivated(int iRow)
+void SlideStripWidget::rowActivated(int row)
 {
-    if (_pDeck != nullptr && iRow >= 0)
-    {
-        _pDeck->setCurrent(iRow);
-    }
+    if (deck_ != nullptr && row >= 0)
+        deck_->setCurrent(row);
 }

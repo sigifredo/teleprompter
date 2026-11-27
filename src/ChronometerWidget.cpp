@@ -1,9 +1,9 @@
 
 
-// Own
+// own
 #include <ChronometerWidget.hpp>
 
-// Qt
+// qt
 #include <QBoxLayout>
 #include <QLabel>
 #include <QPushButton>
@@ -12,90 +12,85 @@
 #include <QTimer>
 #include <QVariant>
 
-ChronometerWidget::ChronometerWidget(QWidget *pParent)
-    : QWidget(pParent), _iTimeElapsed(0)
+namespace
 {
-    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+    // Intervalo del cronómetro y segundos a partir de los cuales se muestran las horas.
+    constexpr int TickInterval = 1000;
+    constexpr int SecondsPerHour = 3600;
+} // namespace
 
-    pLayout->setContentsMargins(0, 0, 0, 0);
-    _pTimer = new QTimer(this);
-
-    _pStartButton = new QPushButton("St&art", this);
-    _pTimeLabel = new QLabel("00:00", this);
-    {
-        _pTimeLabel->setObjectName("timer");
-        _pTimeLabel->setAlignment(Qt::AlignCenter);
-    }
-    QPushButton *pStopButton = new QPushButton("Sto&p", this);
-
-    connect(_pTimer, SIGNAL(timeout()), this, SLOT(updateTime()));
-    connect(_pStartButton, SIGNAL(clicked()), this, SLOT(start()));
-    connect(pStopButton, SIGNAL(clicked()), this, SLOT(stop()));
-
-    pLayout->addWidget(_pStartButton);
-    pLayout->addWidget(_pTimeLabel);
-    pLayout->addWidget(pStopButton);
-}
-
-void ChronometerWidget::start()
+ChronometerWidget::ChronometerWidget(QWidget *parent)
+    : QWidget(parent)
 {
-    if (_pTimer->isActive())
-    {
-        _pTimer->stop();
-        _pStartButton->setText("St&art");
-        setTimerActiveStyle(false);
-    }
-    else
-    {
-        _pTimer->start(1000);
-        _pStartButton->setText("P&ause");
-        setTimerActiveStyle(true);
-    }
+    auto *layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    timer_ = new QTimer(this);
+    startButton_ = new QPushButton(tr("St&art"), this);
+    timeLabel_ = new QLabel(QStringLiteral("00:00"), this);
+    timeLabel_->setProperty("role", "timer");
+    timeLabel_->setAlignment(Qt::AlignCenter);
+
+    auto *stopButton = new QPushButton(tr("Sto&p"), this);
+
+    connect(timer_, &QTimer::timeout, this, &ChronometerWidget::updateTime);
+    connect(startButton_, &QPushButton::clicked, this, &ChronometerWidget::start);
+    connect(stopButton, &QPushButton::clicked, this, &ChronometerWidget::stop);
+
+    layout->addWidget(startButton_);
+    layout->addWidget(timeLabel_);
+    layout->addWidget(stopButton);
 }
 
 bool ChronometerWidget::isRunning() const
 {
-    return _pTimer->isActive();
+    return timer_->isActive();
+}
+
+void ChronometerWidget::start()
+{
+    if (timer_->isActive())
+    {
+        timer_->stop();
+        startButton_->setText(tr("St&art"));
+        setActiveStyle(false);
+    }
+    else
+    {
+        timer_->start(TickInterval);
+        startButton_->setText(tr("P&ause"));
+        setActiveStyle(true);
+    }
 }
 
 void ChronometerWidget::stop()
 {
-    if (_pTimer->isActive())
+    if (timer_->isActive())
     {
-        _pTimer->stop();
-        _pStartButton->setText("St&art");
-        setTimerActiveStyle(false);
+        timer_->stop();
+        startButton_->setText(tr("St&art"));
+        setActiveStyle(false);
     }
 
-    _iTimeElapsed = 0;
-    _pTimeLabel->setText("00:00");
-}
-
-void ChronometerWidget::setTimerActiveStyle(const bool &active)
-{
-    QString value("false");
-
-    if (active)
-    {
-        value = "true";
-    }
-
-    _pTimeLabel->setProperty("active", value);
-    style()->unpolish(_pTimeLabel);
-    style()->polish(_pTimeLabel);
+    timeElapsed_ = 0;
+    timeLabel_->setText(QStringLiteral("00:00"));
 }
 
 void ChronometerWidget::updateTime()
 {
-    QTime time(0, 0);
-    QString sFormat("mm:ss");
+    const QTime zero(0, 0);
 
-    _iTimeElapsed++;
+    timeElapsed_++;
 
-    if (_iTimeElapsed >= 3600)
-    {
-        sFormat = "H:mm:ss";
-    }
+    const QString format = timeElapsed_ >= SecondsPerHour ? QStringLiteral("H:mm:ss") : QStringLiteral("mm:ss");
 
-    _pTimeLabel->setText(time.addSecs(_iTimeElapsed).toString(sFormat));
+    timeLabel_->setText(zero.addSecs(timeElapsed_).toString(format));
+}
+
+void ChronometerWidget::setActiveStyle(bool active)
+{
+    timeLabel_->setProperty("active", active ? "true" : "false");
+    style()->unpolish(timeLabel_);
+    style()->polish(timeLabel_);
 }

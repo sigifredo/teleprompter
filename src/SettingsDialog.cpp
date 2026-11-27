@@ -1,9 +1,10 @@
 
 
-// Own
+// own
 #include <SettingsDialog.hpp>
+#include <BionicWidget.hpp>
 
-// Qt
+// qt
 #include <QBoxLayout>
 #include <QCheckBox>
 #include <QComboBox>
@@ -14,90 +15,95 @@
 
 namespace
 {
-// A slider with its current value next to it.
-QWidget *createSlider(QWidget *pParent, int iMin, int iMax, int iValue, const QString &sSuffix, QSlider **ppSlider)
+    constexpr int MinWidth = 460;
+    constexpr int ValueLabelWidth = 56;
+    constexpr int FormSpacing = 12;
+    constexpr int DialogSpacing = 16;
+
+    // Un deslizador con su valor actual al lado.
+    QWidget *createSlider(QWidget *parent, int min, int max, int value, const QString &suffix, QSlider **slider)
+    {
+        auto *row = new QWidget(parent);
+        auto *layout = new QBoxLayout(QBoxLayout::LeftToRight, row);
+        auto *valueLabel = new QLabel(QString::number(value) + suffix, row);
+
+        *slider = new QSlider(Qt::Horizontal, row);
+        (*slider)->setRange(min, max);
+        (*slider)->setValue(value);
+
+        layout->setContentsMargins(0, 0, 0, 0);
+        valueLabel->setMinimumWidth(ValueLabelWidth);
+        valueLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+
+        QObject::connect(*slider, &QSlider::valueChanged, valueLabel, [valueLabel, suffix](int current)
+                         { valueLabel->setText(QString::number(current) + suffix); });
+
+        layout->addWidget(*slider, 1);
+        layout->addWidget(valueLabel);
+
+        return row;
+    }
+} // namespace
+
+SettingsDialog::SettingsDialog(const SettingsValues &values, QWidget *parent)
+    : QDialog(parent)
 {
-    QWidget *pRow = new QWidget(pParent);
-    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, pRow);
-    QSlider *pSlider = new QSlider(Qt::Horizontal, pRow);
-    QLabel *pValueLabel = new QLabel(QString::number(iValue) + sSuffix, pRow);
+    auto *layout = new QBoxLayout(QBoxLayout::TopToBottom, this);
+    auto *form = new QFormLayout;
 
-    pLayout->setContentsMargins(0, 0, 0, 0);
-    pSlider->setRange(iMin, iMax);
-    pSlider->setValue(iValue);
-    pValueLabel->setMinimumWidth(56);
-    pValueLabel->setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+    auto *themeCombo = new QComboBox(this);
+    themeCombo->addItems({tr("Dark"), tr("Light"), tr("Auto (follow the system)")});
+    themeCombo->setCurrentIndex(values.theme);
 
-    QObject::connect(pSlider, &QSlider::valueChanged, pValueLabel, [pValueLabel, sSuffix](int iNew)
-                     { pValueLabel->setText(QString::number(iNew) + sSuffix); });
+    auto *onTopCheck = new QCheckBox(tr("Keep this window above the others"), this);
+    onTopCheck->setChecked(values.alwaysOnTop);
 
-    pLayout->addWidget(pSlider, 1);
-    pLayout->addWidget(pValueLabel);
-    *ppSlider = pSlider;
+    auto *bandCheck = new QCheckBox(tr("Show the reading band"), this);
+    bandCheck->setChecked(values.bandVisible);
 
-    return pRow;
-}
-}
+    QSlider *bandSlider = nullptr;
+    QWidget *bandRow = createSlider(this, BionicWidget::MinBandPercent, BionicWidget::MaxBandPercent, values.bandPercent, QStringLiteral(" %"), &bandSlider);
+    bandSlider->setEnabled(values.bandVisible);
 
-SettingsDialog::SettingsDialog(const SettingsValues &values, QWidget *pParent)
-    : QDialog(pParent)
-{
-    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, this);
-    QFormLayout *pForm = new QFormLayout();
+    QSlider *columnSlider = nullptr;
+    QWidget *columnRow = createSlider(this, BionicWidget::MinColumnChars, BionicWidget::MaxColumnChars, values.columnChars, QStringLiteral(" ch"), &columnSlider);
 
-    QComboBox *pThemeCombo = new QComboBox(this);
-    pThemeCombo->addItems({"Dark", "Light", "Auto (follow the system)"});
-    pThemeCombo->setCurrentIndex(values.theme);
+    auto *bionicCheck = new QCheckBox(tr("Bionic reading (bold the start of each word)"), this);
+    bionicCheck->setChecked(values.bionic);
 
-    QCheckBox *pOnTopCheck = new QCheckBox("Keep this window above the others", this);
-    pOnTopCheck->setChecked(values.alwaysOnTop);
+    auto *timerCheck = new QCheckBox(tr("Start the timer when presenting"), this);
+    timerCheck->setChecked(values.timerOnPresent);
 
-    QCheckBox *pBandCheck = new QCheckBox("Show the reading band", this);
-    pBandCheck->setChecked(values.bandVisible);
+    auto *vimCheck = new QCheckBox(tr("Vim keys (h j k l) instead of WASD"), this);
+    vimCheck->setChecked(values.vimKeys);
 
-    QSlider *pBandSlider = nullptr;
-    QWidget *pBandRow = createSlider(this, 15, 60, values.bandPercent, " %", &pBandSlider);
-    pBandSlider->setEnabled(values.bandVisible);
+    form->setVerticalSpacing(FormSpacing);
+    form->addRow(tr("Theme"), themeCombo);
+    form->addRow(tr("Window"), onTopCheck);
+    form->addRow(tr("Reading band"), bandCheck);
+    form->addRow(tr("Band position"), bandRow);
+    form->addRow(tr("Column width"), columnRow);
+    form->addRow(tr("Text"), bionicCheck);
+    form->addRow(tr("Presentation"), timerCheck);
+    form->addRow(tr("Keys"), vimCheck);
 
-    QSlider *pColumnSlider = nullptr;
-    QWidget *pColumnRow = createSlider(this, 40, 100, values.columnChars, " ch", &pColumnSlider);
+    auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close, this);
 
-    QCheckBox *pBionicCheck = new QCheckBox("Bionic reading (bold the start of each word)", this);
-    pBionicCheck->setChecked(values.bionic);
+    connect(themeCombo, &QComboBox::currentIndexChanged, this, &SettingsDialog::themeChanged);
+    connect(onTopCheck, &QCheckBox::toggled, this, &SettingsDialog::alwaysOnTopChanged);
+    connect(bandCheck, &QCheckBox::toggled, this, &SettingsDialog::bandVisibleChanged);
+    connect(bandCheck, &QCheckBox::toggled, bandSlider, &QSlider::setEnabled);
+    connect(bandSlider, &QSlider::valueChanged, this, &SettingsDialog::bandPositionChanged);
+    connect(columnSlider, &QSlider::valueChanged, this, &SettingsDialog::columnCharsChanged);
+    connect(bionicCheck, &QCheckBox::toggled, this, &SettingsDialog::bionicChanged);
+    connect(timerCheck, &QCheckBox::toggled, this, &SettingsDialog::timerOnPresentChanged);
+    connect(vimCheck, &QCheckBox::toggled, this, &SettingsDialog::vimKeysChanged);
+    connect(buttons, &QDialogButtonBox::rejected, this, &QDialog::reject);
 
-    QCheckBox *pTimerCheck = new QCheckBox("Start the timer when presenting", this);
-    pTimerCheck->setChecked(values.timerOnPresent);
+    layout->setSpacing(DialogSpacing);
+    layout->addLayout(form);
+    layout->addWidget(buttons);
 
-    QCheckBox *pVimCheck = new QCheckBox("Vim keys (h j k l) instead of WASD", this);
-    pVimCheck->setChecked(values.vimKeys);
-
-    pForm->setVerticalSpacing(12);
-    pForm->addRow("Theme", pThemeCombo);
-    pForm->addRow("Window", pOnTopCheck);
-    pForm->addRow("Reading band", pBandCheck);
-    pForm->addRow("Band position", pBandRow);
-    pForm->addRow("Column width", pColumnRow);
-    pForm->addRow("Text", pBionicCheck);
-    pForm->addRow("Presentation", pTimerCheck);
-    pForm->addRow("Keys", pVimCheck);
-
-    QDialogButtonBox *pButtons = new QDialogButtonBox(QDialogButtonBox::Close, this);
-
-    connect(pThemeCombo, SIGNAL(currentIndexChanged(int)), this, SIGNAL(themeChanged(int)));
-    connect(pOnTopCheck, SIGNAL(toggled(bool)), this, SIGNAL(alwaysOnTopChanged(bool)));
-    connect(pBandCheck, SIGNAL(toggled(bool)), this, SIGNAL(bandVisibleChanged(bool)));
-    connect(pBandCheck, SIGNAL(toggled(bool)), pBandSlider, SLOT(setEnabled(bool)));
-    connect(pBandSlider, SIGNAL(valueChanged(int)), this, SIGNAL(bandPositionChanged(int)));
-    connect(pColumnSlider, SIGNAL(valueChanged(int)), this, SIGNAL(columnCharsChanged(int)));
-    connect(pBionicCheck, SIGNAL(toggled(bool)), this, SIGNAL(bionicChanged(bool)));
-    connect(pTimerCheck, SIGNAL(toggled(bool)), this, SIGNAL(timerOnPresentChanged(bool)));
-    connect(pVimCheck, SIGNAL(toggled(bool)), this, SIGNAL(vimKeysChanged(bool)));
-    connect(pButtons, SIGNAL(rejected()), this, SLOT(reject()));
-
-    pLayout->setSpacing(16);
-    pLayout->addLayout(pForm);
-    pLayout->addWidget(pButtons);
-
-    setWindowTitle("Settings");
-    setMinimumWidth(460);
+    setWindowTitle(tr("Settings"));
+    setMinimumWidth(MinWidth);
 }

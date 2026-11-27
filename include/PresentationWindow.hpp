@@ -19,39 +19,48 @@
 #ifndef PRESENTATIONWINDOW_HPP
 #define PRESENTATIONWINDOW_HPP
 
-// Qt
+// qt
 #include <QImage>
 #include <QWidget>
 
 class SlideDeck;
 
+/**
+ * @brief Ventana de presentación: la diapositiva actual, centrada sobre fondo negro y sin cursor.
+ */
 class PresentationWindow : public QWidget
 {
     Q_OBJECT
 
 public:
-    PresentationWindow(SlideDeck *pDeck, QWidget *pParent = nullptr);
+    explicit PresentationWindow(SlideDeck *deck, QWidget *parent = nullptr);
 
 public slots:
+    /**
+     * @brief Alterna entre la diapositiva y la pantalla en negro.
+     */
     void toggleBlackout();
 
 signals:
+    /**
+     * @brief Se emite cuando la ventana se cierra, para que el panel salga del modo presentación.
+     */
     void closed();
 
 protected:
-    void closeEvent(QCloseEvent *pEvent) override;
-    void paintEvent(QPaintEvent *pEvent) override;
-    void resizeEvent(QResizeEvent *pEvent) override;
-
-private:
-    SlideDeck *_pDeck;
-    QImage _slide;
-    bool _bBlackout;
-
-    void updateSlide();
+    void closeEvent(QCloseEvent *event) override;
+    void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
 private slots:
-    void deckCurrentChanged(int iIndex);
+    void deckCurrentChanged(int index);
+
+private:
+    void updateSlide();
+
+    SlideDeck *deck_;
+    QImage slide_;
+    bool blackout_ = false;
 };
 
 #endif

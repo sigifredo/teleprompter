@@ -23,26 +23,26 @@ El botón "Settings" de la barra de estado (o `Ctrl+,`) abre el panel de configu
 
 ### Atajos de teclado
 
-| Tecla | Acción |
-| --- | --- |
-| `←` / `a` | Diapositiva anterior |
-| `→` / `d` | Diapositiva siguiente |
-| `1-9` + `Enter` | Ir a una diapositiva por su número |
-| `↑` / `w`, `↓` / `s` | Subir y bajar en el guion |
-| `PgUp` / `PgDn` | Subir y bajar una página |
-| `Home`, `End` | Inicio y final del guion |
-| `Ctrl++` / `Ctrl+-` | Letra más grande o más pequeña |
-| `F5` | Iniciar la presentación |
-| `b` | Pantalla en negro durante la presentación |
-| `Esc` / `q` | Salir de la presentación |
-| `Ctrl+,` | Abrir el panel de configuración |
-| `?` | Mostrar la ayuda de atajos |
+| Tecla                | Acción                                    |
+| -------------------- | ----------------------------------------- |
+| `←` / `a`            | Diapositiva anterior                      |
+| `→` / `d`            | Diapositiva siguiente                     |
+| `1-9` + `Enter`      | Ir a una diapositiva por su número        |
+| `↑` / `w`, `↓` / `s` | Subir y bajar en el guion                 |
+| `PgUp` / `PgDn`      | Subir y bajar una página                  |
+| `Home`, `End`        | Inicio y final del guion                  |
+| `Ctrl++` / `Ctrl+-`  | Letra más grande o más pequeña            |
+| `F5`                 | Iniciar la presentación                   |
+| `b`                  | Pantalla en negro durante la presentación |
+| `Esc` / `q`          | Salir de la presentación                  |
+| `Ctrl+,`             | Abrir el panel de configuración           |
+| `?`                  | Mostrar la ayuda de atajos                |
 
 Con las teclas de vim activadas en el panel de configuración, `h`, `j`, `k` y `l` sustituyen a `a`, `s`, `w` y `d` (`h` y `l` para las diapositivas, `k` y `j` para el guion), y además `g` y `G` llevan al inicio y al final del guion. Las letras del modo que no está activo no hacen nada.
 
 ## Compilación
 
-Requiere CMake 3.16 o superior y Qt 6 con los módulos Widgets y Pdf (en Debian: `qt6-base-dev` y `qt6-pdf-dev`).
+Requiere CMake 3.20 o superior, un compilador con C++23 y Qt 6 con los módulos Widgets, Pdf y Svg (en Debian: `qt6-base-dev`, `qt6-pdf-dev` y `qt6-svg-dev`).
 
 ```
 cmake -S . -B build
@@ -51,6 +51,8 @@ cmake --build build -j 8
 ```
 
 El identificador del paquete es `dev.sigifredo.teleprompter`.
+
+Los colores viven en `design/teleprompter.tokens.json`; tras cambiarlos, o la geometría del icono, `python3 design/build_icons.py` regenera los iconos (requiere Pillow).
 
 ## Cambios
 

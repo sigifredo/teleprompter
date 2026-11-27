@@ -1,42 +1,48 @@
 
 
-// Own
+// own
 #include <PresentationWindow.hpp>
 #include <SlideDeck.hpp>
 
-// Qt
+// qt
 #include <QCloseEvent>
 #include <QPainter>
 
-PresentationWindow::PresentationWindow(SlideDeck *pDeck, QWidget *pParent)
-    : QWidget(pParent, Qt::Window), _pDeck(pDeck), _bBlackout(false)
+PresentationWindow::PresentationWindow(SlideDeck *deck, QWidget *parent)
+    : QWidget(parent, Qt::Window), deck_(deck)
 {
     setObjectName("presentation");
     setAttribute(Qt::WA_OpaquePaintEvent);
-    setWindowTitle("Presentation");
+    setWindowTitle(tr("Presentation"));
     setCursor(Qt::BlankCursor);
 
-    connect(_pDeck, SIGNAL(currentChanged(int)), this, SLOT(deckCurrentChanged(int)));
+    connect(deck_, &SlideDeck::currentChanged, this, &PresentationWindow::deckCurrentChanged);
 }
 
-void PresentationWindow::closeEvent(QCloseEvent *pEvent)
+void PresentationWindow::toggleBlackout()
 {
-    pEvent->accept();
+    blackout_ = !blackout_;
+    update();
+}
+
+void PresentationWindow::closeEvent(QCloseEvent *event)
+{
+    event->accept();
     emit closed();
 }
 
 void PresentationWindow::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
+
     painter.fillRect(rect(), Qt::black);
 
-    if (!_bBlackout && !_slide.isNull())
-    {
-        QSizeF logical = QSizeF(_slide.size()) / _slide.devicePixelRatio();
-        QPointF topLeft((width() - logical.width()) / 2, (height() - logical.height()) / 2);
+    if (blackout_ || slide_.isNull())
+        return;
 
-        painter.drawImage(topLeft, _slide);
-    }
+    const QSizeF logical = QSizeF(slide_.size()) / slide_.devicePixelRatio();
+
+    painter.drawImage(QPointF((width() - logical.width()) / 2, (height() - logical.height()) / 2), slide_);
 }
 
 void PresentationWindow::resizeEvent(QResizeEvent *)
@@ -44,22 +50,16 @@ void PresentationWindow::resizeEvent(QResizeEvent *)
     updateSlide();
 }
 
-void PresentationWindow::updateSlide()
-{
-    qreal dRatio = devicePixelRatioF();
-
-    _slide = _pDeck->render(_pDeck->currentIndex(), size() * dRatio);
-    _slide.setDevicePixelRatio(dRatio);
-    update();
-}
-
-void PresentationWindow::toggleBlackout()
-{
-    _bBlackout = !_bBlackout;
-    update();
-}
-
 void PresentationWindow::deckCurrentChanged(int)
 {
     updateSlide();
+}
+
+void PresentationWindow::updateSlide()
+{
+    const qreal ratio = devicePixelRatioF();
+
+    slide_ = deck_->render(deck_->currentIndex(), size() * ratio);
+    slide_.setDevicePixelRatio(ratio);
+    update();
 }

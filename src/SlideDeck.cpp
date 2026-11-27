@@ -1,68 +1,72 @@
 
 
-// Own
+// own
 #include <SlideDeck.hpp>
 
-SlideDeck::SlideDeck(QObject *pParent)
-    : QObject(pParent), _iCurrent(0)
+// qt
+#include <QDebug>
+
+#define CLASS_NAME "SlideDeck"
+#define TELEPROMPTER_WARNING() qWarning() << "[" CLASS_NAME "]"
+
+SlideDeck::SlideDeck(QObject *parent)
+    : QObject(parent)
 {
-    _pDocument = new QPdfDocument(this);
+    document_ = new QPdfDocument(this);
 }
 
-bool SlideDeck::load(const QString &sPath)
+bool SlideDeck::load(const QString &path)
 {
-    if (_pDocument->load(sPath) != QPdfDocument::Error::None || _pDocument->pageCount() == 0)
+    const QPdfDocument::Error error = document_->load(path);
+
+    if (error != QPdfDocument::Error::None || document_->pageCount() == 0)
     {
+        TELEPROMPTER_WARNING() << "No se pudo abrir" << path << "(error" << static_cast<int>(error) << ")";
         return false;
     }
 
-    _iCurrent = 0;
-    emit currentChanged(_iCurrent);
+    current_ = 0;
+    emit currentChanged(current_);
 
     return true;
 }
 
 int SlideDeck::count() const
 {
-    return _pDocument->pageCount();
+    return document_->pageCount();
 }
 
 int SlideDeck::currentIndex() const
 {
-    return _iCurrent;
+    return current_;
 }
 
-QImage SlideDeck::render(int iIndex, const QSize &size) const
+QImage SlideDeck::render(int index, const QSize &size) const
 {
-    if (iIndex < 0 || iIndex >= count() || size.isEmpty())
-    {
-        return QImage();
-    }
+    if (index < 0 || index >= count() || size.isEmpty())
+        return {};
 
-    // Keep the page aspect ratio inside the requested bounds.
-    QSizeF pageSize = _pDocument->pagePointSize(iIndex);
-    QSize target = pageSize.toSize().scaled(size, Qt::KeepAspectRatio);
+    // Se conserva la proporción de la página dentro del tamaño pedido.
+    const QSize page = document_->pagePointSize(index).toSize();
 
-    return _pDocument->render(iIndex, target);
+    return document_->render(index, page.scaled(size, Qt::KeepAspectRatio));
 }
 
 void SlideDeck::next()
 {
-    setCurrent(_iCurrent + 1);
+    setCurrent(current_ + 1);
 }
 
 void SlideDeck::previous()
 {
-    setCurrent(_iCurrent - 1);
+    setCurrent(current_ - 1);
 }
 
-void SlideDeck::setCurrent(int iIndex)
+void SlideDeck::setCurrent(int index)
 {
-    if (iIndex < 0 || iIndex >= count() || iIndex == _iCurrent)
-    {
+    if (index < 0 || index >= count() || index == current_)
         return;
-    }
 
-    _iCurrent = iIndex;
-    emit currentChanged(_iCurrent);
+    current_ = index;
+    emit currentChanged(current_);
 }

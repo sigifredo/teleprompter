@@ -19,26 +19,35 @@
 #ifndef SLIDESTRIPWIDGET_HPP
 #define SLIDESTRIPWIDGET_HPP
 
-// Qt
+// qt
 #include <QListWidget>
 
 class SlideDeck;
 
+/**
+ * @brief Tira horizontal de miniaturas que marca la diapositiva actual.
+ *
+ * Un clic en una miniatura cambia la diapositiva del SlideDeck. No toma el foco, para que
+ * las teclas de dirección sigan llegando al resto de la ventana.
+ */
 class SlideStripWidget : public QListWidget
 {
     Q_OBJECT
 
 public:
-    SlideStripWidget(QWidget *pParent = nullptr);
+    explicit SlideStripWidget(QWidget *parent = nullptr);
 
-    void setDeck(SlideDeck *pDeck);
-
-private:
-    SlideDeck *_pDeck;
+    /**
+     * @brief Genera las miniaturas de una presentación y empieza a seguir su diapositiva actual.
+     */
+    void setDeck(SlideDeck *deck);
 
 private slots:
-    void deckCurrentChanged(int iIndex);
-    void rowActivated(int iRow);
+    void deckCurrentChanged(int index);
+    void rowActivated(int row);
+
+private:
+    SlideDeck *deck_ = nullptr;
 };
 
 #endif

@@ -19,39 +19,42 @@
 #ifndef SLIDEPREVIEWWIDGET_HPP
 #define SLIDEPREVIEWWIDGET_HPP
 
-// Qt
+// qt
 #include <QImage>
 #include <QWidget>
 
 class SlideDeck;
 
 /**
- * Shows the slide at a fixed offset from the current one (0 = current, 1 = next).
+ * @brief Muestra la diapositiva que está a una distancia fija de la actual, con un título encima.
+ *
+ * Un desfase de 0 es la diapositiva actual y uno de 1, la siguiente. Fuera de rango, o sin
+ * presentación, muestra un recuadro con el motivo.
  */
 class SlidePreviewWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    SlidePreviewWidget(SlideDeck *pDeck, int iOffset, const QString &sCaption, QWidget *pParent = nullptr);
+    SlidePreviewWidget(SlideDeck *deck, int offset, const QString &caption, QWidget *parent = nullptr);
 
     QSize minimumSizeHint() const override;
 
 protected:
-    void paintEvent(QPaintEvent *pEvent) override;
-    void resizeEvent(QResizeEvent *pEvent) override;
+    void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
+
+private slots:
+    void deckCurrentChanged(int index);
 
 private:
-    SlideDeck *_pDeck;
-    int _iOffset;
-    QString _sCaption;
-    QImage _image;
-
     QRect slideArea() const;
     void updateImage();
 
-private slots:
-    void deckCurrentChanged(int iIndex);
+    SlideDeck *deck_;
+    int offset_;
+    QString caption_;
+    QImage image_;
 };
 
 #endif

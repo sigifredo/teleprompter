@@ -1,27 +1,27 @@
 
 
-// Own
+// own
 #include <VersionWidget.hpp>
 #include <CreditsDialog.hpp>
 #include <Version.hpp>
 
-// Qt
+// qt
 #include <QBoxLayout>
 #include <QPushButton>
 
-VersionWidget::VersionWidget(QWidget *pParent)
-    : QWidget(pParent)
+VersionWidget::VersionWidget(QWidget *parent)
+    : QWidget(parent)
 {
-    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
-    QPushButton *pVersionButton = new QPushButton("v" PROJECT_VERSION, this);
+    auto *layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+    auto *versionButton = new QPushButton("v" PROJECT_VERSION, this);
 
-    pLayout->setContentsMargins(0, 0, 0, 0);
-    pVersionButton->setObjectName("flat");
-    pVersionButton->setToolTip("About");
+    layout->setContentsMargins(0, 0, 0, 0);
+    versionButton->setProperty("variant", "ghost");
+    versionButton->setToolTip(tr("About"));
 
-    connect(pVersionButton, SIGNAL(clicked()), this, SLOT(showCredits()));
+    connect(versionButton, &QPushButton::clicked, this, &VersionWidget::showCredits);
 
-    pLayout->addWidget(pVersionButton);
+    layout->addWidget(versionButton);
 }
 
 void VersionWidget::showCredits()
