@@ -14,10 +14,15 @@
 #include <QTextFrame>
 #include <QTextFragment>
 
-#define COLUMN_CHARS 62
+#define DEFAULT_COLUMN_CHARS 62
+#define DEFAULT_BAND_PERCENT 30
+#define MIN_COLUMN_CHARS 40
+#define MAX_COLUMN_CHARS 100
+#define MIN_BAND_PERCENT 15
+#define MAX_BAND_PERCENT 60
 
 BionicWidget::BionicWidget(QWidget *pParent)
-    : QTextEdit(pParent)
+    : QTextEdit(pParent), _bBionic(true), _bBandVisible(false), _bLoaded(false), _bMarkdown(false), _iBandPercent(DEFAULT_BAND_PERCENT), _iColumnChars(DEFAULT_COLUMN_CHARS)
 {
     setReadOnly(true);
     setAcceptDrops(false);
@@ -26,8 +31,43 @@ BionicWidget::BionicWidget(QWidget *pParent)
 
 void BionicWidget::setBionicText(const QString &sText)
 {
+    _sSource = sText;
+    _bMarkdown = false;
+    _bLoaded = true;
+    render();
+}
+
+void BionicWidget::setBionicMarkdown(const QString &sText)
+{
+    _sSource = sText;
+    _bMarkdown = true;
+    _bLoaded = true;
+    render();
+}
+
+void BionicWidget::render()
+{
+    if (!_bLoaded)
+    {
+        return;
+    }
+
+    if (_bMarkdown)
+    {
+        renderMarkdown();
+    }
+    else
+    {
+        renderText();
+    }
+
+    updatePadding();
+}
+
+void BionicWidget::renderText()
+{
     QString sResult;
-    QString sFixedText(sText);
+    QString sFixedText(_sSource);
 
     sFixedText
         .replace("<", "&lt;")
@@ -53,9 +93,16 @@ void BionicWidget::setBionicText(const QString &sText)
                 if (!sFixedWord.isEmpty())
                 {
                     int iLen = sFixedWord.length();
-                    int iBoldPart = iLen / 2;
+                    int iBoldPart = _bBionic ? iLen / 2 : 0;
 
-                    sNewParagraph.append("<strong>" + sFixedWord.left(iBoldPart) + "</strong>" + sFixedWord.mid(iBoldPart) + " ");
+                    if (iBoldPart > 0)
+                    {
+                        sNewParagraph.append("<strong>" + sFixedWord.left(iBoldPart) + "</strong>" + sFixedWord.mid(iBoldPart) + " ");
+                    }
+                    else
+                    {
+                        sNewParagraph.append(sFixedWord + " ");
+                    }
                 }
             }
 
@@ -64,12 +111,16 @@ void BionicWidget::setBionicText(const QString &sText)
     }
 
     setHtml(sResult);
-    updatePadding();
 }
 
-void BionicWidget::setBionicMarkdown(const QString &sText)
+void BionicWidget::renderMarkdown()
 {
-    document()->setMarkdown(sText);
+    document()->setMarkdown(_sSource);
+
+    if (!_bBionic)
+    {
+        return;
+    }
 
     // Collect the ranges first: changing formats while iterating invalidates fragments.
     QList<QPair<int, int>> ranges;
@@ -109,7 +160,6 @@ void BionicWidget::setBionicMarkdown(const QString &sText)
     }
 
     cursor.endEditBlock();
-    updatePadding();
 }
 
 void BionicWidget::scrollStep(int iDirection)
@@ -157,22 +207,27 @@ void BionicWidget::paintEvent(QPaintEvent *pEvent)
 {
     QTextEdit::paintEvent(pEvent);
 
+    if (!_bBandVisible)
+    {
+        return;
+    }
+
     // Reading guide: a soft band where the eyes should rest while the text flows through it.
     QPainter painter(viewport());
-    QColor color = palette().color(QPalette::Highlight);
+    QColor fill = palette().color(QPalette::Text);
+    QColor bar = palette().color(QPalette::Highlight);
     QRect band = bandRect();
 
-    color.setAlpha(34);
-    painter.fillRect(band, color);
-    color.setAlpha(200);
-    painter.fillRect(band.x(), band.y(), 3, band.height(), color);
+    fill.setAlpha(22);
+    painter.fillRect(band, fill);
+    painter.fillRect(band.x(), band.y(), 3, band.height(), bar);
 }
 
 QRect BionicWidget::bandRect() const
 {
     int iHeight = static_cast<int>(fontMetrics().lineSpacing() * 1.5);
 
-    return QRect(0, viewport()->height() * 3 / 10, viewport()->width(), iHeight);
+    return QRect(0, viewport()->height() * _iBandPercent / 100, viewport()->width(), iHeight);
 }
 
 void BionicWidget::resizeEvent(QResizeEvent *pEvent)
@@ -185,7 +240,7 @@ void BionicWidget::resizeEvent(QResizeEvent *pEvent)
 void BionicWidget::updateColumn()
 {
     // Keep lines to a comfortable reading width and center them.
-    int iColumn = fontMetrics().averageCharWidth() * COLUMN_CHARS;
+    int iColumn = fontMetrics().averageCharWidth() * _iColumnChars;
     int iAvailable = width() - 2 * frameWidth() - (verticalScrollBar()->isVisible() ? verticalScrollBar()->width() : 0);
     int iMargin = qMax(16, (iAvailable - iColumn) / 2);
 
@@ -230,4 +285,59 @@ int BionicWidget::lineHalfHeight(const QTextBlock &block, bool bLast) const
     }
 
     return static_cast<int>(pLayout->lineAt(bLast ? pLayout->lineCount() - 1 : 0).height() / 2);
+}
+
+bool BionicWidget::isBionicEnabled() const
+{
+    return _bBionic;
+}
+
+bool BionicWidget::isReadingBandVisible() const
+{
+    return _bBandVisible;
+}
+
+int BionicWidget::readingBandPosition() const
+{
+    return _iBandPercent;
+}
+
+int BionicWidget::columnChars() const
+{
+    return _iColumnChars;
+}
+
+void BionicWidget::setBionicEnabled(bool bEnabled)
+{
+    if (bEnabled == _bBionic)
+    {
+        return;
+    }
+
+    _bBionic = bEnabled;
+
+    // Rendering again resets the scroll, so keep the reading position.
+    int iValue = verticalScrollBar()->value();
+
+    render();
+    verticalScrollBar()->setValue(iValue);
+}
+
+void BionicWidget::setReadingBandVisible(bool bVisible)
+{
+    _bBandVisible = bVisible;
+    viewport()->update();
+}
+
+void BionicWidget::setReadingBandPosition(int iPercent)
+{
+    _iBandPercent = qBound(MIN_BAND_PERCENT, iPercent, MAX_BAND_PERCENT);
+    updatePadding();
+    viewport()->update();
+}
+
+void BionicWidget::setColumnChars(int iChars)
+{
+    _iColumnChars = qBound(MIN_COLUMN_CHARS, iChars, MAX_COLUMN_CHARS);
+    updateColumn();
 }

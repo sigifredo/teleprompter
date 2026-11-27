@@ -18,24 +18,27 @@ struct Tokens
     QColor bg, surface, hover, pressed, border;
     QColor text, muted, accent, accentText;
     QColor script, scriptText, disabledBg, disabledText;
+    QColor primary, primaryHover, primaryText;
 };
 
-// Cool, low-chroma palettes designed in OKLCH (hue ~250). Text contrast is kept around
-// 13:1 instead of the maximum, because glare is what tires the eyes in long readings.
+// Neutral cool greys with a single blue accent, after GitHub's Primer palette. Text contrast is
+// kept around 13:1 for the script instead of the maximum, because glare is what tires the eyes.
 Tokens darkTokens()
 {
     return {
-        "#0e141c", "#171f27", "#222b35", "#2d3843", "#29313a",
-        "#d1dbe1", "#98a7b4", "#65d0dc", "#0e141c",
-        "#090f15", "#cdd8de", "#13191f", "#606a74"};
+        "#0d1117", "#151b23", "#212830", "#262c36", "#30363d",
+        "#e6edf3", "#9198a1", "#4493f8", "#0d1117",
+        "#0d1117", "#d1d9e0", "#151b23", "#656c76",
+        "#1f6feb", "#1a65d8", "#ffffff"};
 }
 
 Tokens lightTokens()
 {
     return {
-        "#eff4f9", "#e0e7ee", "#d5dee6", "#c8d3dc", "#cad2da",
-        "#182230", "#4e5c6b", "#006e8e", "#ffffff",
-        "#fafcfe", "#182230", "#e7ecf0", "#828e98"};
+        "#ffffff", "#f6f8fa", "#eff2f5", "#e6eaef", "#d1d9e0",
+        "#1f2328", "#59636e", "#0969da", "#ffffff",
+        "#ffffff", "#1f2328", "#eff2f5", "#818b98",
+        "#0969da", "#0860ca", "#ffffff"};
 }
 }
 
@@ -141,12 +144,15 @@ void Theme::apply()
     }
 
     const QList<QPair<QString, QColor>> replacements = {
-        {"@bg@", t.bg}, {"@surface@", t.surface}, {"@hover@", t.hover}, {"@pressed@", t.pressed}, {"@border@", t.border}, {"@text@", t.text}, {"@muted@", t.muted}, {"@accent@", t.accent}, {"@accentText@", t.accentText}, {"@script@", t.script}, {"@scriptText@", t.scriptText}, {"@disabledBg@", t.disabledBg}, {"@disabledText@", t.disabledText}};
+        {"@bg@", t.bg}, {"@surface@", t.surface}, {"@hover@", t.hover}, {"@pressed@", t.pressed}, {"@border@", t.border}, {"@text@", t.text}, {"@muted@", t.muted}, {"@accent@", t.accent}, {"@accentText@", t.accentText}, {"@script@", t.script}, {"@scriptText@", t.scriptText}, {"@disabledBg@", t.disabledBg}, {"@disabledText@", t.disabledText}, {"@primary@", t.primary}, {"@primaryHover@", t.primaryHover}, {"@primaryText@", t.primaryText}};
 
     for (const QPair<QString, QColor> &replacement : replacements)
     {
         sStyle.replace(replacement.first, replacement.second.name());
     }
+
+    // The check mark must contrast with the accent: dark on the light blue, white on the dark blue.
+    sStyle.replace("@check@", isDark() ? ":/icons/check-dark.png" : ":/icons/check-light.png");
 
     qApp->setStyleSheet(sStyle);
     emit changed();

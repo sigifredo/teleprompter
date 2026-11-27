@@ -37,6 +37,16 @@ public slots:
     void scrollPage(int iDirection);
     void scrollToEdge(bool bEnd);
     void setFontSize(const int &iFontSize);
+    void setBionicEnabled(bool bEnabled);
+    void setReadingBandVisible(bool bVisible);
+    void setReadingBandPosition(int iPercent);
+    void setColumnChars(int iChars);
+
+public:
+    bool isBionicEnabled() const;
+    bool isReadingBandVisible() const;
+    int readingBandPosition() const;
+    int columnChars() const;
 
 protected:
     void paintEvent(QPaintEvent *pEvent) override;
@@ -45,8 +55,19 @@ protected:
 private:
     QRect bandRect() const;
     int lineHalfHeight(const QTextBlock &block, bool bLast) const;
+    void render();
+    void renderMarkdown();
+    void renderText();
     void updateColumn();
     void updatePadding();
+
+    bool _bBionic;
+    bool _bBandVisible;
+    bool _bLoaded;
+    bool _bMarkdown;
+    int _iBandPercent;
+    int _iColumnChars;
+    QString _sSource;
 };
 
 #endif

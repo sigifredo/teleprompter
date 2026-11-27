@@ -4,13 +4,14 @@ Teleprompter es una aplicación para dar charlas y presentaciones con calma: mue
 
 ## Características
 
-- Guion en Markdown (`.md`) o texto plano (`.txt`) con lectura biónica, en una columna centrada con una franja de lectura.
+- Guion en Markdown (`.md`) o texto plano (`.txt`) con lectura biónica, en una columna centrada, con una franja de lectura opcional.
 - Diapositivas en PDF con una tira de miniaturas y la vista de la diapositiva actual y la siguiente.
 - Modo presentación en una ventana aparte, a pantalla completa en el segundo monitor si existe.
 - Cronómetro con inicio, pausa y parada, que arranca solo al presentar.
-- Tema oscuro, claro o automático según el sistema.
+- Estética tipo GitHub, con grises fríos y un único acento azul, en tema oscuro, claro o automático según el sistema.
+- Panel de configuración con aplicación inmediata de los cambios.
 - Atajos de teclado, incluidos los de vim (`h`, `j`, `k`, `l`).
-- Recuerda los últimos archivos, el tamaño de letra, el tema y la posición de la ventana.
+- Recuerda los últimos archivos, el tamaño de letra, el tema, las opciones del panel de configuración y la posición de la ventana.
 
 ## Uso
 
@@ -18,7 +19,7 @@ Abre el guion con "Open script..." (archivos `.md` o `.txt`; el Markdown conserv
 
 La ventana principal es el panel del presentador: a la izquierda el guion, a la derecha la diapositiva actual y la siguiente, y abajo la tira de miniaturas. Con "Present (F5)" se abre una segunda ventana con la diapositiva actual y arranca el cronómetro. El guion y las diapositivas son independientes: las teclas de dirección horizontales cambian de diapositiva y las verticales mueven el guion.
 
-El tema por defecto es oscuro; el botón "Theme" de la barra de estado alterna entre oscuro, claro y automático. El botón "On top" mantiene la ventana principal encima de las demás.
+El botón "Settings" de la barra de estado (o `Ctrl+,`) abre el panel de configuración, donde los cambios se aplican al instante: el tema (oscuro por defecto, claro o automático según el sistema), mantener la ventana encima de las demás, mostrar la franja de lectura (desactivada por defecto) y su posición, el ancho de la columna, la lectura biónica y si el cronómetro arranca al presentar.
 
 ### Atajos de teclado
 
@@ -34,6 +35,7 @@ El tema por defecto es oscuro; el botón "Theme" de la barra de estado alterna e
 | `F5` | Iniciar la presentación |
 | `b` | Pantalla en negro durante la presentación |
 | `Esc` / `q` | Salir de la presentación |
+| `Ctrl+,` | Abrir el panel de configuración |
 | `?` | Mostrar la ayuda de atajos |
 
 ## Compilación

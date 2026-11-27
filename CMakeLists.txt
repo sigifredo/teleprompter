@@ -34,6 +34,7 @@ set(PROJECT_SOURCES
     include/FontBarWidget.hpp
     include/MainWindow.hpp
     include/PresentationWindow.hpp
+    include/SettingsDialog.hpp
     include/SlideDeck.hpp
     include/SlidePreviewWidget.hpp
     include/SlideStripWidget.hpp
@@ -47,6 +48,7 @@ set(PROJECT_SOURCES
     src/main.cpp
     src/MainWindow.cpp
     src/PresentationWindow.cpp
+    src/SettingsDialog.cpp
     src/SlideDeck.cpp
     src/SlidePreviewWidget.cpp
     src/SlideStripWidget.cpp

@@ -32,8 +32,13 @@ void SlidePreviewWidget::paintEvent(QPaintEvent *)
     QColor muted = palette().color(QPalette::PlaceholderText);
     QRect area = slideArea();
 
-    painter.setPen(muted);
+    QFont captionFont = font();
+
+    captionFont.setBold(true);
+    painter.setFont(captionFont);
+    painter.setPen(palette().color(QPalette::WindowText));
     painter.drawText(QRect(0, 0, width(), CAPTION_HEIGHT), Qt::AlignLeft | Qt::AlignVCenter, _sCaption);
+    painter.setFont(font());
 
     if (_image.isNull())
     {

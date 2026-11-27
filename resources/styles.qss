@@ -40,6 +40,10 @@ QStatusBar {
     border-top: 1px solid @border@;
 }
 
+QWidget#topbar {
+    border-bottom: 1px solid @border@;
+}
+
 QStatusBar::item {
     border: 0;
 }
@@ -79,10 +83,20 @@ QPushButton:checked {
 }
 
 QPushButton#primary {
-    background-color: @accent@;
-    border-color: @accent@;
-    color: @accentText@;
+    background-color: @primary@;
+    border-color: @primary@;
+    color: @primaryText@;
     font-weight: 600;
+}
+
+QPushButton#primary:hover {
+    background-color: @primaryHover@;
+    border-color: @primaryHover@;
+}
+
+QPushButton#primary:focus {
+    border: 2px solid @text@;
+    padding: 5px 11px;
 }
 
 QPushButton#primary:disabled {
@@ -116,7 +130,7 @@ QTextEdit {
     background-color: @script@;
     color: @scriptText@;
     border: 1px solid @border@;
-    border-radius: 8px;
+    border-radius: 6px;
     selection-background-color: @accent@;
     selection-color: @accentText@;
 }
@@ -125,7 +139,7 @@ BionicWidget {
     background-color: @script@;
     color: @scriptText@;
     border: 1px solid @border@;
-    border-radius: 8px;
+    border-radius: 6px;
 }
 
 BionicWidget:focus {
@@ -168,7 +182,7 @@ QScrollBar::add-page, QScrollBar::sub-page {
 SlideStripWidget {
     background-color: @script@;
     border: 1px solid @border@;
-    border-radius: 8px;
+    border-radius: 6px;
     color: @muted@;
     outline: 0;
 }
@@ -185,7 +199,7 @@ SlideStripWidget::item:hover {
 }
 
 SlideStripWidget::item:selected {
-    background-color: @surface@;
+    background-color: @hover@;
     border-color: @accent@;
     color: @text@;
 }
@@ -210,4 +224,91 @@ QTabBar::tab:selected {
 
 PresentationWindow {
     background-color: black;
+}
+
+QComboBox {
+    background-color: @surface@;
+    color: @text@;
+    border: 1px solid @border@;
+    border-radius: 6px;
+    padding: 5px 10px;
+    min-height: 20px;
+}
+
+QComboBox:hover {
+    background-color: @hover@;
+}
+
+QComboBox:focus {
+    border: 1px solid @accent@;
+}
+
+QComboBox::drop-down {
+    border: 0;
+    width: 24px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: @surface@;
+    color: @text@;
+    border: 1px solid @border@;
+    selection-background-color: @accent@;
+    selection-color: @accentText@;
+    outline: 0;
+}
+
+QCheckBox {
+    background-color: transparent;
+    color: @text@;
+    spacing: 8px;
+}
+
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid @muted@;
+    border-radius: 4px;
+    background-color: @script@;
+}
+
+QCheckBox::indicator:hover {
+    border-color: @accent@;
+}
+
+QCheckBox::indicator:checked {
+    background-color: @accent@;
+    border-color: @accent@;
+    image: url(@check@);
+}
+
+QCheckBox:focus {
+    color: @accent@;
+}
+
+QSlider::groove:horizontal {
+    height: 4px;
+    border-radius: 2px;
+    background-color: @pressed@;
+}
+
+QSlider::sub-page:horizontal {
+    height: 4px;
+    border-radius: 2px;
+    background-color: @accent@;
+}
+
+QSlider::sub-page:horizontal:disabled {
+    background-color: @disabledText@;
+}
+
+QSlider::handle:horizontal {
+    width: 14px;
+    height: 14px;
+    margin: -6px 0;
+    border-radius: 7px;
+    background-color: @accent@;
+}
+
+QSlider::handle:horizontal:disabled {
+    background-color: @disabledText@;
 }

@@ -4,5 +4,7 @@
         <file>app-icons/teleprompter.icns</file>
         <file>app-icons/teleprompter.ico</file>
         <file>app-icons/teleprompter.png</file>
+        <file>icons/check-dark.png</file>
+        <file>icons/check-light.png</file>
     </qresource>
 </RCC>

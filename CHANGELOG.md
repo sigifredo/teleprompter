@@ -13,18 +13,18 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 - Vista del presentador con la diapositiva actual y la siguiente junto al guion.
 - Guion en Markdown (`.md`) que conserva encabezados, listas y énfasis con la lectura biónica aplicada.
 - Navegación con teclado: `←`/`h` y `→`/`l` para las diapositivas, `↑`/`k` y `↓`/`j` para el guion, `PgUp`/`PgDn`, `Home`/`g`, `End`/`G`, número seguido de `Enter` para ir a una diapositiva, `Ctrl++`/`Ctrl+-` para el tamaño de letra, `F5` para presentar, `b` para la pantalla en negro, `Esc`/`q` para salir y `?` para la ayuda de atajos.
-- Tema oscuro, claro y automático según el sistema, con el oscuro por defecto y una paleta de colores fríos de croma bajo, con el contraste del texto en torno a 13:1 para cansar menos la vista.
-- Columna de lectura centrada con una franja de lectura resaltada en el guion.
+- Tema oscuro, claro y automático según el sistema, con el oscuro por defecto y una estética tipo GitHub de grises fríos con bordes finos y un único acento azul, con el contraste del texto en torno a 13:1 para cansar menos la vista.
+- Columna de lectura centrada con una franja de lectura opcional, desactivada por defecto.
+- Panel de configuración (`Ctrl+,`) con aplicación inmediata de los cambios: tema, mantener la ventana encima, franja de lectura visible y su posición, ancho de la columna, lectura biónica y arranque del cronómetro al presentar.
 - Arrastrar y soltar archivos `.md`, `.txt` y `.pdf` sobre la ventana.
 - Persistencia de los últimos archivos, el tamaño de letra, el tema, la opción de mantener la ventana encima y la posición de la ventana.
-- Opción para mantener la ventana encima de las demás, ahora conmutable.
 - Estado vacío con instrucciones cuando no hay guion ni diapositivas.
 - Ocultar el cursor y pantalla en negro en la ventana de presentación.
 - El cronómetro arranca al iniciar la presentación.
 
 ### Changed
 
-- La interfaz usa una barra de controles única con los archivos, el cronómetro, el tamaño de letra y el botón de presentar, y una barra de estado con el contador de diapositivas, la ayuda, el tema y la versión.
+- La interfaz usa una barra de controles única con los archivos, el cronómetro, el tamaño de letra y el botón de presentar, y una barra de estado con el contador de diapositivas, la ayuda, los ajustes y la versión.
 - Los colores se definen como tokens en una hoja de estilos compartida por toda la aplicación, incluidos los diálogos.
 - Nuevo ícono de la aplicación, con la paleta fría: una pantalla con la línea de lectura resaltada sobre fondo oscuro.
 - Las teclas `↑`/`k` y `↓`/`j` mueven el guion exactamente una línea visual y la dejan en la franja de lectura, sea cual sea su altura, y el guion tiene espacio arriba y abajo para que la primera y la última línea también lleguen a la franja.

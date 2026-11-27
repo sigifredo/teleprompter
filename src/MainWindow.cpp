@@ -7,6 +7,7 @@
 #include <FileWidget.hpp>
 #include <FontBarWidget.hpp>
 #include <PresentationWindow.hpp>
+#include <SettingsDialog.hpp>
 #include <SlideDeck.hpp>
 #include <SlidePreviewWidget.hpp>
 #include <SlideStripWidget.hpp>
@@ -32,7 +33,7 @@
 #include <QTextStream>
 
 MainWindow::MainWindow(QWidget *pParent)
-    : QMainWindow(pParent), _pPresentation(nullptr)
+    : QMainWindow(pParent), _pPresentation(nullptr), _bAlwaysOnTop(true), _bStartTimerOnPresent(true)
 {
     QWidget *pCentralWidget = new QWidget(this);
     QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, pCentralWidget);
@@ -51,7 +52,8 @@ MainWindow::MainWindow(QWidget *pParent)
     {
         QBoxLayout *pBarLayout = new QBoxLayout(QBoxLayout::LeftToRight, pBar);
 
-        pBarLayout->setContentsMargins(0, 0, 0, 0);
+        pBar->setObjectName("topbar");
+        pBarLayout->setContentsMargins(0, 0, 0, 10);
         pBarLayout->setSpacing(16);
         pBarLayout->addWidget(_pFileWidget);
         pBarLayout->addWidget(_pSlidesFileWidget);
@@ -90,23 +92,18 @@ MainWindow::MainWindow(QWidget *pParent)
 
     // Status bar: slide counter and view options.
     _pSlideCounterLabel = new QLabel("No slides", this);
-    _pThemeButton = new QPushButton(this);
-    _pOnTopButton = new QPushButton("On top", this);
+    QPushButton *pSettingsButton = new QPushButton("Settings", this);
     QPushButton *pHelpButton = new QPushButton("?", this);
 
-    _pThemeButton->setObjectName("flat");
-    _pThemeButton->setToolTip("Change theme (Dark / Light / Auto)");
-    _pOnTopButton->setObjectName("flat");
-    _pOnTopButton->setCheckable(true);
-    _pOnTopButton->setToolTip("Keep this window above the others");
+    pSettingsButton->setObjectName("flat");
+    pSettingsButton->setToolTip("Settings (Ctrl+,)");
     pHelpButton->setObjectName("flat");
     pHelpButton->setToolTip("Keyboard shortcuts (?)");
 
     statusBar()->setSizeGripEnabled(false);
     statusBar()->addWidget(_pSlideCounterLabel);
     statusBar()->addPermanentWidget(pHelpButton);
-    statusBar()->addPermanentWidget(_pOnTopButton);
-    statusBar()->addPermanentWidget(_pThemeButton);
+    statusBar()->addPermanentWidget(pSettingsButton);
     statusBar()->addPermanentWidget(new VersionWidget(this));
 
     // Buttons take focus with Tab only, so a mouse click never moves the keyboard focus away from the script.
@@ -120,8 +117,7 @@ MainWindow::MainWindow(QWidget *pParent)
     connect(_pFontBar, SIGNAL(changeFontSize(int)), _pBionicWidget, SLOT(setFontSize(int)));
     connect(_pDeck, SIGNAL(currentChanged(int)), this, SLOT(updateSlideCounter()));
     connect(_pPresentButton, SIGNAL(clicked()), this, SLOT(startPresentation()));
-    connect(_pThemeButton, SIGNAL(clicked()), this, SLOT(cycleTheme()));
-    connect(_pOnTopButton, SIGNAL(toggled(bool)), this, SLOT(setAlwaysOnTop(bool)));
+    connect(pSettingsButton, SIGNAL(clicked()), this, SLOT(openSettings()));
     connect(pHelpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
 
 #if defined(Q_OS_WIN)
@@ -136,7 +132,6 @@ MainWindow::MainWindow(QWidget *pParent)
     qApp->installEventFilter(this);
 
     _pBionicWidget->setFontSize(_pFontBar->fontSize());
-    _pThemeButton->setText("Theme: " + Theme::instance().modeName());
     loadSettings();
 
     // Keys go to the script from the start; buttons are reached with Tab.
@@ -155,8 +150,12 @@ void MainWindow::loadSettings()
     restoreGeometry(settings.value("window/geometry").toByteArray());
     _pFontBar->setFontSize(settings.value("ui/fontSize", _pFontBar->fontSize()).toInt());
 
-    // Setting the state triggers setAlwaysOnTop, which applies the window flag.
-    _pOnTopButton->setChecked(settings.value("ui/alwaysOnTop", true).toBool());
+    setAlwaysOnTop(settings.value("ui/alwaysOnTop", true).toBool());
+    _bStartTimerOnPresent = settings.value("ui/timerOnPresent", true).toBool();
+    _pBionicWidget->setBionicEnabled(settings.value("ui/bionic", true).toBool());
+    _pBionicWidget->setReadingBandVisible(settings.value("ui/bandVisible", false).toBool());
+    _pBionicWidget->setReadingBandPosition(settings.value("ui/bandPercent", _pBionicWidget->readingBandPosition()).toInt());
+    _pBionicWidget->setColumnChars(settings.value("ui/columnChars", _pBionicWidget->columnChars()).toInt());
 
     QString sScript = settings.value("files/script").toString();
     QString sSlides = settings.value("files/slides").toString();
@@ -178,7 +177,12 @@ void MainWindow::saveSettings()
 
     settings.setValue("window/geometry", saveGeometry());
     settings.setValue("ui/fontSize", _pFontBar->fontSize());
-    settings.setValue("ui/alwaysOnTop", _pOnTopButton->isChecked());
+    settings.setValue("ui/alwaysOnTop", _bAlwaysOnTop);
+    settings.setValue("ui/timerOnPresent", _bStartTimerOnPresent);
+    settings.setValue("ui/bionic", _pBionicWidget->isBionicEnabled());
+    settings.setValue("ui/bandVisible", _pBionicWidget->isReadingBandVisible());
+    settings.setValue("ui/bandPercent", _pBionicWidget->readingBandPosition());
+    settings.setValue("ui/columnChars", _pBionicWidget->columnChars());
     settings.setValue("files/script", _sScriptPath);
     settings.setValue("files/slides", _sSlidesPath);
 }
@@ -314,7 +318,7 @@ void MainWindow::startPresentation()
         _pPresentation->showMaximized();
     }
 
-    if (!_pChronometer->isRunning())
+    if (_bStartTimerOnPresent && !_pChronometer->isRunning())
     {
         _pChronometer->start();
     }
@@ -336,19 +340,41 @@ void MainWindow::stopPresentation()
     pPresentation->disconnect(this);
     pPresentation->close();
 
-    setWindowFlag(Qt::WindowStaysOnTopHint, _pOnTopButton->isChecked());
+    setWindowFlag(Qt::WindowStaysOnTopHint, _bAlwaysOnTop);
     show();
     activateWindow();
 }
 
-void MainWindow::cycleTheme()
+void MainWindow::openSettings()
 {
-    Theme::instance().cycle();
-    _pThemeButton->setText("Theme: " + Theme::instance().modeName());
+    SettingsValues values = {
+        static_cast<int>(Theme::instance().mode()),
+        _bAlwaysOnTop,
+        _pBionicWidget->isReadingBandVisible(),
+        _pBionicWidget->readingBandPosition(),
+        _pBionicWidget->columnChars(),
+        _pBionicWidget->isBionicEnabled(),
+        _bStartTimerOnPresent};
+    SettingsDialog dialog(values, this);
+
+    // Changes are applied as they are made; the dialog has nothing to confirm.
+    connect(&dialog, &SettingsDialog::themeChanged, this, [](int iTheme)
+            { Theme::instance().setMode(static_cast<Theme::Mode>(iTheme)); });
+    connect(&dialog, SIGNAL(alwaysOnTopChanged(bool)), this, SLOT(setAlwaysOnTop(bool)));
+    connect(&dialog, SIGNAL(bandVisibleChanged(bool)), _pBionicWidget, SLOT(setReadingBandVisible(bool)));
+    connect(&dialog, SIGNAL(bandPositionChanged(int)), _pBionicWidget, SLOT(setReadingBandPosition(int)));
+    connect(&dialog, SIGNAL(columnCharsChanged(int)), _pBionicWidget, SLOT(setColumnChars(int)));
+    connect(&dialog, SIGNAL(bionicChanged(bool)), _pBionicWidget, SLOT(setBionicEnabled(bool)));
+    connect(&dialog, &SettingsDialog::timerOnPresentChanged, this, [this](bool bEnabled)
+            { _bStartTimerOnPresent = bEnabled; });
+
+    dialog.exec();
 }
 
 void MainWindow::setAlwaysOnTop(bool bEnabled)
 {
+    _bAlwaysOnTop = bEnabled;
+
     // While presenting, the flag stays off; stopPresentation restores it.
     if (_pPresentation == nullptr)
     {
@@ -381,6 +407,7 @@ void MainWindow::showHelp()
         "<tr><td><b>PgUp / PgDn</b></td><td>Scroll a page</td></tr>"
         "<tr><td><b>Home / g, End / G</b></td><td>Top / bottom of the script</td></tr>"
         "<tr><td><b>Ctrl++ / Ctrl+-</b></td><td>Bigger / smaller font</td></tr>"
+        "<tr><td><b>Ctrl+,</b></td><td>Open the settings</td></tr>"
         "<tr><td><b>F5</b></td><td>Start the presentation</td></tr>"
         "<tr><td><b>b</b></td><td>Black out the presentation</td></tr>"
         "<tr><td><b>Esc / q</b></td><td>End the presentation</td></tr>"
@@ -471,6 +498,12 @@ bool MainWindow::handleScriptKey(int iKey, Qt::KeyboardModifiers modifiers, cons
 
     if (bCtrl)
     {
+        if (iKey == Qt::Key_Comma)
+        {
+            openSettings();
+            return true;
+        }
+
         if (iKey == Qt::Key_Plus || iKey == Qt::Key_Equal)
         {
             _pFontBar->setFontSize(_pFontBar->fontSize() + 2);

@@ -62,10 +62,10 @@ private:
     SlideStripWidget *_pSlideStrip;
     QLabel *_pSlideCounterLabel;
     QPushButton *_pPresentButton;
-    QPushButton *_pThemeButton;
-    QPushButton *_pOnTopButton;
     PresentationWindow *_pPresentation;
     QString _sGoToBuffer;
+    bool _bAlwaysOnTop;
+    bool _bStartTimerOnPresent;
     QString _sScriptPath;
     QString _sSlidesPath;
 
@@ -75,7 +75,7 @@ private:
     void saveSettings();
 
 private slots:
-    void cycleTheme();
+    void openSettings();
     void setAlwaysOnTop(bool bEnabled);
     void showHelp();
     void updateSlideCounter();
