@@ -70,7 +70,7 @@ qt_add_resources(teleprompter "teleprompter_resources"
         ${TELEPROMPTER_TOKENS_FILE}
 )
 
-# Identificador fijo del paquete: Qt fija uno por defecto, pero en macOS conviene que no cambie.
+# Identificador del paquete en macOS.
 set(BUNDLE_ID dev.sigifredo.teleprompter)
 
 set_target_properties(teleprompter PROPERTIES
