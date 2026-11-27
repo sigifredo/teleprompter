@@ -77,6 +77,13 @@ void ChronometerWidget::stop()
     timeLabel_->setText(QStringLiteral("00:00"));
 }
 
+void ChronometerWidget::setActiveStyle(bool active)
+{
+    timeLabel_->setProperty("active", active ? "true" : "false");
+    style()->unpolish(timeLabel_);
+    style()->polish(timeLabel_);
+}
+
 void ChronometerWidget::updateTime()
 {
     const QTime zero(0, 0);
@@ -86,11 +93,4 @@ void ChronometerWidget::updateTime()
     const QString format = timeElapsed_ >= SecondsPerHour ? QStringLiteral("H:mm:ss") : QStringLiteral("mm:ss");
 
     timeLabel_->setText(zero.addSecs(timeElapsed_).toString(format));
-}
-
-void ChronometerWidget::setActiveStyle(bool active)
-{
-    timeLabel_->setProperty("active", active ? "true" : "false");
-    style()->unpolish(timeLabel_);
-    style()->polish(timeLabel_);
 }

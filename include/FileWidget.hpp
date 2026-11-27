@@ -46,17 +46,17 @@ public:
      */
     void setFileName(const QString &fileName);
 
-signals:
-    /**
-     * @brief Se emite con la ruta que el usuario eligió.
-     */
-    void fileSelected(const QString &filePath);
-
 public slots:
     /**
      * @brief Abre el diálogo para elegir un archivo.
      */
     void chooseFile();
+
+signals:
+    /**
+     * @brief Se emite con la ruta que el usuario eligió.
+     */
+    void fileSelected(const QString &filePath);
 
 private:
     QLabel *fileNameLabel_;

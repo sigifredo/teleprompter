@@ -65,11 +65,6 @@ void SlidePreviewWidget::resizeEvent(QResizeEvent *)
     updateImage();
 }
 
-void SlidePreviewWidget::deckCurrentChanged(int)
-{
-    updateImage();
-}
-
 QRect SlidePreviewWidget::slideArea() const
 {
     return QRect(0, CaptionHeight, width(), height() - CaptionHeight);
@@ -85,4 +80,9 @@ void SlidePreviewWidget::updateImage()
         image_.setDevicePixelRatio(ratio);
 
     update();
+}
+
+void SlidePreviewWidget::deckCurrentChanged(int)
+{
+    updateImage();
 }

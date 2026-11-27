@@ -37,15 +37,11 @@ class SlidePreviewWidget : public QWidget
 
 public:
     SlidePreviewWidget(SlideDeck *deck, int offset, const QString &caption, QWidget *parent = nullptr);
-
     QSize minimumSizeHint() const override;
 
 protected:
     void paintEvent(QPaintEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
-
-private slots:
-    void deckCurrentChanged(int index);
 
 private:
     SlideDeck *deck_;
@@ -55,6 +51,9 @@ private:
 
     QRect slideArea() const;
     void updateImage();
+
+private slots:
+    void deckCurrentChanged(int index);
 };
 
 #endif

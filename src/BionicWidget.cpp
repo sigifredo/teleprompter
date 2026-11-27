@@ -35,6 +35,11 @@ BionicWidget::BionicWidget(QWidget *parent)
     viewport()->setAcceptDrops(false);
 }
 
+int BionicWidget::columnChars() const
+{
+    return columnChars_;
+}
+
 bool BionicWidget::isBionicEnabled() const
 {
     return bionic_;
@@ -45,30 +50,16 @@ bool BionicWidget::isReadingBandVisible() const
     return bandVisible_;
 }
 
-int BionicWidget::columnChars() const
-{
-    return columnChars_;
-}
-
 int BionicWidget::readingBandPosition() const
 {
     return bandPercent_;
 }
 
-void BionicWidget::setBionicText(const QString &text)
+void BionicWidget::scrollPage(int direction)
 {
-    source_ = text;
-    markdown_ = false;
-    loaded_ = true;
-    render();
-}
+    QScrollBar *bar = verticalScrollBar();
 
-void BionicWidget::setBionicMarkdown(const QString &text)
-{
-    source_ = text;
-    markdown_ = true;
-    loaded_ = true;
-    render();
+    bar->setValue(bar->value() + direction * bar->pageStep() * PageScrollPercent / 100);
 }
 
 void BionicWidget::scrollStep(int direction)
@@ -86,28 +77,11 @@ void BionicWidget::scrollStep(int direction)
     bar->setValue(bar->value() + cursorRect(cursor).center().y() - bandCenter);
 }
 
-void BionicWidget::scrollPage(int direction)
-{
-    QScrollBar *bar = verticalScrollBar();
-
-    bar->setValue(bar->value() + direction * bar->pageStep() * PageScrollPercent / 100);
-}
-
 void BionicWidget::scrollToEdge(bool end)
 {
     QScrollBar *bar = verticalScrollBar();
 
     bar->setValue(end ? bar->maximum() : bar->minimum());
-}
-
-void BionicWidget::setFontSize(int fontSize)
-{
-    QFont newFont = font();
-
-    newFont.setPointSize(fontSize);
-    setFont(newFont);
-    updateColumn();
-    updatePadding();
 }
 
 void BionicWidget::setBionicEnabled(bool enabled)
@@ -124,10 +98,36 @@ void BionicWidget::setBionicEnabled(bool enabled)
     verticalScrollBar()->setValue(value);
 }
 
-void BionicWidget::setReadingBandVisible(bool visible)
+void BionicWidget::setBionicMarkdown(const QString &text)
 {
-    bandVisible_ = visible;
-    viewport()->update();
+    source_ = text;
+    markdown_ = true;
+    loaded_ = true;
+    render();
+}
+
+void BionicWidget::setBionicText(const QString &text)
+{
+    source_ = text;
+    markdown_ = false;
+    loaded_ = true;
+    render();
+}
+
+void BionicWidget::setColumnChars(int chars)
+{
+    columnChars_ = qBound(MinColumnChars, chars, MaxColumnChars);
+    updateColumn();
+}
+
+void BionicWidget::setFontSize(int fontSize)
+{
+    QFont newFont = font();
+
+    newFont.setPointSize(fontSize);
+    setFont(newFont);
+    updateColumn();
+    updatePadding();
 }
 
 void BionicWidget::setReadingBandPosition(int percent)
@@ -137,10 +137,10 @@ void BionicWidget::setReadingBandPosition(int percent)
     viewport()->update();
 }
 
-void BionicWidget::setColumnChars(int chars)
+void BionicWidget::setReadingBandVisible(bool visible)
 {
-    columnChars_ = qBound(MinColumnChars, chars, MaxColumnChars);
-    updateColumn();
+    bandVisible_ = visible;
+    viewport()->update();
 }
 
 void BionicWidget::paintEvent(QPaintEvent *event)
@@ -200,47 +200,6 @@ void BionicWidget::render()
     updatePadding();
 }
 
-void BionicWidget::renderText()
-{
-    QString result;
-    QString fixedText(source_);
-
-    fixedText
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace("\r", "\n")
-        .replace("\f", "\n")
-        .replace("\v", "\n")
-        .replace("\t", " ");
-
-    for (const QString &paragraph : fixedText.split("\n"))
-    {
-        if (paragraph.isEmpty())
-            continue;
-
-        QString newParagraph;
-
-        for (const QString &word : paragraph.split(" "))
-        {
-            const QString fixedWord = word.trimmed();
-
-            if (fixedWord.isEmpty())
-                continue;
-
-            const int boldPart = bionic_ ? fixedWord.length() / 2 : 0;
-
-            if (boldPart > 0)
-                newParagraph.append("<strong>" + fixedWord.left(boldPart) + "</strong>" + fixedWord.mid(boldPart) + " ");
-            else
-                newParagraph.append(fixedWord + " ");
-        }
-
-        result.append(newParagraph.trimmed().append("<br><br>"));
-    }
-
-    setHtml(result);
-}
-
 void BionicWidget::renderMarkdown()
 {
     document()->setMarkdown(source_);
@@ -284,6 +243,47 @@ void BionicWidget::renderMarkdown()
     }
 
     cursor.endEditBlock();
+}
+
+void BionicWidget::renderText()
+{
+    QString result;
+    QString fixedText(source_);
+
+    fixedText
+        .replace("<", "&lt;")
+        .replace(">", "&gt;")
+        .replace("\r", "\n")
+        .replace("\f", "\n")
+        .replace("\v", "\n")
+        .replace("\t", " ");
+
+    for (const QString &paragraph : fixedText.split("\n"))
+    {
+        if (paragraph.isEmpty())
+            continue;
+
+        QString newParagraph;
+
+        for (const QString &word : paragraph.split(" "))
+        {
+            const QString fixedWord = word.trimmed();
+
+            if (fixedWord.isEmpty())
+                continue;
+
+            const int boldPart = bionic_ ? fixedWord.length() / 2 : 0;
+
+            if (boldPart > 0)
+                newParagraph.append("<strong>" + fixedWord.left(boldPart) + "</strong>" + fixedWord.mid(boldPart) + " ");
+            else
+                newParagraph.append(fixedWord + " ");
+        }
+
+        result.append(newParagraph.trimmed().append("<br><br>"));
+    }
+
+    setHtml(result);
 }
 
 void BionicWidget::updateColumn()

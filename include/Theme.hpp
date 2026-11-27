@@ -49,32 +49,6 @@ public:
         Auto ///< Sigue el esquema de colores del sistema.
     };
 
-    static Theme &instance();
-
-    /**
-     * @brief Lee el modo guardado, aplica el tema y, en modo automático, lo mantiene al día con el sistema.
-     */
-    void load();
-
-    Mode mode() const { return mode_; }
-
-    /**
-     * @brief Indica si el tema aplicado es el oscuro, sea por el modo o por el sistema.
-     */
-    bool isDark() const;
-
-    /**
-     * @brief Nombre del tema aplicado en los tokens y en los recursos: "dark" o "light".
-     */
-    QString variantName() const;
-
-    /**
-     * @brief Valor de un token del tema aplicado, tal como está en el JSON.
-     *
-     * @return Una cadena vacía si no existe.
-     */
-    QString token(const QString &name) const;
-
     /**
      * @brief Color de un token. Si no existe devuelve un QColor inválido.
      */
@@ -85,10 +59,36 @@ public:
      */
     QString expand(const QString &templateText) const;
 
+    static Theme &instance();
+
+    /**
+     * @brief Indica si el tema aplicado es el oscuro, sea por el modo o por el sistema.
+     */
+    bool isDark() const;
+
+    /**
+     * @brief Lee el modo guardado, aplica el tema y, en modo automático, lo mantiene al día con el sistema.
+     */
+    void load();
+
+    Mode mode() const { return mode_; }
+
     /**
      * @brief Hoja de estilos base ya expandida.
      */
     QString styleSheet() const;
+
+    /**
+     * @brief Valor de un token del tema aplicado, tal como está en el JSON.
+     *
+     * @return Una cadena vacía si no existe.
+     */
+    QString token(const QString &name) const;
+
+    /**
+     * @brief Nombre del tema aplicado en los tokens y en los recursos: "dark" o "light".
+     */
+    QString variantName() const;
 
 public slots:
     /**
@@ -106,7 +106,6 @@ private:
     QHash<QString, QString> themeLight_;
 
     Theme();
-
     void apply();
     void loadTokens();
     void rebuildValues();

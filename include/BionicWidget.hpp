@@ -40,31 +40,27 @@ class BionicWidget : public QTextEdit
 public:
     /// Ancho de la columna de lectura, en caracteres: valor inicial y límites.
     static constexpr int DefaultColumnChars = 62;
+
     static constexpr int MinColumnChars = 40;
     static constexpr int MaxColumnChars = 100;
 
     /// Posición de la franja de lectura, como porcentaje del alto del visor: valor inicial y límites.
     static constexpr int DefaultBandPercent = 30;
+
     static constexpr int MinBandPercent = 15;
     static constexpr int MaxBandPercent = 60;
 
     explicit BionicWidget(QWidget *parent = nullptr);
-
+    int columnChars() const;
     bool isBionicEnabled() const;
     bool isReadingBandVisible() const;
-    int columnChars() const;
     int readingBandPosition() const;
 
 public slots:
     /**
-     * @brief Muestra un texto plano; los saltos de línea separan párrafos.
+     * @brief Mueve el guion una página, dejando algo de solapamiento.
      */
-    void setBionicText(const QString &text);
-
-    /**
-     * @brief Muestra un texto en Markdown, conservando encabezados, listas y énfasis.
-     */
-    void setBionicMarkdown(const QString &text);
+    void scrollPage(int direction);
 
     /**
      * @brief Mueve el guion una línea visual (dirección positiva baja, negativa sube).
@@ -72,20 +68,26 @@ public slots:
     void scrollStep(int direction);
 
     /**
-     * @brief Mueve el guion una página, dejando algo de solapamiento.
-     */
-    void scrollPage(int direction);
-
-    /**
      * @brief Lleva el guion al final, o al principio si `end` es false.
      */
     void scrollToEdge(bool end);
 
-    void setFontSize(int fontSize);
     void setBionicEnabled(bool enabled);
-    void setReadingBandVisible(bool visible);
-    void setReadingBandPosition(int percent);
+
+    /**
+     * @brief Muestra un texto en Markdown, conservando encabezados, listas y énfasis.
+     */
+    void setBionicMarkdown(const QString &text);
+
+    /**
+     * @brief Muestra un texto plano; los saltos de línea separan párrafos.
+     */
+    void setBionicText(const QString &text);
+
     void setColumnChars(int chars);
+    void setFontSize(int fontSize);
+    void setReadingBandPosition(int percent);
+    void setReadingBandVisible(bool visible);
 
 protected:
     void paintEvent(QPaintEvent *event) override;

@@ -55,9 +55,6 @@ public slots:
      */
     void stop();
 
-private slots:
-    void updateTime();
-
 private:
     QPushButton *startButton_;
     QLabel *timeLabel_;
@@ -65,6 +62,9 @@ private:
     int timeElapsed_ = 0;
 
     void setActiveStyle(bool active);
+
+private slots:
+    void updateTime();
 };
 
 #endif

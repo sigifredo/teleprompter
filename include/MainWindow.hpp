@@ -78,12 +78,6 @@ protected:
     void dropEvent(QDropEvent *event) override;
     bool eventFilter(QObject *object, QEvent *event) override;
 
-private slots:
-    void openSettings();
-    void setAlwaysOnTop(bool enabled);
-    void showHelp();
-    void updateSlideCounter();
-
 private:
     BionicWidget *bionicWidget_;
     ChronometerWidget *chronometer_;
@@ -102,11 +96,17 @@ private:
     bool startTimerOnPresent_ = false;
     bool vimKeys_ = false;
 
-    int translateKey(int key) const;
-    bool handleSlideKey(int key, bool plain);
     bool handleScriptKey(int key, Qt::KeyboardModifiers modifiers, const QString &text);
+    bool handleSlideKey(int key, bool plain);
     void loadSettings();
     void saveSettings();
+    int translateKey(int key) const;
+
+private slots:
+    void openSettings();
+    void setAlwaysOnTop(bool enabled);
+    void showHelp();
+    void updateSlideCounter();
 };
 
 #endif

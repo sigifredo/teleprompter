@@ -15,6 +15,16 @@ SlideDeck::SlideDeck(QObject *parent)
     document_ = new QPdfDocument(this);
 }
 
+int SlideDeck::count() const
+{
+    return document_->pageCount();
+}
+
+int SlideDeck::currentIndex() const
+{
+    return current_;
+}
+
 bool SlideDeck::load(const QString &path)
 {
     const QPdfDocument::Error error = document_->load(path);
@@ -29,16 +39,6 @@ bool SlideDeck::load(const QString &path)
     emit currentChanged(current_);
 
     return true;
-}
-
-int SlideDeck::count() const
-{
-    return document_->pageCount();
-}
-
-int SlideDeck::currentIndex() const
-{
-    return current_;
 }
 
 QImage SlideDeck::render(int index, const QSize &size) const

@@ -50,12 +50,12 @@ public:
     explicit SettingsDialog(const SettingsValues &values, QWidget *parent = nullptr);
 
 signals:
-    void themeChanged(int theme);
     void alwaysOnTopChanged(bool enabled);
-    void bandVisibleChanged(bool visible);
     void bandPositionChanged(int percent);
-    void columnCharsChanged(int chars);
+    void bandVisibleChanged(bool visible);
     void bionicChanged(bool enabled);
+    void columnCharsChanged(int chars);
+    void themeChanged(int theme);
     void timerOnPresentChanged(bool enabled);
     void vimKeysChanged(bool enabled);
 };

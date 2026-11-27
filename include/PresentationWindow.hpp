@@ -52,15 +52,15 @@ protected:
     void paintEvent(QPaintEvent *event) override;
     void resizeEvent(QResizeEvent *event) override;
 
-private slots:
-    void deckCurrentChanged(int index);
-
 private:
     SlideDeck *deck_;
     QImage slide_;
     bool blackout_ = false;
 
     void updateSlide();
+
+private slots:
+    void deckCurrentChanged(int index);
 };
 
 #endif

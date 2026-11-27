@@ -320,6 +320,207 @@ bool MainWindow::eventFilter(QObject *object, QEvent *event)
     return QMainWindow::eventFilter(object, event);
 }
 
+bool MainWindow::handleScriptKey(int key, Qt::KeyboardModifiers modifiers, const QString &text)
+{
+    const bool plain = modifiers == Qt::NoModifier;
+    const bool shift = modifiers == Qt::ShiftModifier;
+    const bool ctrl = (modifiers & ~Qt::ShiftModifier) == Qt::ControlModifier;
+
+    if (ctrl)
+    {
+        if (key == Qt::Key_Comma)
+        {
+            openSettings();
+            return true;
+        }
+
+        if (key == Qt::Key_Plus || key == Qt::Key_Equal)
+        {
+            fontBar_->incrementFontSize();
+            return true;
+        }
+
+        if (key == Qt::Key_Minus)
+        {
+            fontBar_->decrementFontSize();
+            return true;
+        }
+
+        return false;
+    }
+
+    if (text == "?" && (plain || shift))
+    {
+        showHelp();
+        return true;
+    }
+
+    if (vimKeys_ && shift && key == Qt::Key_G)
+    {
+        bionicWidget_->scrollToEdge(true);
+        return true;
+    }
+
+    if (!plain)
+        return false;
+
+    if (vimKeys_ && key == Qt::Key_G)
+    {
+        bionicWidget_->scrollToEdge(false);
+        return true;
+    }
+
+    switch (key)
+    {
+    case Qt::Key_Up:
+        bionicWidget_->scrollStep(-1);
+        return true;
+    case Qt::Key_Down:
+        bionicWidget_->scrollStep(1);
+        return true;
+    case Qt::Key_PageUp:
+        bionicWidget_->scrollPage(-1);
+        return true;
+    case Qt::Key_PageDown:
+        bionicWidget_->scrollPage(1);
+        return true;
+    case Qt::Key_Home:
+        bionicWidget_->scrollToEdge(false);
+        return true;
+    case Qt::Key_End:
+        bionicWidget_->scrollToEdge(true);
+        return true;
+    default:
+        return false;
+    }
+}
+
+bool MainWindow::handleSlideKey(int key, bool plain)
+{
+    if (deck_->count() == 0 || !plain)
+        return false;
+
+    if (key >= Qt::Key_0 && key <= Qt::Key_9)
+    {
+        goToBuffer_.append(QChar('0' + (key - Qt::Key_0)));
+        statusBar()->showMessage(tr("Go to slide: %1 (Enter)").arg(goToBuffer_));
+        return true;
+    }
+
+    if ((key == Qt::Key_Return || key == Qt::Key_Enter) && !goToBuffer_.isEmpty())
+    {
+        deck_->setCurrent(goToBuffer_.toInt() - 1);
+        goToBuffer_.clear();
+        statusBar()->clearMessage();
+        return true;
+    }
+
+    if (key == Qt::Key_Escape && !goToBuffer_.isEmpty())
+    {
+        goToBuffer_.clear();
+        statusBar()->clearMessage();
+        return true;
+    }
+
+    switch (key)
+    {
+    case Qt::Key_Left:
+        deck_->previous();
+        return true;
+    case Qt::Key_Right:
+        deck_->next();
+        return true;
+    case Qt::Key_F5:
+        startPresentation();
+        return true;
+    case Qt::Key_B:
+        if (presentation_ == nullptr)
+            return false;
+
+        presentation_->toggleBlackout();
+        return true;
+    default:
+        return false;
+    }
+}
+
+void MainWindow::loadSettings()
+{
+    QSettings settings;
+
+    restoreGeometry(settings.value("window/geometry").toByteArray());
+    fontBar_->setFontSize(settings.value("ui/fontSize", fontBar_->fontSize()).toInt());
+
+    setAlwaysOnTop(settings.value("ui/alwaysOnTop", true).toBool());
+    startTimerOnPresent_ = settings.value("ui/timerOnPresent", false).toBool();
+    vimKeys_ = settings.value("ui/vimKeys", false).toBool();
+    bionicWidget_->setBionicEnabled(settings.value("ui/bionic", true).toBool());
+    bionicWidget_->setReadingBandVisible(settings.value("ui/bandVisible", false).toBool());
+    bionicWidget_->setReadingBandPosition(settings.value("ui/bandPercent", bionicWidget_->readingBandPosition()).toInt());
+    bionicWidget_->setColumnChars(settings.value("ui/columnChars", bionicWidget_->columnChars()).toInt());
+
+    const QString script = settings.value("files/script").toString();
+    const QString slides = settings.value("files/slides").toString();
+
+    if (!script.isEmpty() && QFileInfo::exists(script))
+        openFile(script);
+
+    if (!slides.isEmpty() && QFileInfo::exists(slides))
+        openSlides(slides);
+}
+
+void MainWindow::saveSettings()
+{
+    QSettings settings;
+
+    settings.setValue("window/geometry", saveGeometry());
+    settings.setValue("ui/fontSize", fontBar_->fontSize());
+    settings.setValue("ui/alwaysOnTop", alwaysOnTop_);
+    settings.setValue("ui/timerOnPresent", startTimerOnPresent_);
+    settings.setValue("ui/vimKeys", vimKeys_);
+    settings.setValue("ui/bionic", bionicWidget_->isBionicEnabled());
+    settings.setValue("ui/bandVisible", bionicWidget_->isReadingBandVisible());
+    settings.setValue("ui/bandPercent", bionicWidget_->readingBandPosition());
+    settings.setValue("ui/columnChars", bionicWidget_->columnChars());
+    settings.setValue("files/script", scriptPath_);
+    settings.setValue("files/slides", slidesPath_);
+}
+
+int MainWindow::translateKey(int key) const
+{
+    // Las letras hacen de flechas: WASD por defecto, hjkl con las teclas de vim.
+    if (vimKeys_)
+    {
+        switch (key)
+        {
+        case Qt::Key_H:
+            return Qt::Key_Left;
+        case Qt::Key_L:
+            return Qt::Key_Right;
+        case Qt::Key_K:
+            return Qt::Key_Up;
+        case Qt::Key_J:
+            return Qt::Key_Down;
+        default:
+            return key;
+        }
+    }
+
+    switch (key)
+    {
+    case Qt::Key_A:
+        return Qt::Key_Left;
+    case Qt::Key_D:
+        return Qt::Key_Right;
+    case Qt::Key_W:
+        return Qt::Key_Up;
+    case Qt::Key_S:
+        return Qt::Key_Down;
+    default:
+        return key;
+    }
+}
+
 void MainWindow::openSettings()
 {
     const SettingsValues values = {
@@ -411,205 +612,4 @@ void MainWindow::updateSlideCounter()
         slideCounterLabel_->setText(tr("No slides"));
     else
         slideCounterLabel_->setText(tr("Slide %1 / %2").arg(deck_->currentIndex() + 1).arg(deck_->count()));
-}
-
-int MainWindow::translateKey(int key) const
-{
-    // Las letras hacen de flechas: WASD por defecto, hjkl con las teclas de vim.
-    if (vimKeys_)
-    {
-        switch (key)
-        {
-        case Qt::Key_H:
-            return Qt::Key_Left;
-        case Qt::Key_L:
-            return Qt::Key_Right;
-        case Qt::Key_K:
-            return Qt::Key_Up;
-        case Qt::Key_J:
-            return Qt::Key_Down;
-        default:
-            return key;
-        }
-    }
-
-    switch (key)
-    {
-    case Qt::Key_A:
-        return Qt::Key_Left;
-    case Qt::Key_D:
-        return Qt::Key_Right;
-    case Qt::Key_W:
-        return Qt::Key_Up;
-    case Qt::Key_S:
-        return Qt::Key_Down;
-    default:
-        return key;
-    }
-}
-
-bool MainWindow::handleSlideKey(int key, bool plain)
-{
-    if (deck_->count() == 0 || !plain)
-        return false;
-
-    if (key >= Qt::Key_0 && key <= Qt::Key_9)
-    {
-        goToBuffer_.append(QChar('0' + (key - Qt::Key_0)));
-        statusBar()->showMessage(tr("Go to slide: %1 (Enter)").arg(goToBuffer_));
-        return true;
-    }
-
-    if ((key == Qt::Key_Return || key == Qt::Key_Enter) && !goToBuffer_.isEmpty())
-    {
-        deck_->setCurrent(goToBuffer_.toInt() - 1);
-        goToBuffer_.clear();
-        statusBar()->clearMessage();
-        return true;
-    }
-
-    if (key == Qt::Key_Escape && !goToBuffer_.isEmpty())
-    {
-        goToBuffer_.clear();
-        statusBar()->clearMessage();
-        return true;
-    }
-
-    switch (key)
-    {
-    case Qt::Key_Left:
-        deck_->previous();
-        return true;
-    case Qt::Key_Right:
-        deck_->next();
-        return true;
-    case Qt::Key_F5:
-        startPresentation();
-        return true;
-    case Qt::Key_B:
-        if (presentation_ == nullptr)
-            return false;
-
-        presentation_->toggleBlackout();
-        return true;
-    default:
-        return false;
-    }
-}
-
-bool MainWindow::handleScriptKey(int key, Qt::KeyboardModifiers modifiers, const QString &text)
-{
-    const bool plain = modifiers == Qt::NoModifier;
-    const bool shift = modifiers == Qt::ShiftModifier;
-    const bool ctrl = (modifiers & ~Qt::ShiftModifier) == Qt::ControlModifier;
-
-    if (ctrl)
-    {
-        if (key == Qt::Key_Comma)
-        {
-            openSettings();
-            return true;
-        }
-
-        if (key == Qt::Key_Plus || key == Qt::Key_Equal)
-        {
-            fontBar_->incrementFontSize();
-            return true;
-        }
-
-        if (key == Qt::Key_Minus)
-        {
-            fontBar_->decrementFontSize();
-            return true;
-        }
-
-        return false;
-    }
-
-    if (text == "?" && (plain || shift))
-    {
-        showHelp();
-        return true;
-    }
-
-    if (vimKeys_ && shift && key == Qt::Key_G)
-    {
-        bionicWidget_->scrollToEdge(true);
-        return true;
-    }
-
-    if (!plain)
-        return false;
-
-    if (vimKeys_ && key == Qt::Key_G)
-    {
-        bionicWidget_->scrollToEdge(false);
-        return true;
-    }
-
-    switch (key)
-    {
-    case Qt::Key_Up:
-        bionicWidget_->scrollStep(-1);
-        return true;
-    case Qt::Key_Down:
-        bionicWidget_->scrollStep(1);
-        return true;
-    case Qt::Key_PageUp:
-        bionicWidget_->scrollPage(-1);
-        return true;
-    case Qt::Key_PageDown:
-        bionicWidget_->scrollPage(1);
-        return true;
-    case Qt::Key_Home:
-        bionicWidget_->scrollToEdge(false);
-        return true;
-    case Qt::Key_End:
-        bionicWidget_->scrollToEdge(true);
-        return true;
-    default:
-        return false;
-    }
-}
-
-void MainWindow::loadSettings()
-{
-    QSettings settings;
-
-    restoreGeometry(settings.value("window/geometry").toByteArray());
-    fontBar_->setFontSize(settings.value("ui/fontSize", fontBar_->fontSize()).toInt());
-
-    setAlwaysOnTop(settings.value("ui/alwaysOnTop", true).toBool());
-    startTimerOnPresent_ = settings.value("ui/timerOnPresent", false).toBool();
-    vimKeys_ = settings.value("ui/vimKeys", false).toBool();
-    bionicWidget_->setBionicEnabled(settings.value("ui/bionic", true).toBool());
-    bionicWidget_->setReadingBandVisible(settings.value("ui/bandVisible", false).toBool());
-    bionicWidget_->setReadingBandPosition(settings.value("ui/bandPercent", bionicWidget_->readingBandPosition()).toInt());
-    bionicWidget_->setColumnChars(settings.value("ui/columnChars", bionicWidget_->columnChars()).toInt());
-
-    const QString script = settings.value("files/script").toString();
-    const QString slides = settings.value("files/slides").toString();
-
-    if (!script.isEmpty() && QFileInfo::exists(script))
-        openFile(script);
-
-    if (!slides.isEmpty() && QFileInfo::exists(slides))
-        openSlides(slides);
-}
-
-void MainWindow::saveSettings()
-{
-    QSettings settings;
-
-    settings.setValue("window/geometry", saveGeometry());
-    settings.setValue("ui/fontSize", fontBar_->fontSize());
-    settings.setValue("ui/alwaysOnTop", alwaysOnTop_);
-    settings.setValue("ui/timerOnPresent", startTimerOnPresent_);
-    settings.setValue("ui/vimKeys", vimKeys_);
-    settings.setValue("ui/bionic", bionicWidget_->isBionicEnabled());
-    settings.setValue("ui/bandVisible", bionicWidget_->isReadingBandVisible());
-    settings.setValue("ui/bandPercent", bionicWidget_->readingBandPosition());
-    settings.setValue("ui/columnChars", bionicWidget_->columnChars());
-    settings.setValue("files/script", scriptPath_);
-    settings.setValue("files/slides", slidesPath_);
 }

@@ -37,46 +37,6 @@ Theme::Theme()
     rebuildValues();
 }
 
-Theme &Theme::instance()
-{
-    static Theme theme;
-
-    return theme;
-}
-
-void Theme::load()
-{
-    const int mode = QSettings().value("ui/theme", static_cast<int>(Mode::Dark)).toInt();
-
-    mode_ = mode >= static_cast<int>(Mode::Dark) && mode <= static_cast<int>(Mode::Auto) ? static_cast<Mode>(mode) : Mode::Dark;
-
-    // En modo automático el tema se vuelve a aplicar cuando el sistema cambia de esquema.
-    connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this]()
-            {
-        if (mode_ == Mode::Auto)
-            apply(); });
-
-    apply();
-}
-
-bool Theme::isDark() const
-{
-    if (mode_ == Mode::Auto)
-        return QGuiApplication::styleHints()->colorScheme() != Qt::ColorScheme::Light;
-
-    return mode_ == Mode::Dark;
-}
-
-QString Theme::variantName() const
-{
-    return isDark() ? QStringLiteral("dark") : QStringLiteral("light");
-}
-
-QString Theme::token(const QString &name) const
-{
-    return values_.value(name);
-}
-
 QColor Theme::color(const QString &name) const
 {
     const QString value = values_.value(name);
@@ -109,6 +69,36 @@ QString Theme::expand(const QString &templateText) const
     return out;
 }
 
+Theme &Theme::instance()
+{
+    static Theme theme;
+
+    return theme;
+}
+
+bool Theme::isDark() const
+{
+    if (mode_ == Mode::Auto)
+        return QGuiApplication::styleHints()->colorScheme() != Qt::ColorScheme::Light;
+
+    return mode_ == Mode::Dark;
+}
+
+void Theme::load()
+{
+    const int mode = QSettings().value("ui/theme", static_cast<int>(Mode::Dark)).toInt();
+
+    mode_ = mode >= static_cast<int>(Mode::Dark) && mode <= static_cast<int>(Mode::Auto) ? static_cast<Mode>(mode) : Mode::Dark;
+
+    // En modo automático el tema se vuelve a aplicar cuando el sistema cambia de esquema.
+    connect(QGuiApplication::styleHints(), &QStyleHints::colorSchemeChanged, this, [this]()
+            {
+        if (mode_ == Mode::Auto)
+            apply(); });
+
+    apply();
+}
+
 QString Theme::styleSheet() const
 {
     QFile file(QStringLiteral(":/teleprompter/qss/teleprompter.qss"));
@@ -120,6 +110,16 @@ QString Theme::styleSheet() const
     }
 
     return expand(QString::fromUtf8(file.readAll()));
+}
+
+QString Theme::token(const QString &name) const
+{
+    return values_.value(name);
+}
+
+QString Theme::variantName() const
+{
+    return isDark() ? QStringLiteral("dark") : QStringLiteral("light");
 }
 
 void Theme::setMode(Mode mode)

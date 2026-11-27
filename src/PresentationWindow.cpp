@@ -50,11 +50,6 @@ void PresentationWindow::resizeEvent(QResizeEvent *)
     updateSlide();
 }
 
-void PresentationWindow::deckCurrentChanged(int)
-{
-    updateSlide();
-}
-
 void PresentationWindow::updateSlide()
 {
     const qreal ratio = devicePixelRatioF();
@@ -62,4 +57,9 @@ void PresentationWindow::updateSlide()
     slide_ = deck_->render(deck_->currentIndex(), size() * ratio);
     slide_.setDevicePixelRatio(ratio);
     update();
+}
+
+void PresentationWindow::deckCurrentChanged(int)
+{
+    updateSlide();
 }

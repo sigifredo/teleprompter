@@ -42,12 +42,12 @@ public:
      */
     void setDeck(SlideDeck *deck);
 
+private:
+    SlideDeck *deck_ = nullptr;
+
 private slots:
     void deckCurrentChanged(int index);
     void rowActivated(int row);
-
-private:
-    SlideDeck *deck_ = nullptr;
 };
 
 #endif

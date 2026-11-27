@@ -38,13 +38,6 @@ public:
     explicit SlideDeck(QObject *parent = nullptr);
 
     /**
-     * @brief Abre un PDF y vuelve a la primera diapositiva.
-     *
-     * @return false si no se pudo abrir o no tiene páginas; en ese caso no cambia nada.
-     */
-    bool load(const QString &path);
-
-    /**
      * @brief Número de diapositivas.
      */
     int count() const;
@@ -55,14 +48,18 @@ public:
     int currentIndex() const;
 
     /**
+     * @brief Abre un PDF y vuelve a la primera diapositiva.
+     *
+     * @return false si no se pudo abrir o no tiene páginas; en ese caso no cambia nada.
+     */
+    bool load(const QString &path);
+
+    /**
      * @brief Dibuja una diapositiva dentro de `size`, conservando la proporción de la página.
      *
      * @return La imagen, o una imagen nula si el índice o el tamaño no son válidos.
      */
     QImage render(int index, const QSize &size) const;
-
-signals:
-    void currentChanged(int index);
 
 public slots:
     void next();
@@ -72,6 +69,9 @@ public slots:
      * @brief Cambia la diapositiva actual; ignora un índice fuera de rango o el mismo.
      */
     void setCurrent(int index);
+
+signals:
+    void currentChanged(int index);
 
 private:
     QPdfDocument *document_;

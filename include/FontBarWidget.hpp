@@ -36,7 +36,6 @@ public:
     static constexpr int DefaultFontSize = 31;
 
     explicit FontBarWidget(QWidget *parent = nullptr);
-
     int fontSize() const;
 
     /**
@@ -44,12 +43,12 @@ public:
      */
     void setFontSize(int fontSize);
 
-signals:
-    void changeFontSize(int fontSize);
-
 public slots:
     void decrementFontSize();
     void incrementFontSize();
+
+signals:
+    void changeFontSize(int fontSize);
 
 private:
     QLabel *fontSizeLabel_;
