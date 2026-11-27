@@ -68,6 +68,9 @@ SettingsDialog::SettingsDialog(const SettingsValues &values, QWidget *pParent)
     QCheckBox *pTimerCheck = new QCheckBox("Start the timer when presenting", this);
     pTimerCheck->setChecked(values.timerOnPresent);
 
+    QCheckBox *pVimCheck = new QCheckBox("Vim keys (h j k l) instead of WASD", this);
+    pVimCheck->setChecked(values.vimKeys);
+
     pForm->setVerticalSpacing(12);
     pForm->addRow("Theme", pThemeCombo);
     pForm->addRow("Window", pOnTopCheck);
@@ -76,6 +79,7 @@ SettingsDialog::SettingsDialog(const SettingsValues &values, QWidget *pParent)
     pForm->addRow("Column width", pColumnRow);
     pForm->addRow("Text", pBionicCheck);
     pForm->addRow("Presentation", pTimerCheck);
+    pForm->addRow("Keys", pVimCheck);
 
     QDialogButtonBox *pButtons = new QDialogButtonBox(QDialogButtonBox::Close, this);
 
@@ -87,6 +91,7 @@ SettingsDialog::SettingsDialog(const SettingsValues &values, QWidget *pParent)
     connect(pColumnSlider, SIGNAL(valueChanged(int)), this, SIGNAL(columnCharsChanged(int)));
     connect(pBionicCheck, SIGNAL(toggled(bool)), this, SIGNAL(bionicChanged(bool)));
     connect(pTimerCheck, SIGNAL(toggled(bool)), this, SIGNAL(timerOnPresentChanged(bool)));
+    connect(pVimCheck, SIGNAL(toggled(bool)), this, SIGNAL(vimKeysChanged(bool)));
     connect(pButtons, SIGNAL(rejected()), this, SLOT(reject()));
 
     pLayout->setSpacing(16);

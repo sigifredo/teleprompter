@@ -33,7 +33,7 @@
 #include <QTextStream>
 
 MainWindow::MainWindow(QWidget *pParent)
-    : QMainWindow(pParent), _pPresentation(nullptr), _bAlwaysOnTop(true), _bStartTimerOnPresent(true)
+    : QMainWindow(pParent), _pPresentation(nullptr), _bAlwaysOnTop(true), _bStartTimerOnPresent(false), _bVimKeys(false)
 {
     QWidget *pCentralWidget = new QWidget(this);
     QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, pCentralWidget);
@@ -151,7 +151,8 @@ void MainWindow::loadSettings()
     _pFontBar->setFontSize(settings.value("ui/fontSize", _pFontBar->fontSize()).toInt());
 
     setAlwaysOnTop(settings.value("ui/alwaysOnTop", true).toBool());
-    _bStartTimerOnPresent = settings.value("ui/timerOnPresent", true).toBool();
+    _bStartTimerOnPresent = settings.value("ui/timerOnPresent", false).toBool();
+    _bVimKeys = settings.value("ui/vimKeys", false).toBool();
     _pBionicWidget->setBionicEnabled(settings.value("ui/bionic", true).toBool());
     _pBionicWidget->setReadingBandVisible(settings.value("ui/bandVisible", false).toBool());
     _pBionicWidget->setReadingBandPosition(settings.value("ui/bandPercent", _pBionicWidget->readingBandPosition()).toInt());
@@ -179,6 +180,7 @@ void MainWindow::saveSettings()
     settings.setValue("ui/fontSize", _pFontBar->fontSize());
     settings.setValue("ui/alwaysOnTop", _bAlwaysOnTop);
     settings.setValue("ui/timerOnPresent", _bStartTimerOnPresent);
+    settings.setValue("ui/vimKeys", _bVimKeys);
     settings.setValue("ui/bionic", _pBionicWidget->isBionicEnabled());
     settings.setValue("ui/bandVisible", _pBionicWidget->isReadingBandVisible());
     settings.setValue("ui/bandPercent", _pBionicWidget->readingBandPosition());
@@ -354,7 +356,8 @@ void MainWindow::openSettings()
         _pBionicWidget->readingBandPosition(),
         _pBionicWidget->columnChars(),
         _pBionicWidget->isBionicEnabled(),
-        _bStartTimerOnPresent};
+        _bStartTimerOnPresent,
+        _bVimKeys};
     SettingsDialog dialog(values, this);
 
     // Changes are applied as they are made; the dialog has nothing to confirm.
@@ -367,6 +370,8 @@ void MainWindow::openSettings()
     connect(&dialog, SIGNAL(bionicChanged(bool)), _pBionicWidget, SLOT(setBionicEnabled(bool)));
     connect(&dialog, &SettingsDialog::timerOnPresentChanged, this, [this](bool bEnabled)
             { _bStartTimerOnPresent = bEnabled; });
+    connect(&dialog, &SettingsDialog::vimKeysChanged, this, [this](bool bEnabled)
+            { _bVimKeys = bEnabled; });
 
     dialog.exec();
 }
@@ -396,16 +401,21 @@ void MainWindow::showHelp()
     QLabel *pLabel = new QLabel(&dialog);
     QDialogButtonBox *pButtons = new QDialogButtonBox(QDialogButtonBox::Close, &dialog);
 
+    QString sPrevious = _bVimKeys ? "&larr; / h" : "&larr; / a";
+    QString sNext = _bVimKeys ? "&rarr; / l" : "&rarr; / d";
+    QString sScroll = _bVimKeys ? "&uarr; / k, &darr; / j" : "&uarr; / w, &darr; / s";
+    QString sEdges = _bVimKeys ? "Home / g, End / G" : "Home, End";
+
     pLabel->setTextFormat(Qt::RichText);
     pLabel->setText(
         "<h3>Keyboard shortcuts</h3>"
         "<table cellspacing='6'>"
-        "<tr><td><b>&larr; / h</b></td><td>Previous slide</td></tr>"
-        "<tr><td><b>&rarr; / l</b></td><td>Next slide</td></tr>"
+        "<tr><td><b>" + sPrevious + "</b></td><td>Previous slide</td></tr>"
+        "<tr><td><b>" + sNext + "</b></td><td>Next slide</td></tr>"
         "<tr><td><b>1-9 + Enter</b></td><td>Go to slide number</td></tr>"
-        "<tr><td><b>&uarr; / k, &darr; / j</b></td><td>Scroll the script</td></tr>"
+        "<tr><td><b>" + sScroll + "</b></td><td>Scroll the script</td></tr>"
         "<tr><td><b>PgUp / PgDn</b></td><td>Scroll a page</td></tr>"
-        "<tr><td><b>Home / g, End / G</b></td><td>Top / bottom of the script</td></tr>"
+        "<tr><td><b>" + sEdges + "</b></td><td>Top / bottom of the script</td></tr>"
         "<tr><td><b>Ctrl++ / Ctrl+-</b></td><td>Bigger / smaller font</td></tr>"
         "<tr><td><b>Ctrl+,</b></td><td>Open the settings</td></tr>"
         "<tr><td><b>F5</b></td><td>Start the presentation</td></tr>"
@@ -432,6 +442,45 @@ void MainWindow::updateSlideCounter()
     {
         _pSlideCounterLabel->setText(QString("Slide %1 / %2").arg(_pDeck->currentIndex() + 1).arg(_pDeck->count()));
     }
+}
+
+int MainWindow::translateKey(int iKey) const
+{
+    // The letter keys stand for the arrows: WASD by default, hjkl when the vim keys are enabled.
+    if (_bVimKeys)
+    {
+        switch (iKey)
+        {
+        case Qt::Key_H:
+            return Qt::Key_Left;
+        case Qt::Key_L:
+            return Qt::Key_Right;
+        case Qt::Key_K:
+            return Qt::Key_Up;
+        case Qt::Key_J:
+            return Qt::Key_Down;
+        default:
+            break;
+        }
+    }
+    else
+    {
+        switch (iKey)
+        {
+        case Qt::Key_A:
+            return Qt::Key_Left;
+        case Qt::Key_D:
+            return Qt::Key_Right;
+        case Qt::Key_W:
+            return Qt::Key_Up;
+        case Qt::Key_S:
+            return Qt::Key_Down;
+        default:
+            break;
+        }
+    }
+
+    return iKey;
 }
 
 bool MainWindow::handleSlideKey(int iKey, bool bPlain)
@@ -466,11 +515,9 @@ bool MainWindow::handleSlideKey(int iKey, bool bPlain)
     switch (iKey)
     {
     case Qt::Key_Left:
-    case Qt::Key_H:
         _pDeck->previous();
         return true;
     case Qt::Key_Right:
-    case Qt::Key_L:
         _pDeck->next();
         return true;
     case Qt::Key_F5:
@@ -525,7 +572,7 @@ bool MainWindow::handleScriptKey(int iKey, Qt::KeyboardModifiers modifiers, cons
         return true;
     }
 
-    if (bShift && iKey == Qt::Key_G)
+    if (_bVimKeys && bShift && iKey == Qt::Key_G)
     {
         _pBionicWidget->scrollToEdge(true);
         return true;
@@ -536,14 +583,18 @@ bool MainWindow::handleScriptKey(int iKey, Qt::KeyboardModifiers modifiers, cons
         return false;
     }
 
+    if (_bVimKeys && iKey == Qt::Key_G)
+    {
+        _pBionicWidget->scrollToEdge(false);
+        return true;
+    }
+
     switch (iKey)
     {
     case Qt::Key_Up:
-    case Qt::Key_K:
         _pBionicWidget->scrollStep(-1);
         return true;
     case Qt::Key_Down:
-    case Qt::Key_J:
         _pBionicWidget->scrollStep(1);
         return true;
     case Qt::Key_PageUp:
@@ -553,7 +604,6 @@ bool MainWindow::handleScriptKey(int iKey, Qt::KeyboardModifiers modifiers, cons
         _pBionicWidget->scrollPage(1);
         return true;
     case Qt::Key_Home:
-    case Qt::Key_G:
         _pBionicWidget->scrollToEdge(false);
         return true;
     case Qt::Key_End:
@@ -573,6 +623,12 @@ bool MainWindow::eventFilter(QObject *pObject, QEvent *pEvent)
         QKeyEvent *pKeyEvent = static_cast<QKeyEvent *>(pEvent);
         Qt::KeyboardModifiers modifiers = pKeyEvent->modifiers() & ~Qt::KeypadModifier;
         int iKey = pKeyEvent->key();
+
+        // Only a bare letter is translated, so Ctrl and Alt combinations keep their meaning.
+        if (modifiers == Qt::NoModifier)
+        {
+            iKey = translateKey(iKey);
+        }
 
         // Alt and Meta combinations are left alone so the mnemonics keep working.
         if (!(modifiers & (Qt::AltModifier | Qt::MetaModifier)))

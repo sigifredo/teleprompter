@@ -12,22 +12,23 @@ El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y e
 - Modo presentación: una segunda ventana muestra la diapositiva actual, a pantalla completa en el segundo monitor si existe, mientras la ventana principal queda como panel del presentador.
 - Vista del presentador con la diapositiva actual y la siguiente junto al guion.
 - Guion en Markdown (`.md`) que conserva encabezados, listas y énfasis con la lectura biónica aplicada.
-- Navegación con teclado: `←`/`h` y `→`/`l` para las diapositivas, `↑`/`k` y `↓`/`j` para el guion, `PgUp`/`PgDn`, `Home`/`g`, `End`/`G`, número seguido de `Enter` para ir a una diapositiva, `Ctrl++`/`Ctrl+-` para el tamaño de letra, `F5` para presentar, `b` para la pantalla en negro, `Esc`/`q` para salir y `?` para la ayuda de atajos.
+- Navegación con teclado: `←`/`a` y `→`/`d` para las diapositivas, `↑`/`w` y `↓`/`s` para el guion, `PgUp`/`PgDn`, `Home`, `End`, número seguido de `Enter` para ir a una diapositiva, `Ctrl++`/`Ctrl+-` para el tamaño de letra, `F5` para presentar, `b` para la pantalla en negro, `Esc`/`q` para salir y `?` para la ayuda de atajos.
 - Tema oscuro, claro y automático según el sistema, con el oscuro por defecto y una estética tipo GitHub de grises fríos con bordes finos y un único acento azul, con el contraste del texto en torno a 13:1 para cansar menos la vista.
 - Columna de lectura centrada con una franja de lectura opcional, desactivada por defecto.
-- Panel de configuración (`Ctrl+,`) con aplicación inmediata de los cambios: tema, mantener la ventana encima, franja de lectura visible y su posición, ancho de la columna, lectura biónica y arranque del cronómetro al presentar.
+- Teclas de vim (`h`, `j`, `k`, `l`, `g`, `G`) como opción del panel de configuración, en lugar de WASD y desactivadas por defecto.
+- Panel de configuración (`Ctrl+,`) con aplicación inmediata de los cambios: tema, mantener la ventana encima, franja de lectura visible y su posición, ancho de la columna, lectura biónica y arranque del cronómetro al presentar y teclas de vim.
 - Arrastrar y soltar archivos `.md`, `.txt` y `.pdf` sobre la ventana.
 - Persistencia de los últimos archivos, el tamaño de letra, el tema, la opción de mantener la ventana encima y la posición de la ventana.
 - Estado vacío con instrucciones cuando no hay guion ni diapositivas.
 - Ocultar el cursor y pantalla en negro en la ventana de presentación.
-- El cronómetro arranca al iniciar la presentación.
+- Opción para que el cronómetro arranque al iniciar la presentación, desactivada por defecto.
 
 ### Changed
 
 - La interfaz usa una barra de controles única con los archivos, el cronómetro, el tamaño de letra y el botón de presentar, y una barra de estado con el contador de diapositivas, la ayuda, los ajustes y la versión.
 - Los colores se definen como tokens en una hoja de estilos compartida por toda la aplicación, incluidos los diálogos.
 - Nuevo ícono de la aplicación, con la paleta fría: una pantalla con la línea de lectura resaltada sobre fondo oscuro.
-- Las teclas `↑`/`k` y `↓`/`j` mueven el guion exactamente una línea visual y la dejan en la franja de lectura, sea cual sea su altura, y el guion tiene espacio arriba y abajo para que la primera y la última línea también lleguen a la franja.
+- Las teclas de subir y bajar el guion (`↑`/`w` y `↓`/`s`, o `k` y `j` con vim) mueven el guion exactamente una línea visual y la dejan en la franja de lectura, sea cual sea su altura, y el guion tiene espacio arriba y abajo para que la primera y la última línea también lleguen a la franja.
 - El enlace del autor en el diálogo About apunta a `sigifredo.dev`.
 - El identificador del paquete es ahora `dev.sigifredo.teleprompter`.
 - La compilación requiere Qt 6 con el módulo Pdf y CMake 3.16 o superior; se elimina el soporte de Qt 5 y Android.

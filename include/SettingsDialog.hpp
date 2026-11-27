@@ -31,6 +31,7 @@ struct SettingsValues
     int columnChars;
     bool bionic;
     bool timerOnPresent;
+    bool vimKeys;
 };
 
 /**
@@ -51,6 +52,7 @@ signals:
     void columnCharsChanged(int iChars);
     void bionicChanged(bool bEnabled);
     void timerOnPresentChanged(bool bEnabled);
+    void vimKeysChanged(bool bEnabled);
 };
 
 #endif

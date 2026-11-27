@@ -66,9 +66,11 @@ private:
     QString _sGoToBuffer;
     bool _bAlwaysOnTop;
     bool _bStartTimerOnPresent;
+    bool _bVimKeys;
     QString _sScriptPath;
     QString _sSlidesPath;
 
+    int translateKey(int iKey) const;
     bool handleSlideKey(int iKey, bool bPlain);
     bool handleScriptKey(int iKey, Qt::KeyboardModifiers modifiers, const QString &sText);
     void loadSettings();
