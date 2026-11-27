@@ -5,8 +5,22 @@
 
 // qt
 #include <QBoxLayout>
+#include <QKeySequence>
 #include <QLabel>
 #include <QPushButton>
+
+namespace
+{
+// Texto de un atajo con Ctrl; en macOS Qt lo asigna a la tecla Command y así se muestra.
+QString shortcutText(int key)
+{
+    QString text = QKeySequence(Qt::CTRL | key).toString(QKeySequence::PortableText);
+#ifdef Q_OS_MACOS
+    text.replace(QStringLiteral("Ctrl"), QStringLiteral("Command"));
+#endif
+    return text;
+}
+} // namespace
 
 namespace
 {
@@ -27,8 +41,8 @@ FontBarWidget::FontBarWidget(QWidget *parent)
     fontSizeLabel_ = new QLabel(QString::number(DefaultFontSize), this);
     fontSizeLabel_->setProperty("role", "font-size");
 
-    plusButton->setToolTip(tr("Increase font size (Ctrl++)"));
-    minusButton->setToolTip(tr("Decrease font size (Ctrl+-)"));
+    plusButton->setToolTip(tr("Increase font size (%1)").arg(shortcutText(Qt::Key_Plus)));
+    minusButton->setToolTip(tr("Decrease font size (%1)").arg(shortcutText(Qt::Key_Minus)));
 
     connect(plusButton, &QPushButton::clicked, this, &FontBarWidget::incrementFontSize);
     connect(minusButton, &QPushButton::clicked, this, &FontBarWidget::decrementFontSize);

@@ -23,6 +23,7 @@
 #include <QDragEnterEvent>
 #include <QFileInfo>
 #include <QKeyEvent>
+#include <QKeySequence>
 #include <QLabel>
 #include <QMessageBox>
 #include <QMimeData>
@@ -31,6 +32,19 @@
 #include <QSettings>
 #include <QStatusBar>
 #include <QTextStream>
+
+namespace
+{
+// Texto de un atajo con Ctrl; en macOS Qt lo asigna a la tecla Command y así se muestra.
+QString shortcutText(int key)
+{
+    QString text = QKeySequence(Qt::CTRL | key).toString(QKeySequence::PortableText);
+#ifdef Q_OS_MACOS
+    text.replace(QStringLiteral("Ctrl"), QStringLiteral("Command"));
+#endif
+    return text;
+}
+} // namespace
 
 namespace
 {
@@ -109,7 +123,7 @@ MainWindow::MainWindow(QWidget *parent)
     auto *helpButton = new QPushButton(QStringLiteral("?"), this);
 
     settingsButton->setProperty("variant", "ghost");
-    settingsButton->setToolTip(tr("Settings (Ctrl+,)"));
+    settingsButton->setToolTip(tr("Settings (%1)").arg(shortcutText(Qt::Key_Comma)));
     helpButton->setProperty("variant", "ghost");
     helpButton->setToolTip(tr("Keyboard shortcuts (?)"));
 
@@ -590,8 +604,8 @@ void MainWindow::showHelp()
                    row(scroll, tr("Scroll the script")) +
                    row("PgUp / PgDn", tr("Scroll a page")) +
                    row(edges, tr("Top / bottom of the script")) +
-                   row("Ctrl++ / Ctrl+-", tr("Bigger / smaller font")) +
-                   row("Ctrl+,", tr("Open the settings")) +
+                   row(shortcutText(Qt::Key_Plus) + " / " + shortcutText(Qt::Key_Minus), tr("Bigger / smaller font")) +
+                   row(shortcutText(Qt::Key_Comma), tr("Open the settings")) +
                    row("F5", tr("Start the presentation")) +
                    row("b", tr("Black out the presentation")) +
                    row("Esc / q", tr("End the presentation")) +
