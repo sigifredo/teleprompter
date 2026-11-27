@@ -18,6 +18,7 @@ El formato sigue las convenciones de [Keep a Changelog](https://keepachangelog.c
 - **design**: `design/teleprompter.tokens.json` es la fuente única de los colores, y `design/build_icons.py` regenera los iconos de la aplicación y las marcas de las casillas a partir de él.
 - **SlideDeck**: avisa en el registro (`[SlideDeck]`) cuando un PDF no se puede abrir.
 - **proyecto**: `.gitattributes` con los finales de línea en LF.
+- **fuente**: el guion se muestra con Atkinson Hyperlegible Next, empaquetada en `resources/fonts/` junto con su licencia (SIL Open Font License 1.1).
 - **archivos**: arrastrar y soltar archivos `.md`, `.txt` y `.pdf` sobre la ventana. Se recuerdan los últimos archivos, el tamaño de letra, el tema, las opciones del panel de configuración y la posición de la ventana. Un estado vacío da instrucciones cuando no hay guion ni diapositivas.
 
 ### Cambiado
@@ -29,6 +30,7 @@ El formato sigue las convenciones de [Keep a Changelog](https://keepachangelog.c
 - **guion**: las teclas de subir y bajar (`↑`/`w` y `↓`/`s`, o `k` y `j` con vim) mueven el guion exactamente una línea visual y la dejan en la franja de lectura, sea cual sea su altura. El guion tiene espacio arriba y abajo para que la primera y la última línea también lleguen a la franja.
 - **About**: el enlace del autor apunta a `sigifredo.dev`.
 - **paquete**: el identificador es ahora `dev.sigifredo.teleprompter`.
+- **macOS**: los atajos se muestran con Command en lugar de Ctrl.
 - **compilación**: por defecto se compila optimizado (`Release`, con `-O3`, `-DNDEBUG` y LTO si el compilador lo soporta); `Debug` pasa a ser opcional con `-DCMAKE_BUILD_TYPE=Debug`.
 - **compilación**: requiere Qt 6 con los módulos Pdf y Svg, un compilador con C++23 y CMake 3.20 o superior; se elimina el soporte de Qt 5 y Android. La configuración se reparte en `config/build.cmake`, `config/deps.cmake` y `config/platform.cmake`, y los archivos se listan en `HDRS` y `SRCS`.
 
