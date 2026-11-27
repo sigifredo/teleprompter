@@ -7,8 +7,11 @@
 #include <QPainter>
 #include <QRegularExpression>
 #include <QScrollBar>
+#include <QAbstractTextDocumentLayout>
 #include <QTextBlock>
+#include <QTextLayout>
 #include <QTextCursor>
+#include <QTextFrame>
 #include <QTextFragment>
 
 #define COLUMN_CHARS 62
@@ -61,6 +64,7 @@ void BionicWidget::setBionicText(const QString &sText)
     }
 
     setHtml(sResult);
+    updatePadding();
 }
 
 void BionicWidget::setBionicMarkdown(const QString &sText)
@@ -105,13 +109,24 @@ void BionicWidget::setBionicMarkdown(const QString &sText)
     }
 
     cursor.endEditBlock();
+    updatePadding();
 }
 
 void BionicWidget::scrollStep(int iDirection)
 {
+    // Move exactly one visual line and put it in the reading band, whatever its height
+    // (headings, lists and paragraph gaps included), so no line is ever skipped.
+    int iBandCenter = bandRect().center().y();
+    QTextCursor cursor = cursorForPosition(QPoint(viewport()->width() / 2, iBandCenter));
+
+    if (!cursor.movePosition(iDirection > 0 ? QTextCursor::Down : QTextCursor::Up))
+    {
+        return;
+    }
+
     QScrollBar *pBar = verticalScrollBar();
 
-    pBar->setValue(pBar->value() + iDirection * 3 * fontMetrics().lineSpacing());
+    pBar->setValue(pBar->value() + cursorRect(cursor).center().y() - iBandCenter);
 }
 
 void BionicWidget::setFontSize(const int &iFontSize)
@@ -121,6 +136,7 @@ void BionicWidget::setFontSize(const int &iFontSize)
 
     setFont(defaultFont);
     updateColumn();
+    updatePadding();
 }
 
 void BionicWidget::scrollPage(int iDirection)
@@ -144,19 +160,26 @@ void BionicWidget::paintEvent(QPaintEvent *pEvent)
     // Reading guide: a soft band where the eyes should rest while the text flows through it.
     QPainter painter(viewport());
     QColor color = palette().color(QPalette::Highlight);
-    int iHeight = static_cast<int>(fontMetrics().lineSpacing() * 1.5);
-    int iTop = viewport()->height() * 3 / 10;
+    QRect band = bandRect();
 
     color.setAlpha(34);
-    painter.fillRect(0, iTop, viewport()->width(), iHeight, color);
+    painter.fillRect(band, color);
     color.setAlpha(200);
-    painter.fillRect(0, iTop, 3, iHeight, color);
+    painter.fillRect(band.x(), band.y(), 3, band.height(), color);
+}
+
+QRect BionicWidget::bandRect() const
+{
+    int iHeight = static_cast<int>(fontMetrics().lineSpacing() * 1.5);
+
+    return QRect(0, viewport()->height() * 3 / 10, viewport()->width(), iHeight);
 }
 
 void BionicWidget::resizeEvent(QResizeEvent *pEvent)
 {
     QTextEdit::resizeEvent(pEvent);
     updateColumn();
+    updatePadding();
 }
 
 void BionicWidget::updateColumn()
@@ -167,4 +190,44 @@ void BionicWidget::updateColumn()
     int iMargin = qMax(16, (iAvailable - iColumn) / 2);
 
     setViewportMargins(iMargin, 0, iMargin, 0);
+}
+
+void BionicWidget::updatePadding()
+{
+    // Space above and below the text lets the first and the last line reach the reading band.
+    // Its size depends on the height of those lines (a heading is taller than a paragraph line).
+    QTextFrame *pRoot = document()->rootFrame();
+    QTextFrameFormat format = pRoot->frameFormat();
+    int iTop = 0;
+    int iBottom = 0;
+
+    if (!document()->isEmpty())
+    {
+        int iCenter = bandRect().center().y();
+
+        iTop = qMax(0, iCenter - lineHalfHeight(document()->begin(), false));
+        iBottom = qMax(0, viewport()->height() - iCenter - lineHalfHeight(document()->lastBlock(), true));
+    }
+
+    if (format.topMargin() != iTop || format.bottomMargin() != iBottom)
+    {
+        format.setTopMargin(iTop);
+        format.setBottomMargin(iBottom);
+        pRoot->setFrameFormat(format);
+    }
+}
+
+int BionicWidget::lineHalfHeight(const QTextBlock &block, bool bLast) const
+{
+    // Asking for the block's rectangle makes the document lay it out, so its lines exist.
+    document()->documentLayout()->blockBoundingRect(block);
+
+    QTextLayout *pLayout = block.layout();
+
+    if (pLayout == nullptr || pLayout->lineCount() == 0)
+    {
+        return fontMetrics().lineSpacing() / 2;
+    }
+
+    return static_cast<int>(pLayout->lineAt(bLast ? pLayout->lineCount() - 1 : 0).height() / 2);
 }

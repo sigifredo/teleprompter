@@ -1,14 +1,26 @@
 # Teleprompter
 
- Teleprompter is an application designed to enhance reading efficiency and manage time effectively. Utilizing the concept of bionic reading, it aids users in improving their reading speed and comprehension by guiding the eyes through text with strategically highlighted focal points. Additionally, the app includes time control via a chronometer, allowing users to check the time while reading. This software is distributed under the terms of the GNU General Public License.
+Teleprompter es una aplicación para dar charlas y presentaciones con calma: muestra tu guion con lectura biónica, controla las diapositivas en un panel de presentador y mide el tiempo con un cronómetro. La lectura biónica guía la vista resaltando la primera parte de cada palabra, lo que ayuda a leer más rápido y con más comprensión. Este software se distribuye bajo los términos de la Licencia Pública General de GNU.
+
+## Características
+
+- Guion en Markdown (`.md`) o texto plano (`.txt`) con lectura biónica, en una columna centrada con una franja de lectura.
+- Diapositivas en PDF con una tira de miniaturas y la vista de la diapositiva actual y la siguiente.
+- Modo presentación en una ventana aparte, a pantalla completa en el segundo monitor si existe.
+- Cronómetro con inicio, pausa y parada, que arranca solo al presentar.
+- Tema oscuro, claro o automático según el sistema.
+- Atajos de teclado, incluidos los de vim (`h`, `j`, `k`, `l`).
+- Recuerda los últimos archivos, el tamaño de letra, el tema y la posición de la ventana.
 
 ## Uso
 
-Abre el guion con "Open script..." (archivos `.md` o `.txt`; el Markdown conserva encabezados, listas y énfasis con la lectura biónica aplicada) y las diapositivas con "Open slides..." (archivos `.pdf`; exporta tu presentación `.pptx` a PDF antes de abrirla). También puedes arrastrar los archivos sobre la ventana. La aplicación recuerda los últimos archivos, el tamaño de letra, el tema y la posición de la ventana.
+Abre el guion con "Open script..." (archivos `.md` o `.txt`; el Markdown conserva encabezados, listas y énfasis con la lectura biónica aplicada) y las diapositivas con "Open slides..." (archivos `.pdf`; exporta tu presentación `.pptx` a PDF antes de abrirla). También puedes arrastrar los archivos sobre la ventana.
 
-La ventana principal es el panel del presentador: a la izquierda el guion, en una columna centrada con una franja de lectura; a la derecha la diapositiva actual y la siguiente; abajo la tira de miniaturas. Con "Present (F5)" se abre una segunda ventana con la diapositiva actual, a pantalla completa en el segundo monitor si existe, y arranca el cronómetro. El guion y las diapositivas son independientes.
+La ventana principal es el panel del presentador: a la izquierda el guion, a la derecha la diapositiva actual y la siguiente, y abajo la tira de miniaturas. Con "Present (F5)" se abre una segunda ventana con la diapositiva actual y arranca el cronómetro. El guion y las diapositivas son independientes: las teclas de dirección horizontales cambian de diapositiva y las verticales mueven el guion.
 
-El tema por defecto es oscuro; el botón "Theme" de la barra de estado alterna entre oscuro, claro y automático (según el sistema).
+El tema por defecto es oscuro; el botón "Theme" de la barra de estado alterna entre oscuro, claro y automático. El botón "On top" mantiene la ventana principal encima de las demás.
+
+### Atajos de teclado
 
 | Tecla | Acción |
 | --- | --- |
@@ -22,8 +34,24 @@ El tema por defecto es oscuro; el botón "Theme" de la barra de estado alterna e
 | `F5` | Iniciar la presentación |
 | `b` | Pantalla en negro durante la presentación |
 | `Esc` / `q` | Salir de la presentación |
-| `?` | Mostrar esta ayuda de atajos |
+| `?` | Mostrar la ayuda de atajos |
 
 ## Compilación
 
-Requiere Qt 6 con los módulos Widgets y Pdf (en Debian: `qt6-base-dev` y `qt6-pdf-dev`). El identificador del paquete es `dev.sigifredo.teleprompter`.
+Requiere CMake 3.16 o superior y Qt 6 con los módulos Widgets y Pdf (en Debian: `qt6-base-dev` y `qt6-pdf-dev`).
+
+```
+cmake -S . -B build
+cmake --build build -j 8
+./build/bin/teleprompter
+```
+
+El identificador del paquete es `dev.sigifredo.teleprompter`.
+
+## Cambios
+
+El historial de versiones está en [CHANGELOG.md](CHANGELOG.md).
+
+## Licencia
+
+GNU General Public License, versión 3 o posterior.

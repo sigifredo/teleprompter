@@ -20,20 +20,22 @@ struct Tokens
     QColor script, scriptText, disabledBg, disabledText;
 };
 
+// Cool, low-chroma palettes designed in OKLCH (hue ~250). Text contrast is kept around
+// 13:1 instead of the maximum, because glare is what tires the eyes in long readings.
 Tokens darkTokens()
 {
     return {
-        "#121417", "#1c1f24", "#262a31", "#30353d", "#2c3139",
-        "#e4e6ea", "#9aa1ad", "#e0a458", "#14161a",
-        "#0e1013", "#eceef2", "#181b1f", "#5c6370"};
+        "#0e141c", "#171f27", "#222b35", "#2d3843", "#29313a",
+        "#d1dbe1", "#98a7b4", "#65d0dc", "#0e141c",
+        "#090f15", "#cdd8de", "#13191f", "#606a74"};
 }
 
 Tokens lightTokens()
 {
     return {
-        "#f6f7f9", "#e6e8ec", "#d9dce2", "#cbcfd6", "#cfd3da",
-        "#1d2127", "#5a616d", "#a8590f", "#ffffff",
-        "#ffffff", "#14161a", "#eceef1", "#9097a3"};
+        "#eff4f9", "#e0e7ee", "#d5dee6", "#c8d3dc", "#cad2da",
+        "#182230", "#4e5c6b", "#006e8e", "#ffffff",
+        "#fafcfe", "#182230", "#e7ecf0", "#828e98"};
 }
 }
 

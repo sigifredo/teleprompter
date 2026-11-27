@@ -20,6 +20,7 @@
 #define BIONICWIDGET_HPP
 
 // Qt
+#include <QTextBlock>
 #include <QTextEdit>
 
 class BionicWidget : public QTextEdit
@@ -42,7 +43,10 @@ protected:
     void resizeEvent(QResizeEvent *pEvent) override;
 
 private:
+    QRect bandRect() const;
+    int lineHalfHeight(const QTextBlock &block, bool bLast) const;
     void updateColumn();
+    void updatePadding();
 };
 
 #endif
