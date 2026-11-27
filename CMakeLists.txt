@@ -64,6 +64,10 @@ qt_add_resources(teleprompter "teleprompter_resources"
         resources/app-icons/teleprompter.icns
         resources/app-icons/teleprompter.ico
         resources/app-icons/teleprompter.png
+        resources/fonts/AtkinsonHyperlegibleNext-Bold.ttf
+        resources/fonts/AtkinsonHyperlegibleNext-BoldItalic.ttf
+        resources/fonts/AtkinsonHyperlegibleNext-Italic.ttf
+        resources/fonts/AtkinsonHyperlegibleNext-Regular.ttf
         resources/qss/teleprompter.qss
         resources/ui/dark/check.svg
         resources/ui/light/check.svg

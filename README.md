@@ -63,8 +63,10 @@ El identificador del paquete es `dev.sigifredo.teleprompter`.
 - `include/` y `src/`: cabeceras y fuentes, un par por clase.
 - `config/`: la configuración de CMake, repartida en compilación (`build.cmake`), dependencias (`deps.cmake`) y plataforma (`platform.cmake`).
 - `design/`: `teleprompter.tokens.json` con los colores, de los que se derivan la paleta de Qt y la hoja de estilos, y `build_icons.py`, que genera los iconos a partir de ellos (requiere Pillow).
-- `resources/`: la hoja de estilos (`qss/`), los iconos de la interfaz por tema (`ui/`) y los de la aplicación (`app-icons/`).
+- `resources/`: la hoja de estilos (`qss/`), los iconos de la interfaz por tema (`ui/`) los de la aplicación (`app-icons/`) y la fuente del visor (`fonts/`).
 
 ## Licencia
 
 GNU General Public License, versión 3 o posterior.
+
+El texto del guion se muestra con Atkinson Hyperlegible Next (`resources/fonts/`), que se distribuye bajo la SIL Open Font License 1.1; su licencia está en `resources/fonts/OFL.txt`.

@@ -23,6 +23,8 @@
 
 // qt
 #include <QApplication>
+#include <QFont>
+#include <QFontDatabase>
 #include <QScreen>
 
 namespace
@@ -40,6 +42,33 @@ namespace
 
         return QRect((screen.width() - width) / 2, (screen.height() - height) / 2, width, height);
     }
+
+    // Fuente del visor biónico: se empaqueta como recurso para que se vea igual en todas las plataformas.
+    void loadBundledFonts()
+    {
+        for (const QString style : {"Regular", "Italic", "Bold", "BoldItalic"})
+            QFontDatabase::addApplicationFont(":/teleprompter/fonts/AtkinsonHyperlegibleNext-" + style + ".ttf");
+    }
+
+    // Si la familia por defecto no existe en el sistema (p. ej. "Sans Serif"), Qt pierde tiempo resolviendo alias.
+    void ensureDefaultFontFamily()
+    {
+        QFont font = QGuiApplication::font();
+
+        if (QFontDatabase::hasFamily(font.family()))
+            return;
+
+        const QString family = QFontDatabase::systemFont(QFontDatabase::GeneralFont).family();
+
+        if (QFontDatabase::hasFamily(family))
+            font.setFamily(family);
+        else if (const QStringList families = QFontDatabase::families(); !families.isEmpty())
+            font.setFamily(families.first());
+        else
+            return;
+
+        QGuiApplication::setFont(font);
+    }
 } // namespace
 
 int main(int argc, char **argv)
@@ -50,6 +79,9 @@ int main(int argc, char **argv)
     QCoreApplication::setOrganizationDomain("sigifredo.dev");
     QCoreApplication::setApplicationName("teleprompter");
     QGuiApplication::setDesktopFileName("dev.sigifredo.teleprompter");
+
+    loadBundledFonts();
+    ensureDefaultFontFamily();
 
     app.setStyle("Fusion");
     Theme::instance().load();

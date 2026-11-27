@@ -5,6 +5,7 @@
 
 // qt
 #include <QAbstractTextDocumentLayout>
+#include <QFont>
 #include <QPainter>
 #include <QRegularExpression>
 #include <QScrollBar>
@@ -23,6 +24,9 @@ namespace
     constexpr int BandAlpha = 22;
     constexpr int BandBarWidth = 3;
 
+    // Familia del texto del visor; sus archivos viajan como recurso y se registran al arrancar (ver main.cpp).
+    const QString FontFamily = QStringLiteral("Atkinson Hyperlegible Next");
+
     // Cuánto de la página visible avanza scrollPage(), en porcentaje.
     constexpr int PageScrollPercent = 90;
 } // namespace
@@ -30,6 +34,7 @@ namespace
 BionicWidget::BionicWidget(QWidget *parent)
     : QTextEdit(parent)
 {
+    setFont(QFont(FontFamily));
     setReadOnly(true);
     setAcceptDrops(false);
     viewport()->setAcceptDrops(false);
