@@ -46,7 +46,7 @@ int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
 
-    QCoreApplication::setOrganizationName("Sigifredo");
+    QCoreApplication::setOrganizationName("sigifredo");
     QCoreApplication::setOrganizationDomain("sigifredo.dev");
     QCoreApplication::setApplicationName("teleprompter");
     QGuiApplication::setDesktopFileName("dev.sigifredo.teleprompter");
