@@ -1,4 +1,4 @@
-/**
+/*
  * Teleprompter: A bionic reading and time control application.
  * Copyright (C) 2024 Sigifredo Escobar Gómez
  *
@@ -16,6 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file CreditsDialog.hpp
+ * @brief Diálogo «Acerca de».
+ */
+
 #ifndef CREDITSDIALOG_HPP
 #define CREDITSDIALOG_HPP
 
@@ -23,13 +28,20 @@
 #include <QDialog>
 
 /**
- * @brief Diálogo "Acerca de": versión, autor y licencia.
+ * @brief Diálogo «Acerca de»: versión, autor y licencia.
+ *
+ * Reparte la información en tres pestañas: About, Author y Licence.
  */
 class CreditsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief Crea el diálogo.
+     *
+     * @param parent Widget padre.
+     */
     explicit CreditsDialog(QWidget *parent = nullptr);
 };
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Teleprompter: A bionic reading and time control application.
  * Copyright (C) 2024 Sigifredo Escobar Gómez
  *
@@ -16,13 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file Version.hpp
+ * @brief Nombre y versión del proyecto. CMake genera este archivo a partir de Version.hpp.in.
+ */
+
 #ifndef VERSION_HPP
 #define VERSION_HPP
 
+/// Número mayor de la versión.
 #define PROJECT_VERSION_MAJOR       @PROJECT_VERSION_MAJOR@
+
+/// Número menor de la versión.
 #define PROJECT_VERSION_MINOR       @PROJECT_VERSION_MINOR@
+
+/// Número de parche de la versión.
 #define PROJECT_VERSION_PATCH       @PROJECT_VERSION_PATCH@
+
+/// Nombre del proyecto.
 #define PROJECT_NAME                "@PROJECT_NAME@"
+
+/// Versión completa como texto, `major.minor.patch`; las compilaciones Debug añaden el sufijo `-debug`.
 #define PROJECT_VERSION             "@PROJECT_VERSION@"
 
 #endif

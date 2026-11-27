@@ -1,4 +1,4 @@
-/**
+/*
  * Teleprompter: A bionic reading and time control application.
  * Copyright (C) 2024 Sigifredo Escobar Gómez
  *
@@ -14,6 +14,11 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @file SlidePreviewWidget.hpp
+ * @brief Vista previa de una diapositiva.
  */
 
 #ifndef SLIDEPREVIEWWIDGET_HPP
@@ -36,23 +41,64 @@ class SlidePreviewWidget : public QWidget
     Q_OBJECT
 
 public:
+    /**
+     * @brief Crea la vista previa.
+     *
+     * @param deck Presentación de la que se toman las diapositivas; debe existir mientras exista la vista.
+     * @param offset Desfase respecto de la diapositiva actual: 0 la actual y 1 la siguiente.
+     * @param caption Título que se muestra encima de la diapositiva.
+     * @param parent Widget padre.
+     */
     SlidePreviewWidget(SlideDeck *deck, int offset, const QString &caption, QWidget *parent = nullptr);
+
+    /**
+     * @brief Tamaño mínimo: el del área de la diapositiva más el del título.
+     *
+     * @return El tamaño mínimo.
+     */
     QSize minimumSizeHint() const override;
 
 protected:
+    /**
+     * @brief Dibuja el título y la diapositiva con un borde.
+     *
+     * Sin diapositiva dibuja un recuadro discontinuo con el motivo: «No slides» o «End of slides».
+     *
+     * @param event Evento de pintado.
+     */
     void paintEvent(QPaintEvent *event) override;
+
+    /**
+     * @brief Vuelve a dibujar la diapositiva al nuevo tamaño.
+     *
+     * @param event Evento de cambio de tamaño.
+     */
     void resizeEvent(QResizeEvent *event) override;
 
 private:
-    SlideDeck *deck_;
-    int offset_;
-    QString caption_;
-    QImage image_;
+    QString caption_; ///< Título mostrado encima de la diapositiva.
+    SlideDeck *deck_; ///< Presentación de la que se toman las diapositivas.
+    QImage image_;    ///< Diapositiva dibujada; nula si no hay ninguna que mostrar.
+    int offset_;      ///< Desfase respecto de la diapositiva actual.
 
+    /**
+     * @brief Área bajo el título donde se dibuja la diapositiva.
+     *
+     * @return El rectángulo, en coordenadas del widget.
+     */
     QRect slideArea() const;
+
+    /**
+     * @brief Dibuja la diapositiva que está al desfase de la actual, al tamaño del área y con la densidad de píxeles de la pantalla, y repinta.
+     */
     void updateImage();
 
 private slots:
+    /**
+     * @brief Vuelve a dibujar la diapositiva cuando cambia la diapositiva actual.
+     *
+     * @param index Índice de la nueva diapositiva actual.
+     */
     void deckCurrentChanged(int index);
 };
 

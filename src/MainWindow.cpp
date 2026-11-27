@@ -524,14 +524,14 @@ int MainWindow::translateKey(int key) const
 void MainWindow::openSettings()
 {
     const SettingsValues values = {
-        static_cast<int>(Theme::instance().mode()),
-        alwaysOnTop_,
-        bionicWidget_->isReadingBandVisible(),
-        bionicWidget_->readingBandPosition(),
-        bionicWidget_->columnChars(),
-        bionicWidget_->isBionicEnabled(),
-        startTimerOnPresent_,
-        vimKeys_};
+        .alwaysOnTop = alwaysOnTop_,
+        .bandPercent = bionicWidget_->readingBandPosition(),
+        .bandVisible = bionicWidget_->isReadingBandVisible(),
+        .bionic = bionicWidget_->isBionicEnabled(),
+        .columnChars = bionicWidget_->columnChars(),
+        .theme = static_cast<int>(Theme::instance().mode()),
+        .timerOnPresent = startTimerOnPresent_,
+        .vimKeys = vimKeys_};
     SettingsDialog dialog(values, this);
 
     // Los cambios se aplican al hacerlos: el diálogo no tiene nada que confirmar.

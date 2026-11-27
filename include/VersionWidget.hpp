@@ -1,4 +1,4 @@
-/**
+/*
  * Teleprompter: A bionic reading and time control application.
  * Copyright (C) 2024 Sigifredo Escobar Gómez
  *
@@ -16,6 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file VersionWidget.hpp
+ * @brief Botón con la versión de la aplicación.
+ */
+
 #ifndef VERSIONWIDGET_HPP
 #define VERSIONWIDGET_HPP
 
@@ -30,9 +35,17 @@ class VersionWidget : public QWidget
     Q_OBJECT
 
 public:
+    /**
+     * @brief Crea el botón con la versión de la aplicación.
+     *
+     * @param parent Widget padre.
+     */
     explicit VersionWidget(QWidget *parent = nullptr);
 
 public slots:
+    /**
+     * @brief Abre el diálogo de créditos y espera a que se cierre.
+     */
     void showCredits();
 };
 

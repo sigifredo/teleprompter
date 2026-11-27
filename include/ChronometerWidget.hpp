@@ -1,4 +1,4 @@
-/**
+/*
  * Teleprompter: A bionic reading and time control application.
  * Copyright (C) 2024 Sigifredo Escobar Gómez
  *
@@ -14,6 +14,11 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @file ChronometerWidget.hpp
+ * @brief Cronómetro con botones de inicio, pausa y parada.
  */
 
 #ifndef CHRONOMETERWIDGET_HPP
@@ -37,10 +42,17 @@ class ChronometerWidget : public QWidget
     Q_OBJECT
 
 public:
+    /**
+     * @brief Crea el cronómetro, parado y en cero.
+     *
+     * @param parent Widget padre.
+     */
     explicit ChronometerWidget(QWidget *parent = nullptr);
 
     /**
      * @brief Indica si el cronómetro está corriendo.
+     *
+     * @return true si corre.
      */
     bool isRunning() const;
 
@@ -56,14 +68,22 @@ public slots:
     void stop();
 
 private:
-    QPushButton *startButton_;
-    QLabel *timeLabel_;
-    QTimer *timer_;
-    int timeElapsed_ = 0;
+    QPushButton *startButton_; ///< Botón de inicio y pausa.
+    int timeElapsed_ = 0;      ///< Segundos transcurridos.
+    QLabel *timeLabel_;        ///< Etiqueta con el tiempo transcurrido.
+    QTimer *timer_;            ///< Temporizador que avanza el tiempo cada segundo.
 
+    /**
+     * @brief Marca la etiqueta del tiempo con la propiedad `active` y repinta su estilo.
+     *
+     * @param active true mientras el cronómetro corre.
+     */
     void setActiveStyle(bool active);
 
 private slots:
+    /**
+     * @brief Suma un segundo y actualiza la etiqueta: mm:ss, o H:mm:ss pasada la hora.
+     */
     void updateTime();
 };
 

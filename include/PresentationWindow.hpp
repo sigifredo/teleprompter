@@ -1,4 +1,4 @@
-/**
+/*
  * Teleprompter: A bionic reading and time control application.
  * Copyright (C) 2024 Sigifredo Escobar Gómez
  *
@@ -16,6 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file PresentationWindow.hpp
+ * @brief Ventana de presentación.
+ */
+
 #ifndef PRESENTATIONWINDOW_HPP
 #define PRESENTATIONWINDOW_HPP
 
@@ -27,12 +32,20 @@ class SlideDeck;
 
 /**
  * @brief Ventana de presentación: la diapositiva actual, centrada sobre fondo negro y sin cursor.
+ *
+ * Sigue a la presentación: cuando cambia la diapositiva actual, la vuelve a dibujar.
  */
 class PresentationWindow : public QWidget
 {
     Q_OBJECT
 
 public:
+    /**
+     * @brief Crea la ventana con la diapositiva actual de una presentación.
+     *
+     * @param deck Presentación que se muestra; debe existir mientras exista la ventana.
+     * @param parent Widget padre.
+     */
     explicit PresentationWindow(SlideDeck *deck, QWidget *parent = nullptr);
 
 public slots:
@@ -48,18 +61,43 @@ signals:
     void closed();
 
 protected:
+    /**
+     * @brief Acepta el cierre y emite closed().
+     *
+     * @param event Evento de cierre.
+     */
     void closeEvent(QCloseEvent *event) override;
+
+    /**
+     * @brief Pinta el fondo negro y, salvo en la pantalla en negro, la diapositiva centrada.
+     *
+     * @param event Evento de pintado.
+     */
     void paintEvent(QPaintEvent *event) override;
+
+    /**
+     * @brief Vuelve a dibujar la diapositiva al nuevo tamaño de la ventana.
+     *
+     * @param event Evento de cambio de tamaño.
+     */
     void resizeEvent(QResizeEvent *event) override;
 
 private:
-    SlideDeck *deck_;
-    QImage slide_;
-    bool blackout_ = false;
+    bool blackout_ = false; ///< La pantalla en negro está activada.
+    SlideDeck *deck_;       ///< Presentación de la que se toma la diapositiva.
+    QImage slide_;          ///< Diapositiva actual, dibujada al tamaño de la ventana.
 
+    /**
+     * @brief Dibuja la diapositiva actual al tamaño de la ventana, con la densidad de píxeles de la pantalla, y repinta.
+     */
     void updateSlide();
 
 private slots:
+    /**
+     * @brief Vuelve a dibujar la diapositiva cuando cambia la diapositiva actual.
+     *
+     * @param index Índice de la nueva diapositiva actual.
+     */
     void deckCurrentChanged(int index);
 };
 

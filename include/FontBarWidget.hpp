@@ -1,4 +1,4 @@
-/**
+/*
  * Teleprompter: A bionic reading and time control application.
  * Copyright (C) 2024 Sigifredo Escobar Gómez
  *
@@ -16,6 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file FontBarWidget.hpp
+ * @brief Barra para cambiar el tamaño de la letra.
+ */
+
 #ifndef FONTBARWIDGET_HPP
 #define FONTBARWIDGET_HPP
 
@@ -26,32 +31,58 @@ class QLabel;
 
 /**
  * @brief Barra con los botones para agrandar y achicar la letra del guion.
+ *
+ * Cada pulsación cambia el tamaño en 2 puntos, y el tamaño no baja de 2.
  */
 class FontBarWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    /// Tamaño de letra inicial, en puntos.
-    static constexpr int DefaultFontSize = 31;
+    static constexpr int DefaultFontSize = 31; ///< Tamaño de letra inicial, en puntos.
 
+    /**
+     * @brief Crea la barra con el tamaño inicial DefaultFontSize.
+     *
+     * @param parent Widget padre.
+     */
     explicit FontBarWidget(QWidget *parent = nullptr);
+
+    /**
+     * @brief Tamaño de letra actual.
+     *
+     * @return El tamaño, en puntos.
+     */
     int fontSize() const;
 
     /**
      * @brief Fija el tamaño de letra y emite changeFontSize().
+     *
+     * @param fontSize Tamaño en puntos.
      */
     void setFontSize(int fontSize);
 
 public slots:
+    /**
+     * @brief Reduce el tamaño de letra en 2 puntos, sin bajar de 2.
+     */
     void decrementFontSize();
+
+    /**
+     * @brief Aumenta el tamaño de letra en 2 puntos.
+     */
     void incrementFontSize();
 
 signals:
+    /**
+     * @brief Se emite cuando se fija un tamaño de letra.
+     *
+     * @param fontSize Tamaño en puntos.
+     */
     void changeFontSize(int fontSize);
 
 private:
-    QLabel *fontSizeLabel_;
+    QLabel *fontSizeLabel_; ///< Etiqueta con el tamaño actual.
 };
 
 #endif

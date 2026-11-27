@@ -1,4 +1,4 @@
-/**
+/*
  * Teleprompter: A bionic reading and time control application.
  * Copyright (C) 2024 Sigifredo Escobar Gómez
  *
@@ -14,6 +14,11 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+/**
+ * @file FileWidget.hpp
+ * @brief Fila para elegir un archivo.
  */
 
 #ifndef FILEWIDGET_HPP
@@ -36,31 +41,40 @@ class FileWidget : public QWidget
 
 public:
     /**
+     * @brief Crea la fila, sin ningún archivo abierto.
+     *
      * @param buttonText Texto del botón; admite un mnemónico con `&`.
      * @param filter Filtro del diálogo de archivos, por ejemplo "Script (*.md *.txt)".
+     * @param parent Widget padre.
      */
     FileWidget(const QString &buttonText, const QString &filter, QWidget *parent = nullptr);
 
     /**
      * @brief Muestra el nombre del archivo abierto; el nombre completo queda en la ayuda emergente.
+     *
+     * Si el nombre no cabe, se abrevia por el medio.
+     *
+     * @param fileName Nombre del archivo, sin la carpeta.
      */
     void setFileName(const QString &fileName);
 
 public slots:
     /**
-     * @brief Abre el diálogo para elegir un archivo.
+     * @brief Abre el diálogo para elegir un archivo y, si se acepta, emite fileSelected().
      */
     void chooseFile();
 
 signals:
     /**
      * @brief Se emite con la ruta que el usuario eligió.
+     *
+     * @param filePath Ruta del archivo elegido.
      */
     void fileSelected(const QString &filePath);
 
 private:
-    QLabel *fileNameLabel_;
-    QString filter_;
+    QLabel *fileNameLabel_; ///< Etiqueta con el nombre del archivo abierto.
+    QString filter_;        ///< Filtro del diálogo de archivos.
 };
 
 #endif

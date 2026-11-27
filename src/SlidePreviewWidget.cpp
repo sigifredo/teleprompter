@@ -17,7 +17,7 @@ namespace
 } // namespace
 
 SlidePreviewWidget::SlidePreviewWidget(SlideDeck *deck, int offset, const QString &caption, QWidget *parent)
-    : QWidget(parent), deck_(deck), offset_(offset), caption_(caption)
+    : QWidget(parent), caption_(caption), deck_(deck), offset_(offset)
 {
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 

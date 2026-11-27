@@ -1,4 +1,4 @@
-/**
+/*
  * Teleprompter: A bionic reading and time control application.
  * Copyright (C) 2024 Sigifredo Escobar Gómez
  *
@@ -16,6 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file SettingsDialog.hpp
+ * @brief Panel de configuración.
+ */
+
 #ifndef SETTINGSDIALOG_HPP
 #define SETTINGSDIALOG_HPP
 
@@ -27,12 +32,12 @@
  */
 struct SettingsValues
 {
-    int theme;           ///< Índice del tema: 0 oscuro, 1 claro, 2 automático.
     bool alwaysOnTop;    ///< La ventana principal se mantiene encima de las demás.
-    bool bandVisible;    ///< Se muestra la franja de lectura.
     int bandPercent;     ///< Posición de la franja, como porcentaje del alto del guion.
-    int columnChars;     ///< Ancho de la columna de lectura, en caracteres.
+    bool bandVisible;    ///< Se muestra la franja de lectura.
     bool bionic;         ///< Lectura biónica activada.
+    int columnChars;     ///< Ancho de la columna de lectura, en caracteres.
+    int theme;           ///< Índice del tema: 0 oscuro, 1 claro, 2 automático.
     bool timerOnPresent; ///< El cronómetro arranca al iniciar la presentación.
     bool vimKeys;        ///< Teclas de vim en lugar de WASD.
 };
@@ -47,16 +52,69 @@ class SettingsDialog : public QDialog
     Q_OBJECT
 
 public:
+    /**
+     * @brief Crea el panel con los valores actuales.
+     *
+     * @param values Valores con los que se abre.
+     * @param parent Widget padre.
+     */
     explicit SettingsDialog(const SettingsValues &values, QWidget *parent = nullptr);
 
 signals:
+    /**
+     * @brief Se emite al cambiar si la ventana principal se mantiene encima de las demás.
+     *
+     * @param enabled true si se mantiene encima.
+     */
     void alwaysOnTopChanged(bool enabled);
+
+    /**
+     * @brief Se emite al mover la posición de la franja de lectura.
+     *
+     * @param percent Porcentaje del alto del guion, de BionicWidget::MinBandPercent a BionicWidget::MaxBandPercent.
+     */
     void bandPositionChanged(int percent);
+
+    /**
+     * @brief Se emite al mostrar u ocultar la franja de lectura.
+     *
+     * @param visible true si se muestra.
+     */
     void bandVisibleChanged(bool visible);
+
+    /**
+     * @brief Se emite al activar o desactivar la lectura biónica.
+     *
+     * @param enabled true si está activada.
+     */
     void bionicChanged(bool enabled);
+
+    /**
+     * @brief Se emite al cambiar el ancho de la columna de lectura.
+     *
+     * @param chars Ancho en caracteres, de BionicWidget::MinColumnChars a BionicWidget::MaxColumnChars.
+     */
     void columnCharsChanged(int chars);
+
+    /**
+     * @brief Se emite al cambiar el tema.
+     *
+     * @param theme Índice del tema: 0 oscuro, 1 claro, 2 automático.
+     */
     void themeChanged(int theme);
+
+    /**
+     * @brief Se emite al cambiar si el cronómetro arranca al iniciar la presentación.
+     *
+     * @param enabled true si arranca.
+     */
     void timerOnPresentChanged(bool enabled);
+
+    /**
+     * @brief Se emite al cambiar entre las teclas de vim y WASD.
+     *
+     * @param enabled true para las teclas de vim.
+     */
     void vimKeysChanged(bool enabled);
 };
 
