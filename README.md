@@ -15,11 +15,11 @@ Teleprompter es una aplicación para dar charlas y presentaciones: muestra guion
 
 ## Uso
 
-El guion se abre con "Open script..." (archivos `.md` o `.txt`; el Markdown conserva encabezados, listas y énfasis con la lectura biónica aplicada) y las diapositivas con "Open slides..." (archivos `.pdf`; una presentación `.pptx` se exporta a PDF antes de abrirla). También se pueden arrastrar los archivos sobre la ventana.
+El guion se abre con "Open script..." (archivos `.md` o `.txt`; el Markdown conserva encabezados, listas y énfasis con la lectura biónica aplicada) y las diapositivas con "Open slides..." (archivos `.pdf`). También se pueden arrastrar los archivos sobre la ventana.
 
 La ventana principal es el panel del presentador: a la izquierda el guion, a la derecha la diapositiva actual y la siguiente, y abajo la tira de miniaturas. Con "Present (F5)" se abre una segunda ventana con la diapositiva actual: a pantalla completa en el segundo monitor si existe, o maximizada si solo hay una pantalla. Mientras dura la presentación, la ventana principal no se mantiene encima de las demás. El guion y las diapositivas son independientes: las teclas de dirección horizontales cambian de diapositiva y las verticales mueven el guion.
 
-El botón "Settings" de la barra de estado (o `Ctrl+,`) abre el panel de configuración, donde los cambios se aplican al instante: el tema (oscuro por defecto, claro o automático según el sistema), mantener la ventana encima de las demás, mostrar la franja de lectura (desactivada por defecto) y su posición, el ancho de la columna, la lectura biónica, si el cronómetro arranca al presentar (desactivado por defecto) y las teclas de vim en lugar de WASD (desactivado por defecto).
+El botón "Settings" de la barra de estado (o `Ctrl+,`) abre el panel de configuración, donde los cambios se aplican al instante: el tema (oscuro por defecto, claro o automático según el sistema), mantener la ventana encima de las demás (activado por defecto), mostrar la franja de lectura (desactivada por defecto) y su posición, el ancho de la columna, la lectura biónica (activada por defecto), si el cronómetro arranca al presentar (desactivado por defecto) y las teclas de vim en lugar de WASD (desactivado por defecto).
 
 La configuración se guarda con `QSettings` (en Linux, en `~/.config/sigifredo/teleprompter.conf`; en macOS, en `~/Library/Preferences/`) al cerrar la ventana; el tema se guarda en cuanto se cambia.
 
@@ -63,7 +63,7 @@ El identificador del paquete es `dev.sigifredo.teleprompter`.
 - `include/` y `src/`: cabeceras y fuentes, un par por clase.
 - `config/`: la configuración de CMake, repartida en compilación (`build.cmake`), dependencias (`deps.cmake`) y plataforma (`platform.cmake`).
 - `design/`: `teleprompter.tokens.json` con los colores, de los que se derivan la paleta de Qt y la hoja de estilos, y `build_icons.py`, que genera los iconos a partir de ellos (requiere Pillow).
-- `resources/`: la hoja de estilos (`qss/`), los iconos de la interfaz por tema (`ui/`) los de la aplicación (`app-icons/`) y la fuente del visor (`fonts/`).
+- `resources/`: la hoja de estilos (`qss/`), los iconos de la interfaz por tema (`ui/`), los de la aplicación (`app-icons/`) y la fuente del visor (`fonts/`).
 
 ## Licencia
 
