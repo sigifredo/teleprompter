@@ -18,15 +18,11 @@ CreditsDialog::CreditsDialog(QWidget *pParent)
     QWidget *pInfoWidget = new QWidget(this);
     {
         QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, pInfoWidget);
-        QLabel *pIconLabel = new QLabel(pInfoWidget);
         QLabel *pAppInfoLabel = new QLabel(pInfoWidget);
 
         pLayout->setSpacing(10);
-        pIconLabel->setPixmap(QPixmap(QString::fromUtf8(":/s9art.png")));
-        pIconLabel->setAlignment(Qt::AlignCenter);
         pAppInfoLabel->setText("<h2>" PROJECT_NAME "</h2>" + QString::fromUtf8("Project version: ") + PROJECT_VERSION "<br>Qt version: " + qVersion());
 
-        pLayout->addWidget(pIconLabel);
         pLayout->addWidget(pAppInfoLabel);
         pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
     }
@@ -49,7 +45,7 @@ CreditsDialog::CreditsDialog(QWidget *pParent)
             QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, pAuthorTabWidget);
             QLabel *pAuthorLabel = new QLabel(pAuthorTabWidget);
 
-            pAuthorLabel->setText("<strong>Sigifredo Escobar Gómez</strong><br><em>Developer</em><br><a href=\"https://s9art.com/links/\">https://s9art.com/links/</a>");
+            pAuthorLabel->setText("<strong>Sigifredo Escobar Gómez</strong><br><em>Developer</em><br><a href=\"https://sigifredo.dev\">sigifredo.dev</a>");
 
             pLayout->addWidget(pAuthorLabel);
         }

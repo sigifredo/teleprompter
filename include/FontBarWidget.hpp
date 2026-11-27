@@ -35,11 +35,12 @@ public:
     FontBarWidget(QWidget *pParent = nullptr);
 
     int fontSize() const;
+    void setFontSize(int iFontSize);
 
 signals:
     void changeFontSize(const int &iFontSize);
 
-protected slots:
+public slots:
     void decrementFontSize();
     void incrementFontSize();
 

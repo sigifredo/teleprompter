@@ -18,15 +18,12 @@
 
 // Own
 #include <MainWindow.hpp>
+#include <Theme.hpp>
 #include <Version.hpp>
 
 // Qt
 #include <QApplication>
-#include <QFile>
 #include <QScreen>
-
-// std
-#include <iostream>
 
 QRect centerGeometry();
 
@@ -34,19 +31,20 @@ int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
 
-    QFile styleFile(":/styles.qss");
+    QCoreApplication::setOrganizationName("Sigifredo");
+    QCoreApplication::setOrganizationDomain("sigifredo.dev");
+    QCoreApplication::setApplicationName("teleprompter");
+    QGuiApplication::setDesktopFileName("dev.sigifredo.teleprompter");
 
-    if (styleFile.open(QFile::ReadOnly))
-    {
-        app.setStyleSheet(QLatin1String(styleFile.readAll()));
-    }
-    else
-    {
-        std::cerr << "[Error] Could not open style file." << std::endl;
-    }
+    app.setStyle("Fusion");
+    Theme::instance().load();
 
     MainWindow mw;
-    mw.setGeometry(centerGeometry());
+    if (!mw.hasSavedGeometry())
+    {
+        mw.setGeometry(centerGeometry());
+    }
+
     mw.setWindowTitle("Teleprompter v" PROJECT_VERSION);
     mw.show();
 
@@ -60,7 +58,7 @@ QRect centerGeometry()
     int screenWidth = screenGeometry.width();
     int screenHeight = screenGeometry.height();
 
-    int windowWidth = screenWidth * 0.5;
+    int windowWidth = screenWidth * 0.6;
     int windowHeight = screenHeight * 0.7;
 
     int posX = (screenWidth - windowWidth) / 2;

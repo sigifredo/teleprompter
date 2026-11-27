@@ -32,6 +32,9 @@ class PresentationWindow : public QWidget
 public:
     PresentationWindow(SlideDeck *pDeck, QWidget *pParent = nullptr);
 
+public slots:
+    void toggleBlackout();
+
 signals:
     void closed();
 
@@ -43,6 +46,7 @@ protected:
 private:
     SlideDeck *_pDeck;
     QImage _slide;
+    bool _bBlackout;
 
     void updateSlide();
 

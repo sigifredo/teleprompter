@@ -7,26 +7,34 @@
 #include <QBoxLayout>
 #include <QFileDialog>
 #include <QLabel>
+#include <QFontMetrics>
 #include <QPushButton>
+#include <QStyle>
 
 FileWidget::FileWidget(const QString &sButtonText, const QString &sFilter, QWidget *pParent)
     : QWidget(pParent), _sFilter(sFilter)
 {
-    QLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
 
-    _pFileNameLabel = new QLabel(this);
+    pLayout->setContentsMargins(0, 0, 0, 0);
+
+    _pFileNameLabel = new QLabel("No file", this);
+    _pFileNameLabel->setMaximumWidth(110);
     QPushButton *pOpenFileButton = new QPushButton(sButtonText, this);
 
     connect(pOpenFileButton, SIGNAL(clicked()), this, SLOT(chooseFile()));
 
     pLayout->addWidget(_pFileNameLabel);
-    pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
     pLayout->addWidget(pOpenFileButton);
 }
 
 void FileWidget::setFileName(const QString &sFileName)
 {
-    _pFileNameLabel->setText(sFileName);
+    _pFileNameLabel->setObjectName("fileName");
+    _pFileNameLabel->setText(_pFileNameLabel->fontMetrics().elidedText(sFileName, Qt::ElideMiddle, 110));
+    _pFileNameLabel->setToolTip(sFileName);
+    style()->unpolish(_pFileNameLabel);
+    style()->polish(_pFileNameLabel);
 }
 
 void FileWidget::chooseFile()

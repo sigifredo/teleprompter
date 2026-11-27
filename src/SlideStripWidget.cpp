@@ -37,7 +37,14 @@ void SlideStripWidget::setDeck(SlideDeck *pDeck)
     for (int i = 0; i < pDeck->count(); i++)
     {
         QImage image = pDeck->render(i, QSize(THUMBNAIL_WIDTH * 2, THUMBNAIL_HEIGHT * 2));
-        QListWidgetItem *pItem = new QListWidgetItem(QIcon(QPixmap::fromImage(image)), QString::number(i + 1), this);
+        QPixmap pixmap = QPixmap::fromImage(image);
+        QIcon icon;
+
+        // The same pixmap for the selected state avoids Qt's grey selection tint.
+        icon.addPixmap(pixmap, QIcon::Normal);
+        icon.addPixmap(pixmap, QIcon::Selected);
+
+        QListWidgetItem *pItem = new QListWidgetItem(icon, QString::number(i + 1), this);
 
         pItem->setTextAlignment(Qt::AlignHCenter);
     }

@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/">
         <file>styles.qss</file>
-        <file>s9art.png</file>
         <file>app-icons/teleprompter.icns</file>
         <file>app-icons/teleprompter.ico</file>
         <file>app-icons/teleprompter.png</file>

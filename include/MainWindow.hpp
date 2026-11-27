@@ -22,7 +22,9 @@
 #include <QMainWindow>
 
 class BionicWidget;
+class ChronometerWidget;
 class FileWidget;
+class FontBarWidget;
 class PresentationWindow;
 class QLabel;
 class QPushButton;
@@ -36,28 +38,46 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *pParent = nullptr);
 
+    bool hasSavedGeometry() const;
+
 public slots:
-    void fontSizeChanged(const int &iSize);
     void openFile(const QString &sFilePath);
     void openSlides(const QString &sFilePath);
     void startPresentation();
     void stopPresentation();
 
 protected:
+    void closeEvent(QCloseEvent *pEvent) override;
+    void dragEnterEvent(QDragEnterEvent *pEvent) override;
+    void dropEvent(QDropEvent *pEvent) override;
     bool eventFilter(QObject *pObject, QEvent *pEvent) override;
 
 private:
     BionicWidget *_pBionicWidget;
-    QLabel *_pFontSizeLabel;
+    ChronometerWidget *_pChronometer;
     FileWidget *_pFileWidget;
     FileWidget *_pSlidesFileWidget;
+    FontBarWidget *_pFontBar;
     SlideDeck *_pDeck;
     SlideStripWidget *_pSlideStrip;
     QLabel *_pSlideCounterLabel;
     QPushButton *_pPresentButton;
+    QPushButton *_pThemeButton;
+    QPushButton *_pOnTopButton;
     PresentationWindow *_pPresentation;
+    QString _sGoToBuffer;
+    QString _sScriptPath;
+    QString _sSlidesPath;
+
+    bool handleSlideKey(int iKey, bool bPlain);
+    bool handleScriptKey(int iKey, Qt::KeyboardModifiers modifiers, const QString &sText);
+    void loadSettings();
+    void saveSettings();
 
 private slots:
+    void cycleTheme();
+    void setAlwaysOnTop(bool bEnabled);
+    void showHelp();
     void updateSlideCounter();
 };
 

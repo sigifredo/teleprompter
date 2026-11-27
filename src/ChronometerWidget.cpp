@@ -15,7 +15,9 @@
 ChronometerWidget::ChronometerWidget(QWidget *pParent)
     : QWidget(pParent), _iTimeElapsed(0)
 {
-    QLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+
+    pLayout->setContentsMargins(0, 0, 0, 0);
     _pTimer = new QTimer(this);
 
     _pStartButton = new QPushButton("St&art", this);
@@ -30,11 +32,9 @@ ChronometerWidget::ChronometerWidget(QWidget *pParent)
     connect(_pStartButton, SIGNAL(clicked()), this, SLOT(start()));
     connect(pStopButton, SIGNAL(clicked()), this, SLOT(stop()));
 
-    pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
     pLayout->addWidget(_pStartButton);
     pLayout->addWidget(_pTimeLabel);
     pLayout->addWidget(pStopButton);
-    pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
 }
 
 void ChronometerWidget::start()
@@ -51,6 +51,11 @@ void ChronometerWidget::start()
         _pStartButton->setText("P&ause");
         setTimerActiveStyle(true);
     }
+}
+
+bool ChronometerWidget::isRunning() const
+{
+    return _pTimer->isActive();
 }
 
 void ChronometerWidget::stop()

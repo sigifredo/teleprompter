@@ -17,7 +17,7 @@ if (APPLE)
     set(MACOSX_BUNDLE_ICON_FILE teleprompter.icns)
 
     # And the following tells CMake where to find and install the file itself.
-    set(app_icon "${CMAKE_CURRENT_SOURCE_DIR}/resources/teleprompter.icns")
+    set(app_icon "${CMAKE_CURRENT_SOURCE_DIR}/resources/app-icons/teleprompter.icns")
     set_source_files_properties(${app_icon} PROPERTIES
            MACOSX_PACKAGE_LOCATION "Resources")
 
@@ -35,7 +35,9 @@ set(PROJECT_SOURCES
     include/MainWindow.hpp
     include/PresentationWindow.hpp
     include/SlideDeck.hpp
+    include/SlidePreviewWidget.hpp
     include/SlideStripWidget.hpp
+    include/Theme.hpp
     include/VersionWidget.hpp
     src/BionicWidget.cpp
     src/ChronometerWidget.cpp
@@ -46,7 +48,9 @@ set(PROJECT_SOURCES
     src/MainWindow.cpp
     src/PresentationWindow.cpp
     src/SlideDeck.cpp
+    src/SlidePreviewWidget.cpp
     src/SlideStripWidget.cpp
+    src/Theme.cpp
     src/VersionWidget.cpp
     ${RESOURCES}
     ${app_icon}
@@ -62,12 +66,10 @@ target_link_libraries(teleprompter PRIVATE Qt6::Widgets Qt6::Pdf)
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an
 # explicit, fixed bundle identifier manually though.
-if(Qt6_VERSION VERSION_LESS 6.1.0)
-    set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.nowhere.teleprompter)
-endif()
+set(BUNDLE_ID dev.sigifredo.teleprompter)
 
 set_target_properties(teleprompter PROPERTIES
-    ${BUNDLE_ID_OPTION}
+    MACOSX_BUNDLE_GUI_IDENTIFIER ${BUNDLE_ID}
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE

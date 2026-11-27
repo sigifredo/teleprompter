@@ -33,7 +33,16 @@ public slots:
     void setBionicText(const QString &sText);
     void setBionicMarkdown(const QString &sText);
     void scrollStep(int iDirection);
+    void scrollPage(int iDirection);
+    void scrollToEdge(bool bEnd);
     void setFontSize(const int &iFontSize);
+
+protected:
+    void paintEvent(QPaintEvent *pEvent) override;
+    void resizeEvent(QResizeEvent *pEvent) override;
+
+private:
+    void updateColumn();
 };
 
 #endif

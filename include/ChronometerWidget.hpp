@@ -33,6 +33,8 @@ class ChronometerWidget : public QWidget
 public:
     ChronometerWidget(QWidget *pParent = nullptr);
 
+    bool isRunning() const;
+
 public slots:
     void start();
     void stop();

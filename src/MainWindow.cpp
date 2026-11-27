@@ -8,18 +8,27 @@
 #include <FontBarWidget.hpp>
 #include <PresentationWindow.hpp>
 #include <SlideDeck.hpp>
+#include <SlidePreviewWidget.hpp>
 #include <SlideStripWidget.hpp>
+#include <Theme.hpp>
 #include <VersionWidget.hpp>
 
 // Qt
 #include <QApplication>
 #include <QBoxLayout>
-#include <QKeyEvent>
-#include <QPushButton>
-#include <QScreen>
+#include <QCloseEvent>
+#include <QDialog>
+#include <QDialogButtonBox>
+#include <QDragEnterEvent>
 #include <QFileInfo>
+#include <QKeyEvent>
 #include <QLabel>
 #include <QMessageBox>
+#include <QMimeData>
+#include <QPushButton>
+#include <QScreen>
+#include <QSettings>
+#include <QStatusBar>
 #include <QTextStream>
 
 MainWindow::MainWindow(QWidget *pParent)
@@ -28,52 +37,92 @@ MainWindow::MainWindow(QWidget *pParent)
     QWidget *pCentralWidget = new QWidget(this);
     QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, pCentralWidget);
 
+    _pDeck = new SlideDeck(this);
     _pFileWidget = new FileWidget("Open &script...", "Script (*.md *.txt)", pCentralWidget);
     _pSlidesFileWidget = new FileWidget("Open s&lides...", "Slides (*.pdf)", pCentralWidget);
-    _pDeck = new SlideDeck(this);
+    _pChronometer = new ChronometerWidget(pCentralWidget);
+    _pFontBar = new FontBarWidget(pCentralWidget);
+    _pPresentButton = new QPushButton("Present (F5)", pCentralWidget);
+    _pBionicWidget = new BionicWidget(pCentralWidget);
     _pSlideStrip = new SlideStripWidget(pCentralWidget);
-    _pSlideStrip->hide();
 
-    QWidget *pSlideBar = new QWidget(pCentralWidget);
+    // Single control bar: files, timer, font size and presentation.
+    QWidget *pBar = new QWidget(pCentralWidget);
     {
-        QBoxLayout *pBarLayout = new QBoxLayout(QBoxLayout::LeftToRight, pSlideBar);
+        QBoxLayout *pBarLayout = new QBoxLayout(QBoxLayout::LeftToRight, pBar);
 
-        _pSlideCounterLabel = new QLabel("No slides", pSlideBar);
-        _pPresentButton = new QPushButton("&Present (F5)", pSlideBar);
-        _pPresentButton->setEnabled(false);
-
-        pBarLayout->addWidget(_pSlideCounterLabel);
-        pBarLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
+        pBarLayout->setContentsMargins(0, 0, 0, 0);
+        pBarLayout->setSpacing(16);
+        pBarLayout->addWidget(_pFileWidget);
+        pBarLayout->addWidget(_pSlidesFileWidget);
+        pBarLayout->addStretch(1);
+        pBarLayout->addWidget(_pChronometer);
+        pBarLayout->addWidget(_pFontBar);
         pBarLayout->addWidget(_pPresentButton);
     }
-    _pBionicWidget = new BionicWidget(pCentralWidget);
-    ChronometerWidget *pChronometerWidget = new ChronometerWidget(pCentralWidget);
-    FontBarWidget *pFontBarWidget = new FontBarWidget(pCentralWidget);
-    VersionWidget *pVersionWidget = new VersionWidget(pCentralWidget);
 
-    pLayout->setSpacing(0);
-    _pBionicWidget->setBionicText("Hello world!");
-    _pBionicWidget->setFontSize(pFontBarWidget->fontSize());
+    // Script on the left, current and next slide on the right (presenter view).
+    QWidget *pBody = new QWidget(pCentralWidget);
+    {
+        QBoxLayout *pBodyLayout = new QBoxLayout(QBoxLayout::LeftToRight, pBody);
+        QBoxLayout *pPreviewLayout = new QBoxLayout(QBoxLayout::TopToBottom);
+
+        pBodyLayout->setContentsMargins(0, 0, 0, 0);
+        pBodyLayout->setSpacing(12);
+        pPreviewLayout->setSpacing(8);
+        pPreviewLayout->addWidget(new SlidePreviewWidget(_pDeck, 0, "Current", pBody), 3);
+        pPreviewLayout->addWidget(new SlidePreviewWidget(_pDeck, 1, "Next", pBody), 2);
+
+        pBodyLayout->addWidget(_pBionicWidget, 3);
+        pBodyLayout->addLayout(pPreviewLayout, 2);
+    }
+
+    _pPresentButton->setObjectName("primary");
+    _pPresentButton->setEnabled(false);
+    _pPresentButton->setToolTip("Start the presentation (F5)");
+    _pBionicWidget->setPlaceholderText("Open a script (.md / .txt)\nand slides (.pdf)\n\nPress ? for shortcuts");
+
+    pLayout->setSpacing(10);
+    pLayout->addWidget(pBar);
+    pLayout->addWidget(pBody, 1);
+    pLayout->addWidget(_pSlideStrip);
+    setCentralWidget(pCentralWidget);
+
+    // Status bar: slide counter and view options.
+    _pSlideCounterLabel = new QLabel("No slides", this);
+    _pThemeButton = new QPushButton(this);
+    _pOnTopButton = new QPushButton("On top", this);
+    QPushButton *pHelpButton = new QPushButton("?", this);
+
+    _pThemeButton->setObjectName("flat");
+    _pThemeButton->setToolTip("Change theme (Dark / Light / Auto)");
+    _pOnTopButton->setObjectName("flat");
+    _pOnTopButton->setCheckable(true);
+    _pOnTopButton->setToolTip("Keep this window above the others");
+    pHelpButton->setObjectName("flat");
+    pHelpButton->setToolTip("Keyboard shortcuts (?)");
+
+    statusBar()->setSizeGripEnabled(false);
+    statusBar()->addWidget(_pSlideCounterLabel);
+    statusBar()->addPermanentWidget(pHelpButton);
+    statusBar()->addPermanentWidget(_pOnTopButton);
+    statusBar()->addPermanentWidget(_pThemeButton);
+    statusBar()->addPermanentWidget(new VersionWidget(this));
+
+    // Buttons take focus with Tab only, so a mouse click never moves the keyboard focus away from the script.
+    for (QPushButton *pButton : findChildren<QPushButton *>())
+    {
+        pButton->setFocusPolicy(Qt::TabFocus);
+    }
 
     connect(_pFileWidget, SIGNAL(fileSelected(QString)), this, SLOT(openFile(QString)));
     connect(_pSlidesFileWidget, SIGNAL(fileSelected(QString)), this, SLOT(openSlides(QString)));
+    connect(_pFontBar, SIGNAL(changeFontSize(int)), _pBionicWidget, SLOT(setFontSize(int)));
     connect(_pDeck, SIGNAL(currentChanged(int)), this, SLOT(updateSlideCounter()));
     connect(_pPresentButton, SIGNAL(clicked()), this, SLOT(startPresentation()));
-    connect(pFontBarWidget, SIGNAL(changeFontSize(int)), _pBionicWidget, SLOT(setFontSize(int)));
-
-    pLayout->addWidget(_pFileWidget);
-    pLayout->addWidget(_pSlidesFileWidget);
-    pLayout->addWidget(_pBionicWidget, 2);
-    pLayout->addWidget(_pSlideStrip);
-    pLayout->addWidget(pSlideBar);
-    pLayout->addWidget(pChronometerWidget);
-    pLayout->addWidget(pFontBarWidget);
-    pLayout->addWidget(pVersionWidget);
-
-    setCentralWidget(pCentralWidget);
-    setWindowFlag(Qt::WindowStaysOnTopHint);
-
-    qApp->installEventFilter(this);
+    connect(_pThemeButton, SIGNAL(clicked()), this, SLOT(cycleTheme()));
+    connect(_pOnTopButton, SIGNAL(toggled(bool)), this, SLOT(setAlwaysOnTop(bool)));
+    connect(pHelpButton, SIGNAL(clicked()), this, SLOT(showHelp()));
 
 #if defined(Q_OS_WIN)
     setWindowIcon(QIcon(":/app-icons/teleprompter.ico"));
@@ -82,11 +131,98 @@ MainWindow::MainWindow(QWidget *pParent)
 #else
     setWindowIcon(QIcon(":/app-icons/teleprompter.png"));
 #endif
+
+    setAcceptDrops(true);
+    qApp->installEventFilter(this);
+
+    _pBionicWidget->setFontSize(_pFontBar->fontSize());
+    _pThemeButton->setText("Theme: " + Theme::instance().modeName());
+    loadSettings();
+
+    // Keys go to the script from the start; buttons are reached with Tab.
+    _pBionicWidget->setFocus();
 }
 
-void MainWindow::fontSizeChanged(const int &iSize)
+bool MainWindow::hasSavedGeometry() const
 {
-    _pFontSizeLabel->setText(QString::number(iSize));
+    return QSettings().contains("window/geometry");
+}
+
+void MainWindow::loadSettings()
+{
+    QSettings settings;
+
+    restoreGeometry(settings.value("window/geometry").toByteArray());
+    _pFontBar->setFontSize(settings.value("ui/fontSize", _pFontBar->fontSize()).toInt());
+
+    // Setting the state triggers setAlwaysOnTop, which applies the window flag.
+    _pOnTopButton->setChecked(settings.value("ui/alwaysOnTop", true).toBool());
+
+    QString sScript = settings.value("files/script").toString();
+    QString sSlides = settings.value("files/slides").toString();
+
+    if (!sScript.isEmpty() && QFileInfo::exists(sScript))
+    {
+        openFile(sScript);
+    }
+
+    if (!sSlides.isEmpty() && QFileInfo::exists(sSlides))
+    {
+        openSlides(sSlides);
+    }
+}
+
+void MainWindow::saveSettings()
+{
+    QSettings settings;
+
+    settings.setValue("window/geometry", saveGeometry());
+    settings.setValue("ui/fontSize", _pFontBar->fontSize());
+    settings.setValue("ui/alwaysOnTop", _pOnTopButton->isChecked());
+    settings.setValue("files/script", _sScriptPath);
+    settings.setValue("files/slides", _sSlidesPath);
+}
+
+void MainWindow::closeEvent(QCloseEvent *pEvent)
+{
+    saveSettings();
+
+    if (_pPresentation != nullptr)
+    {
+        _pPresentation->disconnect(this);
+        _pPresentation->close();
+        _pPresentation = nullptr;
+    }
+
+    QMainWindow::closeEvent(pEvent);
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *pEvent)
+{
+    if (pEvent->mimeData()->hasUrls())
+    {
+        pEvent->acceptProposedAction();
+    }
+}
+
+void MainWindow::dropEvent(QDropEvent *pEvent)
+{
+    for (const QUrl &url : pEvent->mimeData()->urls())
+    {
+        QString sPath = url.toLocalFile();
+        QString sSuffix = QFileInfo(sPath).suffix().toLower();
+
+        if (sSuffix == "pdf")
+        {
+            openSlides(sPath);
+        }
+        else if (sSuffix == "md" || sSuffix == "txt")
+        {
+            openFile(sPath);
+        }
+    }
+
+    pEvent->acceptProposedAction();
 }
 
 void MainWindow::openFile(const QString &sFilePath)
@@ -98,9 +234,10 @@ void MainWindow::openFile(const QString &sFilePath)
         if (file.open(QFile::ReadOnly | QFile::Text))
         {
             QTextStream in(&file);
-
-            _pFileWidget->setFileName(QFileInfo(file).fileName());
             QString sText = in.readAll().trimmed();
+
+            _sScriptPath = sFilePath;
+            _pFileWidget->setFileName(QFileInfo(file).fileName());
 
             if (QFileInfo(file).suffix().compare("md", Qt::CaseInsensitive) == 0)
             {
@@ -129,9 +266,9 @@ void MainWindow::openSlides(const QString &sFilePath)
 
     if (_pDeck->load(sFilePath))
     {
+        _sSlidesPath = sFilePath;
         _pSlidesFileWidget->setFileName(QFileInfo(sFilePath).fileName());
         _pSlideStrip->setDeck(_pDeck);
-        _pSlideStrip->show();
         _pPresentButton->setEnabled(true);
         updateSlideCounter();
     }
@@ -177,6 +314,11 @@ void MainWindow::startPresentation()
         _pPresentation->showMaximized();
     }
 
+    if (!_pChronometer->isRunning())
+    {
+        _pChronometer->start();
+    }
+
     activateWindow();
     raise();
 }
@@ -194,56 +336,223 @@ void MainWindow::stopPresentation()
     pPresentation->disconnect(this);
     pPresentation->close();
 
-    setWindowFlag(Qt::WindowStaysOnTopHint, true);
+    setWindowFlag(Qt::WindowStaysOnTopHint, _pOnTopButton->isChecked());
     show();
     activateWindow();
 }
 
+void MainWindow::cycleTheme()
+{
+    Theme::instance().cycle();
+    _pThemeButton->setText("Theme: " + Theme::instance().modeName());
+}
+
+void MainWindow::setAlwaysOnTop(bool bEnabled)
+{
+    // While presenting, the flag stays off; stopPresentation restores it.
+    if (_pPresentation == nullptr)
+    {
+        bool bVisible = isVisible();
+
+        setWindowFlag(Qt::WindowStaysOnTopHint, bEnabled);
+
+        if (bVisible)
+        {
+            show();
+        }
+    }
+}
+
+void MainWindow::showHelp()
+{
+    QDialog dialog(this);
+    QBoxLayout *pLayout = new QBoxLayout(QBoxLayout::TopToBottom, &dialog);
+    QLabel *pLabel = new QLabel(&dialog);
+    QDialogButtonBox *pButtons = new QDialogButtonBox(QDialogButtonBox::Close, &dialog);
+
+    pLabel->setTextFormat(Qt::RichText);
+    pLabel->setText(
+        "<h3>Keyboard shortcuts</h3>"
+        "<table cellspacing='6'>"
+        "<tr><td><b>&larr; / h</b></td><td>Previous slide</td></tr>"
+        "<tr><td><b>&rarr; / l</b></td><td>Next slide</td></tr>"
+        "<tr><td><b>1-9 + Enter</b></td><td>Go to slide number</td></tr>"
+        "<tr><td><b>&uarr; / k, &darr; / j</b></td><td>Scroll the script</td></tr>"
+        "<tr><td><b>PgUp / PgDn</b></td><td>Scroll a page</td></tr>"
+        "<tr><td><b>Home / g, End / G</b></td><td>Top / bottom of the script</td></tr>"
+        "<tr><td><b>Ctrl++ / Ctrl+-</b></td><td>Bigger / smaller font</td></tr>"
+        "<tr><td><b>F5</b></td><td>Start the presentation</td></tr>"
+        "<tr><td><b>b</b></td><td>Black out the presentation</td></tr>"
+        "<tr><td><b>Esc / q</b></td><td>End the presentation</td></tr>"
+        "</table>");
+
+    connect(pButtons, SIGNAL(rejected()), &dialog, SLOT(reject()));
+
+    pLayout->addWidget(pLabel);
+    pLayout->addWidget(pButtons);
+
+    dialog.setWindowTitle("Shortcuts");
+    dialog.exec();
+}
+
 void MainWindow::updateSlideCounter()
 {
-    _pSlideCounterLabel->setText(QString("Slide %1 / %2").arg(_pDeck->currentIndex() + 1).arg(_pDeck->count()));
+    if (_pDeck->count() == 0)
+    {
+        _pSlideCounterLabel->setText("No slides");
+    }
+    else
+    {
+        _pSlideCounterLabel->setText(QString("Slide %1 / %2").arg(_pDeck->currentIndex() + 1).arg(_pDeck->count()));
+    }
+}
+
+bool MainWindow::handleSlideKey(int iKey, bool bPlain)
+{
+    if (_pDeck->count() == 0 || !bPlain)
+    {
+        return false;
+    }
+
+    if (iKey >= Qt::Key_0 && iKey <= Qt::Key_9)
+    {
+        _sGoToBuffer.append(QChar('0' + (iKey - Qt::Key_0)));
+        statusBar()->showMessage("Go to slide: " + _sGoToBuffer + " (Enter)");
+        return true;
+    }
+
+    if ((iKey == Qt::Key_Return || iKey == Qt::Key_Enter) && !_sGoToBuffer.isEmpty())
+    {
+        _pDeck->setCurrent(_sGoToBuffer.toInt() - 1);
+        _sGoToBuffer.clear();
+        statusBar()->clearMessage();
+        return true;
+    }
+
+    if (iKey == Qt::Key_Escape && !_sGoToBuffer.isEmpty())
+    {
+        _sGoToBuffer.clear();
+        statusBar()->clearMessage();
+        return true;
+    }
+
+    switch (iKey)
+    {
+    case Qt::Key_Left:
+    case Qt::Key_H:
+        _pDeck->previous();
+        return true;
+    case Qt::Key_Right:
+    case Qt::Key_L:
+        _pDeck->next();
+        return true;
+    case Qt::Key_F5:
+        startPresentation();
+        return true;
+    case Qt::Key_B:
+        if (_pPresentation != nullptr)
+        {
+            _pPresentation->toggleBlackout();
+            return true;
+        }
+        break;
+    default:
+        break;
+    }
+
+    return false;
+}
+
+bool MainWindow::handleScriptKey(int iKey, Qt::KeyboardModifiers modifiers, const QString &sText)
+{
+    bool bPlain = modifiers == Qt::NoModifier;
+    bool bShift = modifiers == Qt::ShiftModifier;
+    bool bCtrl = (modifiers & ~Qt::ShiftModifier) == Qt::ControlModifier;
+
+    if (bCtrl)
+    {
+        if (iKey == Qt::Key_Plus || iKey == Qt::Key_Equal)
+        {
+            _pFontBar->setFontSize(_pFontBar->fontSize() + 2);
+            return true;
+        }
+
+        if (iKey == Qt::Key_Minus && _pFontBar->fontSize() > 2)
+        {
+            _pFontBar->setFontSize(_pFontBar->fontSize() - 2);
+            return true;
+        }
+
+        return false;
+    }
+
+    if (sText == "?" && (bPlain || bShift))
+    {
+        showHelp();
+        return true;
+    }
+
+    if (bShift && iKey == Qt::Key_G)
+    {
+        _pBionicWidget->scrollToEdge(true);
+        return true;
+    }
+
+    if (!bPlain)
+    {
+        return false;
+    }
+
+    switch (iKey)
+    {
+    case Qt::Key_Up:
+    case Qt::Key_K:
+        _pBionicWidget->scrollStep(-1);
+        return true;
+    case Qt::Key_Down:
+    case Qt::Key_J:
+        _pBionicWidget->scrollStep(1);
+        return true;
+    case Qt::Key_PageUp:
+        _pBionicWidget->scrollPage(-1);
+        return true;
+    case Qt::Key_PageDown:
+        _pBionicWidget->scrollPage(1);
+        return true;
+    case Qt::Key_Home:
+    case Qt::Key_G:
+        _pBionicWidget->scrollToEdge(false);
+        return true;
+    case Qt::Key_End:
+        _pBionicWidget->scrollToEdge(true);
+        return true;
+    default:
+        break;
+    }
+
+    return false;
 }
 
 bool MainWindow::eventFilter(QObject *pObject, QEvent *pEvent)
 {
-    if (pEvent->type() == QEvent::KeyPress && _pDeck->count() > 0 && QApplication::activeModalWidget() == nullptr)
+    if (pEvent->type() == QEvent::KeyPress && QApplication::activeModalWidget() == nullptr)
     {
         QKeyEvent *pKeyEvent = static_cast<QKeyEvent *>(pEvent);
+        Qt::KeyboardModifiers modifiers = pKeyEvent->modifiers() & ~Qt::KeypadModifier;
+        int iKey = pKeyEvent->key();
 
-        // Modifiers are left alone so the Alt+<letter> mnemonics keep working.
-        if (pKeyEvent->modifiers() == Qt::NoModifier || pKeyEvent->modifiers() == Qt::KeypadModifier)
+        // Alt and Meta combinations are left alone so the mnemonics keep working.
+        if (!(modifiers & (Qt::AltModifier | Qt::MetaModifier)))
         {
-            switch (pKeyEvent->key())
+            if ((iKey == Qt::Key_Escape || iKey == Qt::Key_Q) && modifiers == Qt::NoModifier && _sGoToBuffer.isEmpty() && _pPresentation != nullptr)
             {
-            case Qt::Key_Left:
-            case Qt::Key_H:
-                _pDeck->previous();
+                stopPresentation();
                 return true;
-            case Qt::Key_Right:
-            case Qt::Key_L:
-                _pDeck->next();
+            }
+
+            if (handleSlideKey(iKey, modifiers == Qt::NoModifier) || handleScriptKey(iKey, modifiers, pKeyEvent->text()))
+            {
                 return true;
-            case Qt::Key_Up:
-            case Qt::Key_K:
-                _pBionicWidget->scrollStep(-1);
-                return true;
-            case Qt::Key_Down:
-            case Qt::Key_J:
-                _pBionicWidget->scrollStep(1);
-                return true;
-            case Qt::Key_F5:
-                startPresentation();
-                return true;
-            case Qt::Key_Escape:
-            case Qt::Key_Q:
-                if (_pPresentation != nullptr)
-                {
-                    stopPresentation();
-                    return true;
-                }
-                break;
-            default:
-                break;
             }
         }
     }

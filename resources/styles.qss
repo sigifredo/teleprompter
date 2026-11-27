@@ -1,117 +1,211 @@
-BionicWidget {
-    background-color: white;
-    border: 2px solid #dadbdf;
-    color: #212121;
+/* Colors are tokens (@name@) replaced by Theme.cpp for the dark and light schemes. */
+
+QWidget {
+    background-color: @bg@;
+    color: @text@;
 }
 
-MainWindow {
-    background-color: #f8f8f8;
+QToolTip {
+    background-color: @surface@;
+    color: @text@;
+    border: 1px solid @border@;
+    padding: 4px;
 }
 
-MainWindow QLabel {
-    color: #6b717f;
+QLabel {
+    background-color: transparent;
+    color: @muted@;
 }
 
-MainWindow QLabel#fontSizeLabel {
+QLabel#fileName {
+    color: @text@;
+}
+
+QLabel#fontSizeLabel {
+    font: 16pt;
+    min-width: 36px;
+    qproperty-alignment: AlignCenter;
+}
+
+QLabel#timer {
     font: 18pt;
-    text-align: center;
+    color: @text@;
 }
 
-MainWindow QLabel#timer {
-    font: 24pt;
+QLabel#timer[active="true"] {
+    color: @accent@;
 }
 
-MainWindow QLabel#timer[active="true"] {
-    color: #803c3c;
+QStatusBar {
+    border-top: 1px solid @border@;
 }
 
-MainWindow QPushButton {
-    background-color: #dadbdf;
-    color: #6b717f;
-    border: 2px solid #dadbdf;
-    padding: 5px 10px;
+QStatusBar::item {
+    border: 0;
+}
+
+QPushButton {
+    background-color: @surface@;
+    color: @text@;
+    border: 1px solid @border@;
+    border-radius: 6px;
+    padding: 6px 12px;
     font-size: 14px;
-    text-align: center;
-    text-decoration: none;
 }
 
-MainWindow QPushButton:hover {
-    background-color: #ccced3;
-    border-color: #ccced3;
+QPushButton:hover {
+    background-color: @hover@;
 }
 
-MainWindow QPushButton:pressed {
-    background-color: #bfc0c7;
-    border-color: #bfc0c7;
+QPushButton:pressed {
+    background-color: @pressed@;
 }
 
-MainWindow QPushButton:disabled {
-    background-color: #cccccc;
-    border-color: #cccccc;
-    color: #999999;
+QPushButton:disabled {
+    background-color: @disabledBg@;
+    border-color: @disabledBg@;
+    color: @disabledText@;
 }
 
-MainWindow QPushButton:focus {
+QPushButton:focus {
+    border: 2px solid @accent@;
+    padding: 5px 11px;
     outline: none;
 }
 
-MainWindow QScrollBar:vertical {
+QPushButton:checked {
+    border-color: @accent@;
+    color: @accent@;
+}
+
+QPushButton#primary {
+    background-color: @accent@;
+    border-color: @accent@;
+    color: @accentText@;
+    font-weight: 600;
+}
+
+QPushButton#primary:disabled {
+    background-color: @disabledBg@;
+    border-color: @disabledBg@;
+    color: @disabledText@;
+}
+
+QPushButton#flat {
     background-color: transparent;
-    border: 0;
-    width: 15px;
-}
-
-MainWindow QScrollBar::handle:vertical {
-    background-color: #dadbdf;
-    min-height: 20px;
-}
-
-MainWindow QScrollBar::add-line:vertical {
-    background-color: transparent;
-}
-
-MainWindow QScrollBar::sub-line:vertical {
-    background-color: transparent;
-}
-
-MainWindow QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
-    background-color: transparent;
-    border: 0;
-}
-
-MainWindow QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
-    background-color: transparent;
-    border: 0;
-}
-
-VersionWidget QPushButton,
-VersionWidget QPushButton:hover,
-VersionWidget QPushButton:pressed,
-VersionWidget QPushButton:disabled {
-    background-color: transparent;
-    border: 0;
-}
-
-VersionWidget QPushButton {
+    border: 1px solid transparent;
+    color: @muted@;
     font-size: 11px;
-    padding: 2px;
+    padding: 2px 6px;
+}
+
+QPushButton#flat:hover {
+    background-color: @hover@;
+}
+
+QPushButton#flat:checked {
+    color: @accent@;
+}
+
+QPushButton#flat:focus {
+    border: 1px solid @accent@;
+    padding: 2px 6px;
+}
+
+QTextEdit {
+    background-color: @script@;
+    color: @scriptText@;
+    border: 1px solid @border@;
+    border-radius: 8px;
+    selection-background-color: @accent@;
+    selection-color: @accentText@;
+}
+
+BionicWidget {
+    background-color: @script@;
+    color: @scriptText@;
+    border: 1px solid @border@;
+    border-radius: 8px;
+}
+
+BionicWidget:focus {
+    border: 1px solid @accent@;
+}
+
+QScrollBar:vertical {
+    background-color: transparent;
+    border: 0;
+    width: 12px;
+    margin: 2px;
+}
+
+QScrollBar:horizontal {
+    background-color: transparent;
+    border: 0;
+    height: 12px;
+    margin: 2px;
+}
+
+QScrollBar::handle {
+    background-color: @hover@;
+    border-radius: 4px;
+    min-height: 24px;
+    min-width: 24px;
+}
+
+QScrollBar::handle:hover {
+    background-color: @pressed@;
+}
+
+QScrollBar::add-line, QScrollBar::sub-line,
+QScrollBar::add-page, QScrollBar::sub-page {
+    background-color: transparent;
+    border: 0;
+    width: 0;
+    height: 0;
 }
 
 SlideStripWidget {
-    background-color: white;
-    border: 2px solid #dadbdf;
-    color: #6b717f;
+    background-color: @script@;
+    border: 1px solid @border@;
+    border-radius: 8px;
+    color: @muted@;
+    outline: 0;
 }
 
 SlideStripWidget::item {
+    background-color: transparent;
     border: 2px solid transparent;
+    border-radius: 6px;
     padding: 2px;
 }
 
+SlideStripWidget::item:hover {
+    background-color: @surface@;
+}
+
 SlideStripWidget::item:selected {
-    background-color: #ccced3;
-    border-color: #803c3c;
-    color: #212121;
+    background-color: @surface@;
+    border-color: @accent@;
+    color: @text@;
+}
+
+QTabWidget::pane {
+    border: 1px solid @border@;
+    border-radius: 6px;
+}
+
+QTabBar::tab {
+    background-color: @surface@;
+    color: @muted@;
+    padding: 6px 14px;
+    border: 1px solid @border@;
+    border-bottom: 0;
+}
+
+QTabBar::tab:selected {
+    color: @text@;
+    border-top: 2px solid @accent@;
 }
 
 PresentationWindow {
