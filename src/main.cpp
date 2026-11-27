@@ -16,55 +16,51 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// Own
+// own
 #include <MainWindow.hpp>
+#include <Theme.hpp>
 #include <Version.hpp>
 
-// Qt
+// qt
 #include <QApplication>
-#include <QFile>
 #include <QScreen>
 
-// std
-#include <iostream>
+namespace
+{
+    // Tamaño inicial de la ventana, como fracción de la pantalla.
+    constexpr double WindowWidthFraction = 0.6;
+    constexpr double WindowHeightFraction = 0.7;
 
-QRect centerGeometry();
+    // Rectángulo centrado en la pantalla principal.
+    QRect centerGeometry()
+    {
+        const QRect screen = QGuiApplication::primaryScreen()->geometry();
+        const int width = static_cast<int>(screen.width() * WindowWidthFraction);
+        const int height = static_cast<int>(screen.height() * WindowHeightFraction);
+
+        return QRect((screen.width() - width) / 2, (screen.height() - height) / 2, width, height);
+    }
+} // namespace
 
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
 
-    QFile styleFile(":/styles.qss");
+    QCoreApplication::setOrganizationName("Sigifredo");
+    QCoreApplication::setOrganizationDomain("sigifredo.dev");
+    QCoreApplication::setApplicationName("teleprompter");
+    QGuiApplication::setDesktopFileName("dev.sigifredo.teleprompter");
 
-    if (styleFile.open(QFile::ReadOnly))
-    {
-        app.setStyleSheet(QLatin1String(styleFile.readAll()));
-    }
-    else
-    {
-        std::cerr << "[Error] Could not open style file." << std::endl;
-    }
+    app.setStyle("Fusion");
+    Theme::instance().load();
 
-    MainWindow mw;
-    mw.setGeometry(centerGeometry());
-    mw.setWindowTitle("Teleprompter v" PROJECT_VERSION);
-    mw.show();
+    MainWindow window;
+
+    if (!window.hasSavedGeometry())
+        window.setGeometry(centerGeometry());
+
+    window.setWindowTitle(PROJECT_NAME " v" PROJECT_VERSION);
+    window.show();
 
     return app.exec();
-}
-
-QRect centerGeometry()
-{
-    QRect screenGeometry = QGuiApplication::primaryScreen()->geometry();
-
-    int screenWidth = screenGeometry.width();
-    int screenHeight = screenGeometry.height();
-
-    int windowWidth = screenWidth * 0.3;
-    int windowHeight = screenHeight * 0.5;
-
-    int posX = (screenWidth - windowWidth) / 2;
-    int posY = (screenHeight - windowHeight) / 2;
-
-    return QRect(posX, posY, windowWidth, windowHeight);
 }

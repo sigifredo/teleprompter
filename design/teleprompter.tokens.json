@@ -1,0 +1,43 @@
+{
+    "name": "teleprompter-identidad",
+    "version": "1.0.0",
+    "note": "Fuente única de los colores de Teleprompter. La paleta de Qt y la hoja de estilos se derivan de este archivo y no se editan a mano. Grises fríos con un único acento azul.",
+    "themes": {
+        "dark": {
+            "bg": "#0d1117",
+            "surface": "#151b23",
+            "surface-hover": "#212830",
+            "surface-pressed": "#262c36",
+            "surface-disabled": "#151b23",
+            "line": "#30363d",
+            "fg": "#e6edf3",
+            "fg-muted": "#9198a1",
+            "fg-subtle": "#656c76",
+            "accent": "#4493f8",
+            "accent-text": "#0d1117",
+            "primary": "#1f6feb",
+            "primary-hover": "#1a65d8",
+            "primary-text": "#ffffff",
+            "script-bg": "#0d1117",
+            "script-fg": "#d1d9e0"
+        },
+        "light": {
+            "bg": "#ffffff",
+            "surface": "#f6f8fa",
+            "surface-hover": "#eff2f5",
+            "surface-pressed": "#e6eaef",
+            "surface-disabled": "#eff2f5",
+            "line": "#d1d9e0",
+            "fg": "#1f2328",
+            "fg-muted": "#59636e",
+            "fg-subtle": "#818b98",
+            "accent": "#0969da",
+            "accent-text": "#ffffff",
+            "primary": "#0969da",
+            "primary-hover": "#0860ca",
+            "primary-text": "#ffffff",
+            "script-bg": "#ffffff",
+            "script-fg": "#1f2328"
+        }
+    }
+}

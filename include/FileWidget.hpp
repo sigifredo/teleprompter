@@ -19,28 +19,48 @@
 #ifndef FILEWIDGET_HPP
 #define FILEWIDGET_HPP
 
-// Qt
+// qt
 #include <QWidget>
 
 class QLabel;
 
+/**
+ * @brief Fila con el nombre del archivo abierto y un botón para elegir otro.
+ *
+ * El filtro del diálogo se recibe al construirla, así que la misma clase sirve para el guion
+ * y para las diapositivas.
+ */
 class FileWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    FileWidget(QWidget *pParent = nullptr);
+    /**
+     * @param buttonText Texto del botón; admite un mnemónico con `&`.
+     * @param filter Filtro del diálogo de archivos, por ejemplo "Script (*.md *.txt)".
+     */
+    FileWidget(const QString &buttonText, const QString &filter, QWidget *parent = nullptr);
 
-    void setFileName(const QString &sFileName);
+    /**
+     * @brief Muestra el nombre del archivo abierto; el nombre completo queda en la ayuda emergente.
+     */
+    void setFileName(const QString &fileName);
 
 signals:
-    void fileSelected(const QString &sFilePath);
+    /**
+     * @brief Se emite con la ruta que el usuario eligió.
+     */
+    void fileSelected(const QString &filePath);
 
 public slots:
+    /**
+     * @brief Abre el diálogo para elegir un archivo.
+     */
     void chooseFile();
 
 private:
-    QLabel *_pFileNameLabel;
+    QLabel *fileNameLabel_;
+    QString filter_;
 };
 
 #endif

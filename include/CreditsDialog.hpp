@@ -19,15 +19,18 @@
 #ifndef CREDITSDIALOG_HPP
 #define CREDITSDIALOG_HPP
 
-// Qt
+// qt
 #include <QDialog>
 
+/**
+ * @brief Diálogo "Acerca de": versión, autor y licencia.
+ */
 class CreditsDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    CreditsDialog(QWidget *pParent = nullptr);
+    explicit CreditsDialog(QWidget *parent = nullptr);
 };
 
 #endif

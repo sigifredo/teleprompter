@@ -19,32 +19,40 @@
 #ifndef FONTBARWIDGET_HPP
 #define FONTBARWIDGET_HPP
 
-// Own
-#define DEFAULT_FONT_SIZE 31
-
-// Qt
+// qt
 #include <QWidget>
 
 class QLabel;
 
+/**
+ * @brief Barra con los botones para agrandar y achicar la letra del guion.
+ */
 class FontBarWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    FontBarWidget(QWidget *pParent = nullptr);
+    /// Tamaño de letra inicial, en puntos.
+    static constexpr int DefaultFontSize = 31;
+
+    explicit FontBarWidget(QWidget *parent = nullptr);
 
     int fontSize() const;
 
-signals:
-    void changeFontSize(const int &iFontSize);
+    /**
+     * @brief Fija el tamaño de letra y emite changeFontSize().
+     */
+    void setFontSize(int fontSize);
 
-protected slots:
+signals:
+    void changeFontSize(int fontSize);
+
+public slots:
     void decrementFontSize();
     void incrementFontSize();
 
 private:
-    QLabel *_pFontSizeLabel;
+    QLabel *fontSizeLabel_;
 };
 
 #endif

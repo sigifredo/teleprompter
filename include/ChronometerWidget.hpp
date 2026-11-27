@@ -19,34 +19,52 @@
 #ifndef CHRONOMETERWIDGET_HPP
 #define CHRONOMETERWIDGET_HPP
 
-// Qt
+// qt
 #include <QWidget>
 
 class QLabel;
 class QPushButton;
 class QTimer;
 
+/**
+ * @brief Cronómetro con botones de inicio, pausa y parada.
+ *
+ * Muestra el tiempo como mm:ss, o como H:mm:ss pasada la hora. Mientras corre, la etiqueta
+ * lleva la propiedad dinámica `active`, que la hoja de estilos usa para destacarla.
+ */
 class ChronometerWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    ChronometerWidget(QWidget *pParent = nullptr);
+    explicit ChronometerWidget(QWidget *parent = nullptr);
+
+    /**
+     * @brief Indica si el cronómetro está corriendo.
+     */
+    bool isRunning() const;
 
 public slots:
+    /**
+     * @brief Inicia el cronómetro; si ya corría, lo pausa.
+     */
     void start();
+
+    /**
+     * @brief Lo detiene y vuelve el tiempo a cero.
+     */
     void stop();
-
-private:
-    QPushButton *_pStartButton;
-    QLabel *_pTimeLabel;
-    QTimer *_pTimer;
-    int _iTimeElapsed;
-
-    void setTimerActiveStyle(const bool &active);
 
 private slots:
     void updateTime();
+
+private:
+    void setActiveStyle(bool active);
+
+    QPushButton *startButton_;
+    QLabel *timeLabel_;
+    QTimer *timer_;
+    int timeElapsed_ = 0;
 };
 
 #endif

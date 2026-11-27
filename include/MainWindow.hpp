@@ -19,27 +19,94 @@
 #ifndef MAINWINDOW_HPP
 #define MAINWINDOW_HPP
 
+// qt
 #include <QMainWindow>
 
 class BionicWidget;
+class ChronometerWidget;
 class FileWidget;
+class FontBarWidget;
+class PresentationWindow;
 class QLabel;
+class QPushButton;
+class SlideDeck;
+class SlideStripWidget;
 
+/**
+ * @brief Ventana principal: el panel del presentador.
+ *
+ * Reúne el guion, la diapositiva actual y la siguiente, la tira de miniaturas, el cronómetro y
+ * los controles. Con la presentación en marcha, la diapositiva se muestra aparte en una
+ * PresentationWindow y esta ventana sigue sirviendo de panel de control.
+ *
+ * Las teclas se atienden con un filtro de eventos de toda la aplicación, así que funcionan
+ * desde cualquiera de las dos ventanas.
+ */
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *pParent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
+
+    /**
+     * @brief Indica si hay una posición de ventana guardada de una sesión anterior.
+     */
+    bool hasSavedGeometry() const;
 
 public slots:
-    void fontSizeChanged(const int &iSize);
-    void openFile(const QString &sFilePath);
+    /**
+     * @brief Abre un guion: Markdown si el archivo es `.md` y texto plano en otro caso.
+     */
+    void openFile(const QString &filePath);
+
+    /**
+     * @brief Abre unas diapositivas en PDF; avisa si no se pueden abrir.
+     */
+    void openSlides(const QString &filePath);
+
+    /**
+     * @brief Abre la ventana de presentación, en otra pantalla si hay una; sin diapositivas no hace nada.
+     */
+    void startPresentation();
+
+    void stopPresentation();
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
+    bool eventFilter(QObject *object, QEvent *event) override;
+
+private slots:
+    void openSettings();
+    void setAlwaysOnTop(bool enabled);
+    void showHelp();
+    void updateSlideCounter();
 
 private:
-    BionicWidget *_pBionicWidget;
-    QLabel *_pFontSizeLabel;
-    FileWidget *_pFileWidget;
+    int translateKey(int key) const;
+    bool handleSlideKey(int key, bool plain);
+    bool handleScriptKey(int key, Qt::KeyboardModifiers modifiers, const QString &text);
+    void loadSettings();
+    void saveSettings();
+
+    BionicWidget *bionicWidget_;
+    ChronometerWidget *chronometer_;
+    FileWidget *fileWidget_;
+    FileWidget *slidesFileWidget_;
+    FontBarWidget *fontBar_;
+    SlideDeck *deck_;
+    SlideStripWidget *slideStrip_;
+    QLabel *slideCounterLabel_;
+    QPushButton *presentButton_;
+    PresentationWindow *presentation_ = nullptr;
+    QString goToBuffer_; ///< Dígitos tecleados para ir a una diapositiva por su número.
+    QString scriptPath_;
+    QString slidesPath_;
+    bool alwaysOnTop_ = true;
+    bool startTimerOnPresent_ = false;
+    bool vimKeys_ = false;
 };
 
 #endif

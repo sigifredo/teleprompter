@@ -19,15 +19,18 @@
 #ifndef VERSIONWIDGET_HPP
 #define VERSIONWIDGET_HPP
 
-// Qt
+// qt
 #include <QWidget>
 
+/**
+ * @brief Botón con la versión de la aplicación; abre el diálogo de créditos.
+ */
 class VersionWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    VersionWidget(QWidget *pParent = nullptr);
+    explicit VersionWidget(QWidget *parent = nullptr);
 
 public slots:
     void showCredits();

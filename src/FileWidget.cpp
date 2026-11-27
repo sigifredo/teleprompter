@@ -1,48 +1,63 @@
 
 
-// Own
+// own
 #include <FileWidget.hpp>
 
-// Qt
+// qt
 #include <QBoxLayout>
 #include <QFileDialog>
+#include <QFontMetrics>
 #include <QLabel>
 #include <QPushButton>
+#include <QStyle>
 
-FileWidget::FileWidget(QWidget *pParent)
-    : QWidget(pParent)
+namespace
 {
-    QLayout *pLayout = new QBoxLayout(QBoxLayout::LeftToRight, this);
+    // Ancho máximo de la etiqueta con el nombre del archivo.
+    constexpr int MaxNameWidth = 110;
+} // namespace
 
-    _pFileNameLabel = new QLabel(this);
-    QPushButton *pOpenFileButton = new QPushButton("&Open file...", this);
+FileWidget::FileWidget(const QString &buttonText, const QString &filter, QWidget *parent)
+    : QWidget(parent), filter_(filter)
+{
+    auto *layout = new QBoxLayout(QBoxLayout::LeftToRight, this);
 
-    connect(pOpenFileButton, SIGNAL(clicked()), this, SLOT(chooseFile()));
+    layout->setContentsMargins(0, 0, 0, 0);
 
-    pLayout->addWidget(_pFileNameLabel);
-    pLayout->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding, QSizePolicy::Minimum));
-    pLayout->addWidget(pOpenFileButton);
+    fileNameLabel_ = new QLabel(tr("No file"), this);
+    fileNameLabel_->setMaximumWidth(MaxNameWidth);
+
+    auto *openFileButton = new QPushButton(buttonText, this);
+
+    connect(openFileButton, &QPushButton::clicked, this, &FileWidget::chooseFile);
+
+    layout->addWidget(fileNameLabel_);
+    layout->addWidget(openFileButton);
 }
 
-void FileWidget::setFileName(const QString &sFileName)
+void FileWidget::setFileName(const QString &fileName)
 {
-    _pFileNameLabel->setText(sFileName);
+    // Con el nombre puesto, la hoja de estilos deja de pintar la etiqueta como texto de relleno.
+    fileNameLabel_->setProperty("role", "file");
+    fileNameLabel_->setText(fileNameLabel_->fontMetrics().elidedText(fileName, Qt::ElideMiddle, MaxNameWidth));
+    fileNameLabel_->setToolTip(fileName);
+    style()->unpolish(fileNameLabel_);
+    style()->polish(fileNameLabel_);
 }
 
 void FileWidget::chooseFile()
 {
     QFileDialog dialog(this);
+
     dialog.setFileMode(QFileDialog::ExistingFile);
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
-    dialog.setNameFilter(tr("Markdown (*.md)"));
+    dialog.setNameFilter(filter_);
 
-    if (dialog.exec() == QDialog::Accepted)
-    {
-        QStringList files = dialog.selectedFiles();
+    if (dialog.exec() != QDialog::Accepted)
+        return;
 
-        if (files.size() > 0)
-        {
-            emit fileSelected(files.first().trimmed());
-        }
-    }
+    const QStringList files = dialog.selectedFiles();
+
+    if (!files.isEmpty())
+        emit fileSelected(files.first().trimmed());
 }

@@ -1,0 +1,322 @@
+/* Hoja de estilos de Teleprompter.
+ *
+ * Es una plantilla: Theme sustituye cada marcador entre llaves dobles por el valor del tema activo, tomado de
+ * design/teleprompter.tokens.json. Aquí no hay colores literales. Tokens disponibles: las claves de
+ * "themes.<tema>" y "theme" (dark o light).
+ *
+ * Las variantes se eligen con propiedades dinámicas (role, variant, active); tras cambiar una en ejecución,
+ * style()->unpolish(w) y style()->polish(w).
+ */
+
+QWidget {
+    background-color: {{bg}};
+    color: {{fg}};
+}
+
+QToolTip {
+    background-color: {{surface}};
+    color: {{fg}};
+    border: 1px solid {{line}};
+    padding: 4px;
+}
+
+QLabel {
+    background-color: transparent;
+    color: {{fg-muted}};
+}
+
+QLabel[role="file"] {
+    color: {{fg}};
+}
+
+QLabel[role="font-size"] {
+    font: 16pt;
+    min-width: 36px;
+    qproperty-alignment: AlignCenter;
+}
+
+QLabel[role="timer"] {
+    font: 18pt;
+    color: {{fg}};
+}
+
+QLabel[role="timer"][active="true"] {
+    color: {{accent}};
+}
+
+QStatusBar {
+    border-top: 1px solid {{line}};
+}
+
+QWidget[role="toolbar"] {
+    border-bottom: 1px solid {{line}};
+}
+
+QStatusBar::item {
+    border: 0;
+}
+
+QPushButton {
+    background-color: {{surface}};
+    color: {{fg}};
+    border: 1px solid {{line}};
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 14px;
+}
+
+QPushButton:hover {
+    background-color: {{surface-hover}};
+}
+
+QPushButton:pressed {
+    background-color: {{surface-pressed}};
+}
+
+QPushButton:disabled {
+    background-color: {{surface-disabled}};
+    border-color: {{surface-disabled}};
+    color: {{fg-subtle}};
+}
+
+QPushButton:focus {
+    border: 2px solid {{accent}};
+    padding: 5px 11px;
+    outline: none;
+}
+
+QPushButton:checked {
+    border-color: {{accent}};
+    color: {{accent}};
+}
+
+QPushButton[variant="primary"] {
+    background-color: {{primary}};
+    border-color: {{primary}};
+    color: {{primary-text}};
+    font-weight: 600;
+}
+
+QPushButton[variant="primary"]:hover {
+    background-color: {{primary-hover}};
+    border-color: {{primary-hover}};
+}
+
+QPushButton[variant="primary"]:focus {
+    border: 2px solid {{fg}};
+    padding: 5px 11px;
+}
+
+QPushButton[variant="primary"]:disabled {
+    background-color: {{surface-disabled}};
+    border-color: {{surface-disabled}};
+    color: {{fg-subtle}};
+}
+
+QPushButton[variant="ghost"] {
+    background-color: transparent;
+    border: 1px solid transparent;
+    color: {{fg-muted}};
+    font-size: 11px;
+    padding: 2px 6px;
+}
+
+QPushButton[variant="ghost"]:hover {
+    background-color: {{surface-hover}};
+}
+
+QPushButton[variant="ghost"]:checked {
+    color: {{accent}};
+}
+
+QPushButton[variant="ghost"]:focus {
+    border: 1px solid {{accent}};
+    padding: 2px 6px;
+}
+
+QTextEdit {
+    background-color: {{script-bg}};
+    color: {{script-fg}};
+    border: 1px solid {{line}};
+    border-radius: 6px;
+    selection-background-color: {{accent}};
+    selection-color: {{accent-text}};
+}
+
+BionicWidget {
+    background-color: {{script-bg}};
+    color: {{script-fg}};
+    border: 1px solid {{line}};
+    border-radius: 6px;
+}
+
+BionicWidget:focus {
+    border: 1px solid {{accent}};
+}
+
+QScrollBar:vertical {
+    background-color: transparent;
+    border: 0;
+    width: 12px;
+    margin: 2px;
+}
+
+QScrollBar:horizontal {
+    background-color: transparent;
+    border: 0;
+    height: 12px;
+    margin: 2px;
+}
+
+QScrollBar::handle {
+    background-color: {{surface-hover}};
+    border-radius: 4px;
+    min-height: 24px;
+    min-width: 24px;
+}
+
+QScrollBar::handle:hover {
+    background-color: {{surface-pressed}};
+}
+
+QScrollBar::add-line, QScrollBar::sub-line,
+QScrollBar::add-page, QScrollBar::sub-page {
+    background-color: transparent;
+    border: 0;
+    width: 0;
+    height: 0;
+}
+
+SlideStripWidget {
+    background-color: {{script-bg}};
+    border: 1px solid {{line}};
+    border-radius: 6px;
+    color: {{fg-muted}};
+    outline: 0;
+}
+
+SlideStripWidget::item {
+    background-color: transparent;
+    border: 2px solid transparent;
+    border-radius: 6px;
+    padding: 2px;
+}
+
+SlideStripWidget::item:hover {
+    background-color: {{surface}};
+}
+
+SlideStripWidget::item:selected {
+    background-color: {{surface-hover}};
+    border-color: {{accent}};
+    color: {{fg}};
+}
+
+QTabWidget::pane {
+    border: 1px solid {{line}};
+    border-radius: 6px;
+}
+
+QTabBar::tab {
+    background-color: {{surface}};
+    color: {{fg-muted}};
+    padding: 6px 14px;
+    border: 1px solid {{line}};
+    border-bottom: 0;
+}
+
+QTabBar::tab:selected {
+    color: {{fg}};
+    border-top: 2px solid {{accent}};
+}
+
+PresentationWindow {
+    background-color: black;
+}
+
+QComboBox {
+    background-color: {{surface}};
+    color: {{fg}};
+    border: 1px solid {{line}};
+    border-radius: 6px;
+    padding: 5px 10px;
+    min-height: 20px;
+}
+
+QComboBox:hover {
+    background-color: {{surface-hover}};
+}
+
+QComboBox:focus {
+    border: 1px solid {{accent}};
+}
+
+QComboBox::drop-down {
+    border: 0;
+    width: 24px;
+}
+
+QComboBox QAbstractItemView {
+    background-color: {{surface}};
+    color: {{fg}};
+    border: 1px solid {{line}};
+    selection-background-color: {{accent}};
+    selection-color: {{accent-text}};
+    outline: 0;
+}
+
+QCheckBox {
+    background-color: transparent;
+    color: {{fg}};
+    spacing: 8px;
+}
+
+QCheckBox::indicator {
+    width: 16px;
+    height: 16px;
+    border: 1px solid {{fg-muted}};
+    border-radius: 4px;
+    background-color: {{script-bg}};
+}
+
+QCheckBox::indicator:hover {
+    border-color: {{accent}};
+}
+
+QCheckBox::indicator:checked {
+    background-color: {{accent}};
+    border-color: {{accent}};
+    image: url(:/teleprompter/ui/{{theme}}/check.svg);
+}
+
+QCheckBox:focus {
+    color: {{accent}};
+}
+
+QSlider::groove:horizontal {
+    height: 4px;
+    border-radius: 2px;
+    background-color: {{surface-pressed}};
+}
+
+QSlider::sub-page:horizontal {
+    height: 4px;
+    border-radius: 2px;
+    background-color: {{accent}};
+}
+
+QSlider::sub-page:horizontal:disabled {
+    background-color: {{fg-subtle}};
+}
+
+QSlider::handle:horizontal {
+    width: 14px;
+    height: 14px;
+    margin: -6px 0;
+    border-radius: 7px;
+    background-color: {{accent}};
+}
+
+QSlider::handle:horizontal:disabled {
+    background-color: {{fg-subtle}};
+}
