@@ -50,6 +50,8 @@ cmake --build build -j 8
 ./build/bin/teleprompter
 ```
 
+Sin un tipo explícito se compila optimizado (`Release`, con `-O3` y LTO si el compilador lo soporta). Para depurar, `-DCMAKE_BUILD_TYPE=Debug`, que además agrega `-debug` a la versión.
+
 El identificador del paquete es `dev.sigifredo.teleprompter`.
 
 Los colores viven en `design/teleprompter.tokens.json`; tras cambiarlos, o la geometría del icono, `python3 design/build_icons.py` regenera los iconos (requiere Pillow).
